@@ -1,0 +1,15 @@
+
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;">
+  <g id="hydrometeorology">
+    
+    <g fill="#b3e5fc">
+      <ellipse cx="200" cy="100" rx="60" ry="30"/>
+      <ellipse cx="250" cy="100" rx="60" ry="30"/>
+      <ellipse cx="230" cy="80" rx="60" ry="30"/>
+    </g>
+    <line x1="230" y1="110" x2="230" y2="150" stroke="#4fc3f7" stroke-width="3"/>
+    <line x1="240" y1="110" x2="240" y2="150" stroke="#4fc3f7" stroke-width="3"/>
+    <line x1="220" y1="110" x2="220" y2="150" stroke="#4fc3f7" stroke-width="3"/>
+    
+  </g>
+</svg>

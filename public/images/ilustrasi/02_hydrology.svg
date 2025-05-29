@@ -1,0 +1,9 @@
+
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;">
+  <g id="hydrology">
+    
+    <path d="M100 350 Q200 370 300 390 T500 410" stroke="#0288d1" stroke-width="8" fill="none"/>
+    <ellipse cx="600" cy="450" rx="50" ry="20" fill="#4fc3f7"/>
+    
+  </g>
+</svg>
