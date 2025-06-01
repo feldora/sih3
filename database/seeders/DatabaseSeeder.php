@@ -22,6 +22,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PermissionRoleMenuSeeder::class,
             MenuSeeder::class,
+            CategorySeeder::class,
+            TagsTableSeeder::class,
+            PostSeeder::class,
         ]);
     }
 }

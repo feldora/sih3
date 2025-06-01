@@ -1,6 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 @import "leaflet/dist/leaflet.css";
 
 @import "choices.js/src/styles/choices";
+
+@import "tinymce/skins/ui/oxide/skin.min.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

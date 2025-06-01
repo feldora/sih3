@@ -51,15 +51,16 @@
       });
 
       // Toggle dark mode
-      document.getElementById('theme-toggle').addEventListener('change', function () {
-        if (this.checked) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        } else {
-          document.documentElement.setAttribute('data-theme', 'corporate');
-        }
-      });
+      // document.getElementById('theme-toggle').addEventListener('change', function () {
+      //   if (this.checked) {
+      //     document.documentElement.setAttribute('data-theme', 'dark');
+      //   } else {
+      //     document.documentElement.setAttribute('data-theme', 'corporate');
+      //   }
+      // });
     </script>
-    <script src="{{ asset('js/app.js') }}"></script>
+    {{-- <script src="{{ asset('resources/js/app.js') }}"></script> --}}
+    @yield('scripts')
     @stack('scripts')
     
   </body>

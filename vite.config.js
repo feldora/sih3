@@ -8,4 +8,13 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    // resolve: {
+    //     alias: {
+    //         '~': path.join(__dirname, '/node_modules/'),
+    //     }
+    // },
+    // build: {
+    //     chunkSizeWarningLimit: 1600,
+    // },
+
 });

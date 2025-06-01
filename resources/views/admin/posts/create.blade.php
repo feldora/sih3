@@ -20,7 +20,8 @@
     @endif
 
     <!-- Form untuk membuat post -->
-    <form action="{{ route('admin.posts.store') }}" method="POST">
+    {{-- <form action="{{ route('admin.posts.store') }}" method="POST"> --}}
+        <form action="/admin/posts" method="POST">
         @csrf
         <div class="space-y-6">
             <!-- Type Field -->
@@ -44,20 +45,12 @@
                 @enderror
             </div>
 
-            <!-- Content Field -->
-            <div>
-                <label for="content" class="label">Content</label>
-                <textarea id="content" name="content" class="textarea textarea-bordered w-full" rows="6" required>{{ old('content') }}</textarea>
-                @error('content')
-                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <x-map-picker 
-                name="location" 
-                label="Location" 
-                :defaultLocation="old('location', ['lat' => -6.1751, 'lng' => 106.8650])"
-                placeholder="Click to select location on map"
+            <!-- content Field -->
+            <x-text-editor 
+                name="content"
+                label="Post Content"
+                placeholder="Write your post content here..."
+                required
             />
 
             <!-- Category Field -->
@@ -68,14 +61,14 @@
                 itemLabel="name" 
                 placeholder="Select a category"
             />
-
-            <!-- Tags Field -->
-            <x-select-multiple
-                name="tags[]"
+            
+            <x-choices-multiple
+                name="tags"
                 label="Tags"
-                :items="$tags"
-                itemLabel="name"
-                :selectedItems="old('tags', [])"
+                :options="$tags->map(function($tag) {
+                    return ['value' => $tag->id, 'label' => $tag->name];
+                })->toArray()"
+                :selected="old('tags', [])"
                 placeholder="Select tags..."
             />
 
@@ -93,9 +86,15 @@
 
             <!-- Submit Button -->
             <div class="flex justify-end">
-                <button type="submit" class="btn btn-primary">Save Post</button>
+                <button id="simpan" type="submit" class="btn btn-primary">Save Post</button>
             </div>
         </div>
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+</script>
+
+@endpush

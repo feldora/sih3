@@ -94,7 +94,7 @@
     <div class="navbar container mx-auto">
         <!-- Logo -->
         <div class="navbar-start">
-            <a href="#" class="btn btn-ghost normal-case text-2xl font-bold">SIH3</a>
+            <a href="/" class="btn btn-ghost normal-case text-2xl font-bold">SIH3</a>
         </div>
 
         <!-- Navigation Links -->
@@ -103,28 +103,39 @@
                 @auth
                     <li><a href="{{ url('/dashboard') }}" class="hover:text-green-400">Dashboard</a></li>
                 @endauth
-                <li tabindex="0">
-                    <details>
-                        <summary class="hover:text-green-400">Informasi H3</summary>
-                        <ul class="p-2 bg-gray-900 text-white">
-                            <li><a href="#" class="hover:text-green-400">Info H3</a></li>
-                            <li><a href="#" class="hover:text-green-400">Pos Pengamatan H3</a></li>
-                            <li><a href="#" class="hover:text-green-400">Data H3</a></li>
-                            <li><a href="#" class="hover:text-green-400">Neraca Air</a></li>
-                        </ul>
-                    </details>
-                </li>
-                <li tabindex="0">
-                    <details>
-                        <summary class="hover:text-green-400">Geospasial</summary>
-                        <ul class="p-2 bg-gray-900 text-white">
-                            <li><a href="#" class="hover:text-green-400">Peta Geospasial</a></li>
-                            <li><a href="#" class="hover:text-green-400">Monitoring Data</a></li>
-                        </ul>
-                    </details>
-                </li>
-                <li><a href="#" class="hover:text-green-400">Produk Hukum</a></li>
-                <li><a href="#" class="hover:text-green-400">Kontak</a></li>
+                @foreach ($menus_public as $menu)
+                    <li class="{{ $menu->children->count() > 0 ? 'relative' : '' }}">
+                        @if ($menu->children->count() > 0)
+                            <details>
+                                <summary class="hover:text-green-400 flex items-center">
+                                    @if ($menu->icon)
+                                        <i class="{{ $menu->icon }} text-xl mr-2"></i>
+                                    @endif
+                                    {{ $menu->title }}
+                                </summary>
+                                <ul class="p-2 bg-gray-900 text-white">
+                                    @foreach ($menu->children as $child)
+                                        <li>
+                                            <a href="{{ url($child->url) }}" class="hover:text-green-400 flex items-center">
+                                                @if ($child->icon)
+                                                    <i class="{{ $child->icon }} text-lg mr-2"></i>
+                                                @endif
+                                                {{ $child->title }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </details>
+                        @else
+                            <a href="{{ url($menu->url) }}" class="hover:text-green-400 flex items-center">
+                                @if ($menu->icon)
+                                    <i class="{{ $menu->icon }} text-xl mr-2"></i>
+                                @endif
+                                {{ $menu->title }}
+                            </a>
+                        @endif
+                    </li>
+                @endforeach
             </ul>
         </div>
 

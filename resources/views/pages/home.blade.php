@@ -21,34 +21,34 @@
         <section class="flex-1 py-16 bg-gray-100 text-gray-800 overflow-auto">
             <div class="container mx-auto grid md:grid-cols-3 gap-8 text-center p-10">
                 <div
-                    class="bg-gradient-to-br from-blue-100 via-blue-50 to-blue-200 rounded-xl shadow p-8 transition hover:scale-105">
-                    <a href="#">
-                        <div class="text-4xl mb-4">💧</div>
-                        <h3 class="text-xl font-semibold mb-2 text-blue-700">
+                    class="bg-gradient-to-br from-blue-100 via-blue-50 to-blue-200 rounded-xl shadow p-8 transition hover:scale-105 flex items-center md:block">
+                    <a href="#" class="flex items-center md:block">
+                        <div class="text-4xl mb-0 md:mb-4 mr-4 md:mr-0">💧</div>
+                        <h3 class="text-xl font-semibold mb-0 md:mb-2 text-blue-700">
                             Hidrologi
                         </h3>
                     </a>
-                    <p class="text-blue-900">Mempelajari pergerakan, distribusi, dan kualitas air di bumi.</p>
+                    <p class="text-blue-900 hidden md:block mt-2">Mempelajari pergerakan, distribusi, dan kualitas air di bumi.</p>
                 </div>
                 <div
-                    class="bg-gradient-to-br from-yellow-100 via-yellow-50 to-yellow-200 rounded-xl shadow p-8 transition hover:scale-105">
-                    <a href="#">
-                        <div class="text-4xl mb-4">🌦️</div>
-                        <h3 class="text-xl font-semibold mb-2 text-yellow-700">
+                    class="bg-gradient-to-br from-yellow-100 via-yellow-50 to-yellow-200 rounded-xl shadow p-8 transition hover:scale-105 flex items-center md:block">
+                    <a href="#" class="flex items-center md:block">
+                        <div class="text-4xl mb-0 md:mb-4 mr-4 md:mr-0">🌦️</div>
+                        <h3 class="text-xl font-semibold mb-0 md:mb-2 text-yellow-700">
                             Hidrometeorologi
                         </h3>
                     </a>
-                    <p class="text-yellow-900">Mengkaji hubungan antara proses atmosfer dan air di permukaan bumi.</p>
+                    <p class="text-yellow-900 hidden md:block mt-2">Mengkaji hubungan antara proses atmosfer dan air di permukaan bumi.</p>
                 </div>
                 <div
-                    class="bg-gradient-to-br from-teal-100 via-teal-50 to-teal-200 rounded-xl shadow p-8 transition hover:scale-105">
-                    <a href="#">
-                        <div class="text-4xl mb-4">🌊</div>
-                        <h3 class="text-xl font-semibold mb-2 text-teal-700">
+                    class="bg-gradient-to-br from-teal-100 via-teal-50 to-teal-200 rounded-xl shadow p-8 transition hover:scale-105 flex items-center md:block">
+                    <a href="#" class="flex items-center md:block">
+                        <div class="text-4xl mb-0 md:mb-4 mr-4 md:mr-0">🌊</div>
+                        <h3 class="text-xl font-semibold mb-0 md:mb-2 text-teal-700">
                             Hidrogeologi
                         </h3>
                     </a>
-                    <p class="text-teal-900">Fokus pada distribusi dan pergerakan air tanah di dalam tanah dan batuan.</p>
+                    <p class="text-teal-900 hidden md:block mt-2">Fokus pada distribusi dan pergerakan air tanah di dalam tanah dan batuan.</p>
                 </div>
             </div>
 
@@ -62,7 +62,7 @@
 
                         @foreach ($sungai as $index => $nama)
                             <a href="#"
-                                class="bg-white shadow rounded-lg p-6 flex items-center opacity-0 translate-y-8 transition-all duration-700 ease-out hover:scale-105 hover:shadow-xl hover:-translate-y-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                class="bg-white shadow rounded-lg p-6 flex items-center opacity-0 translate-y-8 transition-all duration-700 ease-out hover:scale-105 hover:shadow-xl hover:-translate-y-2 focus:outline-none focus:ring-2 focus:ring-blue-400 w-64 justify-center"
                                 style="transition-delay: {{ $index * 100 }}ms" x-data x-init="$el.classList.remove('opacity-0', 'translate-y-8')"
                                 tabindex="0">
                                 <img src="/images/ilustrasi/river_icon_126879.svg" alt="River Icon" class="w-12 h-12 mr-4">

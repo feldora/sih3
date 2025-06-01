@@ -9,17 +9,9 @@ class MenuSeeder extends Seeder
 {
     public function run()
     {
-        // Menu Publik
-        $dashboard = Menu::create([
-            'title' => 'Dashboard',
-            'url' => '/dashboard',
-            'icon' => 'fas fa-tachometer-alt',
-            'parent_id' => null,
-            'order' => 1,
-            'permission_name' => null,
-            'menu_type' => 'public',
-        ]);
 
+
+        // Menu Publik
         $informasiH3 = Menu::create([
             'title' => 'Informasi H3',
             'url' => '/informasi-h3',
@@ -112,11 +104,30 @@ class MenuSeeder extends Seeder
 
         // Menu Admin
         Menu::create([
+            'title' => 'Dashboard',
+            'url' => '/dashboard',
+            'icon' => 'fas fa-tachometer-alt',
+            'parent_id' => null,
+            'order' => 1,
+            'permission_name' => 'admin.dashboard',
+            'menu_type' => 'admin',
+        ]);
+        Menu::create([
+            'title' => 'Postingan',
+            'url' => '/admin/posts',
+            'icon' => 'fas fa-newspaper',
+            'parent_id' => null,
+            'order' => 2,
+            'permission_name' => 'admin.posts',
+            'menu_type' => 'admin',
+        ]);
+
+        Menu::create([
             'title' => 'Manajemen Menu',
             'url' => '/admin/menus',
             'icon' => 'fas fa-list',
             'parent_id' => null,
-            'order' => 1,
+            'order' => 3,
             'permission_name' => 'admin.menus',
             'menu_type' => 'admin',
         ]);
@@ -126,7 +137,7 @@ class MenuSeeder extends Seeder
             'url' => '/admin/users',
             'icon' => 'fas fa-users',
             'parent_id' => null,
-            'order' => 2,
+            'order' => 4,
             'permission_name' => 'admin.users',
             'menu_type' => 'admin',
         ]);
@@ -136,9 +147,28 @@ class MenuSeeder extends Seeder
             'url' => '/admin/settings',
             'icon' => 'fas fa-cogs',
             'parent_id' => null,
-            'order' => 3,
+            'order' => 5,
             'permission_name' => 'admin.settings',
             'menu_type' => 'admin',
+        ]);
+        Menu::create([
+            'title' => 'Artikel',
+            'url' => '/artikel',
+            'icon' => 'fas fa-file-alt',
+            'parent_id' => null,
+            'order' => 6,
+            'permission_name' => null,
+            'menu_type' => 'public',
+        ]);
+
+        Menu::create([
+            'title' => 'Berita',
+            'url' => '/berita',
+            'icon' => 'fas fa-bullhorn',
+            'parent_id' => null,
+            'order' => 7,
+            'permission_name' => null,
+            'menu_type' => 'public',
         ]);
     }
 }

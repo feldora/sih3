@@ -17,6 +17,24 @@ use App\Http\Controllers\TagController;
 //     return view('dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
+// public route
+Route::view('/informasi-h3', 'pages.blank_page');
+Route::view('/informasi-h3/info', 'pages.blank_page');
+Route::view('/informasi-h3/data', 'pages.blank_page');
+Route::view('/informasi-h3/neraca-air', 'pages.blank_page');
+Route::view('/geospasial', 'pages.blank_page');
+Route::view('/geospasial/peta', 'pages.blank_page');
+Route::view('/geospasial/monitoring', 'pages.blank_page');
+Route::view('/produk-hukum', 'pages.blank_page');
+Route::view('/kontak', 'pages.blank_page');
+// Route::view('/artikel', 'pages.blank_page');
+Route::view('/berita', 'pages.blank_page');
+
+Route::get('/artikel',  PostController::class . '@publicIndex')->name('artikel.publicIndex');
+Route::get('/artikel/{slug}',  PostController::class . '@publicShow')->name('artikel.publicShow');
+
+
+// admin route
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -29,9 +47,9 @@ Route::get('/', function () {
     return view('pages.home');
 });
 
-Route::get('/artikels', function () {
-    return view('pages.artikel.list');
-});
+// Route::get('/artikel', function () {
+//     return view('pages.artikel.list');
+// });
 
 
 // route after authentication and verification
@@ -42,28 +60,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
-Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
 
     Route::resource('users', UserManagementController::class);
+    Route::resource('menus', MenuController::class);
+    Route::resource('posts', PostController::class);
+    Route::resource('categories', CategoryController::class);
+    Route::resource('tags', TagController::class);
 
     Route::get('/blank', function () {
         return view('admin.blank');
     })->name('blank');
-
-    Route::resource('menus', MenuController::class);
-    
-});
-
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
-    // Rute untuk PostController
-    Route::resource('posts', PostController::class);
-
-    // Rute untuk CategoryController
-    Route::resource('categories', CategoryController::class);
-
-    // Rute untuk TagController
-    Route::resource('tags', TagController::class);
 });

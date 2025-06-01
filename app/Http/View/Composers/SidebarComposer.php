@@ -21,21 +21,10 @@ class SidebarComposer
             ->filter(function ($menu) use ($user) {
                 // Filter berdasarkan permission untuk menu utama
                 if ($menu->permission_name) {
-                    return $user->can($menu->permission_name);
+                    return $user && method_exists($user, 'can') && $user->can($menu->permission_name);
                 }
                 return true;
             });
-
-        // Memfilter children setelah mengambil data
-        // $menus_admin->each(function ($menu) use ($user) {
-        //     // Hanya filter children yang di-load dengan get()
-        //     $menu->children = $menu->children->filter(function ($child) use ($user) {
-        //         if ($child->permission_name) {
-        //             return $user->can($child->permission_name);
-        //         }
-        //         return true;
-        //     });
-        // });
 
         // Mendapatkan menu public tanpa filter permission
         $menus_public = Menu::whereNull('parent_id')
@@ -51,3 +40,4 @@ class SidebarComposer
         ]);
     }
 }
+ 

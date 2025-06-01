@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         view()->composer('components.admin.sidebar', \App\Http\View\Composers\SidebarComposer::class);
-
-    }
+        view()->composer('partials.header', \App\Http\View\Composers\SidebarComposer::class);
+        view()->composer('partials.post-asside', \App\Http\View\Composers\PostAsideComposer::class);
+}
 }

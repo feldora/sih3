@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Services\PostService;
 
 class PostController extends Controller
 {
@@ -26,28 +27,18 @@ class PostController extends Controller
     }
 
     // Menyimpan post baru
-    public function store(Request $request)
+    public function store(Request $request, PostService $service)
     {
+
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|exists:categories,name',
             'status' => 'required|in:draft,published',
             'tags' => 'array|exists:tags,id',
         ]);
 
-        $post = Post::create([
-            'title' => $request->title,
-            'slug' => Str::slug($request->title),
-            'content' => $request->content,
-            'user_id' => auth()->id(),
-            'category_id' => $request->category_id,
-            'status' => $request->status,
-        ]);
-
-        if ($request->tags) {
-            $post->tags()->sync($request->tags);
-        }
+        $service->store($request->all());
 
         return redirect()->route('admin.posts.index')->with('success', 'Post created successfully.');
     }
@@ -61,27 +52,17 @@ class PostController extends Controller
     }
 
     // Mengupdate post yang ada
-    public function update(Request $request, Post $post)
+    public function update(Request $request, Post $post, PostService $service)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|exists:categories,name',
             'status' => 'required|in:draft,published',
             'tags' => 'array|exists:tags,id',
         ]);
 
-        $post->update([
-            'title' => $request->title,
-            'slug' => Str::slug($request->title),
-            'content' => $request->content,
-            'category_id' => $request->category_id,
-            'status' => $request->status,
-        ]);
-
-        if ($request->tags) {
-            $post->tags()->sync($request->tags);
-        }
+        $service->update($post, $request->all());
 
         return redirect()->route('admin.posts.index')->with('success', 'Post updated successfully.');
     }
@@ -91,5 +72,27 @@ class PostController extends Controller
     {
         $post->delete();
         return redirect()->route('admin.posts.index')->with('success', 'Post deleted successfully.');
+    }
+
+    public function publicIndex()
+    {
+        $query = Post::where('status', 'published')->with('user', 'category', 'tags');
+
+        if ($category = request('category')) {
+            $query->whereHas('category', function ($q) use ($category) {
+            $q->where('name', $category);
+            });
+        }
+
+        $posts = $query->latest()->paginate(10);
+        return view('pages.artikel.list', compact('posts'));
+    }
+    
+    public function publicShow($slug)
+    {
+        $post = Post::where('slug', $slug)->where('status', 'published')->with('user', 'category', 'tags')->firstOrFail();
+        $popularPosts = Post::where('status', 'published')->with('user', 'category', 'tags')->latest()->take(5)->get();
+        $post->increment('views');
+        return view('pages.artikel.show', compact('post', 'popularPosts'));
     }
 }
