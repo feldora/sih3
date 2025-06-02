@@ -22,7 +22,6 @@ import 'tinymce/plugins/charmap';
 import 'tinymce/plugins/preview';
 import 'tinymce/icons/default';
 import 'tinymce/skins/ui/oxide/skin.min.css';
-import 'tinymce/skins/content/default/content.min.css';
 
 import 'tinymce/skins/ui/oxide/content.css';
 import 'tinymce/skins/ui/oxide/content.min.css';

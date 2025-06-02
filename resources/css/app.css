@@ -4,6 +4,8 @@
 
 @import "tinymce/skins/ui/oxide/skin.min.css";
 
+@import "mod.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

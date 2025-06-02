@@ -90,12 +90,15 @@
         }
     }
 </style>
-<header class="sticky top-0 z-50 bg-gray-900 text-white shadow-md">
-    <div class="navbar container mx-auto">
-        <!-- Logo -->
-        <div class="navbar-start">
-            <a href="/" class="btn btn-ghost normal-case text-2xl font-bold">SIH3</a>
-        </div>
+<header class="sticky top-0 z-50 bg-gray-900 opacity-90 text-white shadow-md">
+    <div class="navbar container mx-auto px-4">
+            <!-- Logo -->
+            <div class="navbar-start">
+                <a href="/" class="btn btn-ghost normal-case text-2xl font-bold text-white hover:text-accent smooth-transition">
+                    <div class="water-drop mr-2"></div>
+                    SIH3
+                </a>
+            </div>
 
         <!-- Navigation Links -->
         <div class="navbar-center hidden lg:flex">
@@ -146,75 +149,75 @@
                     <!-- Tambahkan menu pengguna jika diperlukan -->
                 @else
                     <button id="loginDrawerButton" class="btn btn-outline btn-success">Log in</button>
+                    <!-- Drawer Overlay -->
+                    <div id="loginDrawerOverlay" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden"></div>
+
+                    <!-- Drawer -->
+                    <div id="loginDrawer"
+                        class="fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-blue-400/60 via-cyan-400/50 to-blue-600/60 shadow-lg z-50 backdrop-blur-md transform translate-x-full transition-transform duration-300 ease-in-out border-l border-white/20">
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-bold text-white">Login</h2>
+                                <button id="closeLoginDrawer"
+                                    class="text-blue-100 hover:text-white text-2xl leading-none">&times;</button>
+                            </div>
+                            <form method="POST" action="{{ route('login') }}">
+                                @csrf
+                                <div class="mb-4">
+                                    <label for="email" class="block text-sm mb-1 text-white">Email</label>
+                                    <input id="email" type="email" name="email" required autofocus
+                                        class="w-full px-3 py-2 rounded bg-blue-200/30 bg-opacity-30 text-white placeholder-blue-100 focus:outline-none focus:ring focus:border-cyan-300">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="password" class="block text-sm mb-1 text-white">Password</label>
+                                    <input id="password" type="password" name="password" required
+                                        class="w-full px-3 py-2 rounded bg-blue-200/30 bg-opacity-30 text-white placeholder-blue-100 focus:outline-none focus:ring focus:border-cyan-300">
+                                </div>
+                                <div class="mb-4 flex items-center">
+                                    <input type="checkbox" name="remember" id="remember" class="mr-2 accent-cyan-400">
+                                    <label for="remember" class="text-sm text-white">Remember me</label>
+                                </div>
+                                <button type="submit"
+                                    class="w-full bg-cyan-500/80 hover:bg-cyan-600/80 text-white py-2 rounded shadow">Log in</button>
+                            </form>
+                        </div>
+                        <ul class="bg-bubbles" id="bgAnimation">
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                        </ul>
+                    </div>
+
+                    <script>
+                        const loginDrawerButton = document.getElementById('loginDrawerButton');
+                        const loginDrawer = document.getElementById('loginDrawer');
+                        const loginDrawerOverlay = document.getElementById('loginDrawerOverlay');
+                        const closeLoginDrawer = document.getElementById('closeLoginDrawer');
+
+                        loginDrawerButton.addEventListener('click', () => {
+                            loginDrawer.classList.remove('translate-x-full');
+                            loginDrawerOverlay.classList.remove('hidden');
+                        });
+
+                        closeLoginDrawer.addEventListener('click', () => {
+                            loginDrawer.classList.add('translate-x-full');
+                            loginDrawerOverlay.classList.add('hidden');
+                        });
+
+                        loginDrawerOverlay.addEventListener('click', () => {
+                            loginDrawer.classList.add('translate-x-full');
+                            loginDrawerOverlay.classList.add('hidden');
+                        });
+                    </script>
                 @endauth
             @endif
         </div>
     </div>
 
-    <!-- Drawer Overlay -->
-    <div id="loginDrawerOverlay" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden"></div>
-
-    <!-- Drawer -->
-    <div id="loginDrawer"
-        class="fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-blue-400/60 via-cyan-400/50 to-blue-600/60 shadow-lg z-50 backdrop-blur-md transform translate-x-full transition-transform duration-300 ease-in-out border-l border-white/20">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-white">Login</h2>
-                <button id="closeLoginDrawer"
-                    class="text-blue-100 hover:text-white text-2xl leading-none">&times;</button>
-            </div>
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
-                <div class="mb-4">
-                    <label for="email" class="block text-sm mb-1 text-white">Email</label>
-                    <input id="email" type="email" name="email" required autofocus
-                        class="w-full px-3 py-2 rounded bg-blue-200/30 bg-opacity-30 text-white placeholder-blue-100 focus:outline-none focus:ring focus:border-cyan-300">
-                </div>
-                <div class="mb-4">
-                    <label for="password" class="block text-sm mb-1 text-white">Password</label>
-                    <input id="password" type="password" name="password" required
-                        class="w-full px-3 py-2 rounded bg-blue-200/30 bg-opacity-30 text-white placeholder-blue-100 focus:outline-none focus:ring focus:border-cyan-300">
-                </div>
-                <div class="mb-4 flex items-center">
-                    <input type="checkbox" name="remember" id="remember" class="mr-2 accent-cyan-400">
-                    <label for="remember" class="text-sm text-white">Remember me</label>
-                </div>
-                <button type="submit"
-                    class="w-full bg-cyan-500/80 hover:bg-cyan-600/80 text-white py-2 rounded shadow">Log in</button>
-            </form>
-        </div>
-        <ul class="bg-bubbles" id="bgAnimation">
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-        </ul>
-    </div>
-
-    <script>
-        const loginDrawerButton = document.getElementById('loginDrawerButton');
-        const loginDrawer = document.getElementById('loginDrawer');
-        const loginDrawerOverlay = document.getElementById('loginDrawerOverlay');
-        const closeLoginDrawer = document.getElementById('closeLoginDrawer');
-
-        loginDrawerButton.addEventListener('click', () => {
-            loginDrawer.classList.remove('translate-x-full');
-            loginDrawerOverlay.classList.remove('hidden');
-        });
-
-        closeLoginDrawer.addEventListener('click', () => {
-            loginDrawer.classList.add('translate-x-full');
-            loginDrawerOverlay.classList.add('hidden');
-        });
-
-        loginDrawerOverlay.addEventListener('click', () => {
-            loginDrawer.classList.add('translate-x-full');
-            loginDrawerOverlay.classList.add('hidden');
-        });
-    </script>

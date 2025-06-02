@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {{-- <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"> --}}
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="hidroinfo">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="sih3-modern">
 
 <head>
     <meta charset="utf-8">
@@ -17,18 +17,18 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="flex flex-col min-h-screen bg-gray-200 text-base-content">
+<body class="bg-gradient-to-br from-slate-50 to-blue-50">
     <!-- Loader -->
-    {{-- <div id="loader" class="fixed inset-0 flex items-center justify-center bg-white z-50"> --}}
     <div id="loader" role="status" aria-live="polite" class="fixed inset-0 flex items-center justify-center bg-white z-50">
 
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
     </div>
+
     <div class="fixed top-0 left-0 w-full z-40">
         @include('partials.header')
     </div>
 
-    <main class="grow">
+    <main class="">
         @yield('content')
     </main>
 

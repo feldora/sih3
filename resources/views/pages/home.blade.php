@@ -3,93 +3,246 @@
 @section('title', 'Beranda')
 
 @section('content')
-    <div class="min-h-screen mb-20">
+    {{-- <div class="min-h-screen mb-20"> --}}
 
 
-        <section class="carousel md:w-full max-h-screen">
-            <div id="slide1" class="carousel-item relative w-full">
-                <img src="/images/sungai_palu.webp" class="w-full h-screen md:h-[66vh] object-cover" />
+        <section class="relative h-screen overflow-hidden carousel-modern">
+            <div x-data="{
+                    active: 0,
+                    slides: [
+                        { img: '/images/sungai_palu.webp', gradient: 'from-blue-900/60 to-cyan-600/40' },
+                        { img: '/images/saluopa.jpg', gradient: 'from-emerald-900/60 to-blue-600/40' },
+                        { img: '/images/paisupok.webp', gradient: 'from-purple-900/60 to-pink-600/40' }
+                    ],
+                    interval: null,
+                    start() {
+                        this.interval = setInterval(() => {
+                            this.active = (this.active + 1) % this.slides.length;
+                        }, 4000);
+                    },
+                    stop() {
+                        clearInterval(this.interval);
+                    }
+                }"
+                x-init="start()"
+                @mouseenter="stop()" @mouseleave="start()"
+                class="relative w-full h-full"
+            >
+                <template x-for="(slide, idx) in slides" :key="idx">
+                    <div
+                        x-show="active === idx"
+                        x-transition:enter="transition-opacity duration-700"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition-opacity duration-700"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        class="absolute inset-0 w-full h-full"
+                        style="z-index: 1;"
+                    >
+                        <img :src="slide.img" class="w-full h-full object-cover" alt="">
+                        <div class="absolute inset-0" :class="'bg-gradient-to-r ' + slide.gradient"></div>
+                    </div>
+                </template>
             </div>
-            <div id="slide2" class="carousel-item relative w-full">
-                <img src="/images/saluopa.jpg" class="w-full h-screen md:h-[66vh] object-cover" />
+            <!-- Hero Content -->
+            <div class="absolute inset-0 flex items-center justify-center z-10">
+                <div class="text-center text-white hero-content max-w-4xl px-6">
+                    <div class="mb-6">
+                        <div class="water-drop mx-auto mb-4 float"></div>
+                        <h1 class="text-6xl font-bold mb-6 hero-title">
+                            Sistem Informasi H3
+                        </h1>
+                        <p class="text-xl mb-8 leading-relaxed opacity-90">
+                            Portal terintegrasi untuk pengelolaan Hidrologi, Hidrometeorologi, dan Hidrogeologi 
+                            di Provinsi Sulawesi Tengah
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div id="slide3" class="carousel-item relative w-full">
-                <img src="/images/paisupok.webp" class="w-full h-screen md:h-[66vh] object-cover" />
+
+            <!-- Carousel Indicators -->
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                <a href="#slide1" class="w-3 h-3 rounded-full bg-white/50 hover:bg-white smooth-transition"></a>
+                <a href="#slide2" class="w-3 h-3 rounded-full bg-white/50 hover:bg-white smooth-transition"></a>
+                <a href="#slide3" class="w-3 h-3 rounded-full bg-white/50 hover:bg-white smooth-transition"></a>
             </div>
         </section>
 
-        <section class="flex-1 py-16 bg-gray-100 text-gray-800 overflow-auto">
-            <div class="container mx-auto grid md:grid-cols-3 gap-8 text-center p-10">
-                <div
-                    class="bg-gradient-to-br from-blue-100 via-blue-50 to-blue-200 rounded-xl shadow p-8 transition hover:scale-105 flex items-center md:block">
-                    <a href="#" class="flex items-center md:block">
-                        <div class="text-4xl mb-0 md:mb-4 mr-4 md:mr-0">💧</div>
-                        <h3 class="text-xl font-semibold mb-0 md:mb-2 text-blue-700">
-                            Hidrologi
-                        </h3>
-                    </a>
-                    <p class="text-blue-900 hidden md:block mt-2">Mempelajari pergerakan, distribusi, dan kualitas air di bumi.</p>
+        <!-- Enhanced H3 Categories -->
+        <section class="py-20 gradient-light">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">Bidang Keahlian H3</h2>
+                    <p class="text-xl text-gray-600">Tiga pilar utama pengelolaan sumber daya air</p>
                 </div>
-                <div
-                    class="bg-gradient-to-br from-yellow-100 via-yellow-50 to-yellow-200 rounded-xl shadow p-8 transition hover:scale-105 flex items-center md:block">
-                    <a href="#" class="flex items-center md:block">
-                        <div class="text-4xl mb-0 md:mb-4 mr-4 md:mr-0">🌦️</div>
-                        <h3 class="text-xl font-semibold mb-0 md:mb-2 text-yellow-700">
-                            Hidrometeorologi
-                        </h3>
-                    </a>
-                    <p class="text-yellow-900 hidden md:block mt-2">Mengkaji hubungan antara proses atmosfer dan air di permukaan bumi.</p>
-                </div>
-                <div
-                    class="bg-gradient-to-br from-teal-100 via-teal-50 to-teal-200 rounded-xl shadow p-8 transition hover:scale-105 flex items-center md:block">
-                    <a href="#" class="flex items-center md:block">
-                        <div class="text-4xl mb-0 md:mb-4 mr-4 md:mr-0">🌊</div>
-                        <h3 class="text-xl font-semibold mb-0 md:mb-2 text-teal-700">
-                            Hidrogeologi
-                        </h3>
-                    </a>
-                    <p class="text-teal-900 hidden md:block mt-2">Fokus pada distribusi dan pergerakan air tanah di dalam tanah dan batuan.</p>
-                </div>
-            </div>
-
-            <div class="flex w-full flex-col mt-10 mb-10">
-                <div class="flex flex-col items-center justify-center w-full">
-                    <h1 class="text-4xl font-bold mb-4">Wilayah Sungai</h1>
-                    <div class="flex flex-wrap justify-center gap-6 w-full max-w-screen">
-                        @php
-                            $sungai = ['Sungai Bongka', 'Sungai Laa', 'Sungai Lariang', 'Sungai Palu', 'Sungai Poso'];
-                        @endphp
-
-                        @foreach ($sungai as $index => $nama)
-                            <a href="#"
-                                class="bg-white shadow rounded-lg p-6 flex items-center opacity-0 translate-y-8 transition-all duration-700 ease-out hover:scale-105 hover:shadow-xl hover:-translate-y-2 focus:outline-none focus:ring-2 focus:ring-blue-400 w-64 justify-center"
-                                style="transition-delay: {{ $index * 100 }}ms" x-data x-init="$el.classList.remove('opacity-0', 'translate-y-8')"
-                                tabindex="0">
-                                <img src="/images/ilustrasi/river_icon_126879.svg" alt="River Icon" class="w-12 h-12 mr-4">
-                                <div class="flex flex-col items-start">
-                                    <h2 class="text-xl font-semibold mb-1">{{ $nama }}</h2>
-                                </div>
-                            </a>
-                        @endforeach
-
-                        @push('scripts')
-                            <script src="https://unpkg.com/alpinejs" defer></script>
-                        @endpush
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="modern-card rounded-2xl p-8 text-center group">
+                        <div class="text-6xl mb-6 group-hover:scale-110 smooth-transition">💧</div>
+                        <h3 class="text-2xl font-bold mb-4 text-primary">Hidrologi</h3>
+                        <p class="text-gray-600 leading-relaxed">Mempelajari pergerakan, distribusi, dan kualitas air di bumi untuk pengelolaan sumber daya air yang berkelanjutan.</p>
+                        <div class="mt-6">
+                            <button class="btn btn-primary btn-sm hover:scale-105 smooth-transition">
+                                <i class="fas fa-arrow-right mr-2"></i>
+                                Pelajari
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="modern-card rounded-2xl p-8 text-center group">
+                        <div class="text-6xl mb-6 group-hover:scale-110 smooth-transition">🌦️</div>
+                        <h3 class="text-2xl font-bold mb-4 text-secondary">Hidrometeorologi</h3>
+                        <p class="text-gray-600 leading-relaxed">Mengkaji hubungan antara proses atmosfer dan air di permukaan bumi untuk prediksi cuaca dan iklim.</p>
+                        <div class="mt-6">
+                            <button class="btn btn-secondary btn-sm hover:scale-105 smooth-transition">
+                                <i class="fas fa-arrow-right mr-2"></i>
+                                Pelajari
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="modern-card rounded-2xl p-8 text-center group">
+                        <div class="text-6xl mb-6 group-hover:scale-110 smooth-transition">🌊</div>
+                        <h3 class="text-2xl font-bold mb-4 text-accent">Hidrogeologi</h3>
+                        <p class="text-gray-600 leading-relaxed">Fokus pada distribusi dan pergerakan air tanah di dalam tanah dan batuan untuk eksplorasi air bawah tanah.</p>
+                        <div class="mt-6">
+                            <button class="btn btn-accent btn-sm hover:scale-105 smooth-transition">
+                                <i class="fas fa-arrow-right mr-2"></i>
+                                Pelajari
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="flex w-full flex-col mt-10 mb-10">
-            <div class="container mx-auto px-4">
-                <div class="flex flex-col md:flex-row items-center justify-center">
-                    <div
-                        class="bg-gray-800 text-white rounded-lg shadow-lg flex flex-col md:flex-row w-full overflow-hidden">
-                        <div class="md:w-1/2 w-full">
-                            <img src="/images/sih3.png" class="w-full h-auto object-cover" alt="about img">
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">Wilayah Sungai</h2>
+                    <p class="text-xl text-gray-600">Sistem sungai utama yang dimonitor di Sulawesi Tengah</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 river-grid">
+                    <div class="river-card rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl">
+                                🏞️
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Sungai Bongka</h3>
+                                <p class="text-gray-500">DAS Bongka</p>
+                            </div>
                         </div>
-                        <div class="md:w-1/2 w-full p-8 flex flex-col justify-center">
-                            <h2 class="text-2xl font-bold mb-4">Apa Itu SIH3?</h2>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="flex space-x-2">
+                                <span class="badge badge-primary badge-sm">Aktif</span>
+                                <span class="badge badge-outline badge-sm">5 Stasiun</span>
+                            </div>
+                            <button class="btn btn-ghost btn-sm text-primary hover:bg-primary hover:text-white smooth-transition">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="river-card rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white text-2xl">
+                                🌿
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Sungai Laa</h3>
+                                <p class="text-gray-500">DAS Laa</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="flex space-x-2">
+                                <span class="badge badge-secondary badge-sm">Aktif</span>
+                                <span class="badge badge-outline badge-sm">3 Stasiun</span>
+                            </div>
+                            <button class="btn btn-ghost btn-sm text-secondary hover:bg-secondary hover:text-white smooth-transition">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="river-card rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-full flex items-center justify-center text-white text-2xl">
+                                🏔️
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Sungai Lariang</h3>
+                                <p class="text-gray-500">DAS Lariang</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="flex space-x-2">
+                                <span class="badge badge-accent badge-sm">Aktif</span>
+                                <span class="badge badge-outline badge-sm">7 Stasiun</span>
+                            </div>
+                            <button class="btn btn-ghost btn-sm text-accent hover:bg-accent hover:text-white smooth-transition">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="river-card rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl">
+                                🏙️
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Sungai Palu</h3>
+                                <p class="text-gray-500">DAS Palu</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="flex space-x-2">
+                                <span class="badge badge-warning badge-sm">Aktif</span>
+                                <span class="badge badge-outline badge-sm">8 Stasiun</span>
+                            </div>
+                            <button class="btn btn-ghost btn-sm text-warning hover:bg-warning hover:text-white smooth-transition">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="river-card rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl">
+                                🌊
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Sungai Poso</h3>
+                                <p class="text-gray-500">DAS Poso</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="flex space-x-2">
+                                <span class="badge badge-info badge-sm">Aktif</span>
+                                <span class="badge badge-outline badge-sm">6 Stasiun</span>
+                            </div>
+                            <button class="btn btn-ghost btn-sm text-info hover:bg-info hover:text-white smooth-transition">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-20 gradient-water">
+            <div class="container mx-auto px-6">
+                <div class="glass-dark rounded-3xl overflow-hidden shadow-2xl">
+                    <div class="grid md:grid-cols-2 gap-0">
+                        <div class="relative">
+                            <img src="/images/sih3.png" class="w-full h-full object-cover" alt="SIH3 Illustration">
+                            <div class="absolute inset-0 bg-gradient-to-br from-transparent to-black/20"></div>
+                        </div>
+                        <div class="p-12 text-white flex flex-col justify-center">
+                            <h2 class="text-4xl font-bold mb-6">Apa Itu SIH3?</h2>
                             <p class="mb-3">Portal SIH3 merupakan portal informasi pengelolaan hidrologi,
                                 hidrometeorologi, dan hidrogeologi di Provinsi Sulawesi Tengah hasil kolaborasi BMKG, Dinas
                                 Pekerjaan Umum Sumber Daya Air Provinsi Sulawesi Tengah, BBWS Sulawesi III, dan Dinas ESDM
@@ -104,29 +257,4 @@
                 </div>
             </div>
         </section>
-        {{-- <div id="map"></div> --}}
-    </div>
-
-    {{-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var map = L.map('map').setView([-1.430025, 121.445617], 6); // Centered on Sulawesi Tengah
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 18,
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-
-            // Example marker (Palu)
-            L.marker([-0.8917, 119.8707]).addTo(map)
-                .bindPopup('Kota Palu')
-                .openPopup();
-
-            // Set map container height
-            document.getElementById('map').style.height = '400px';
-        });
-    </script> --}}
 @endsection

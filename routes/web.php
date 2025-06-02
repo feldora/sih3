@@ -68,6 +68,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::resource('users', UserManagementController::class);
     Route::resource('menus', MenuController::class);
     Route::resource('posts', PostController::class);
+    Route::post('admin.posts.bulk-action', [PostController::class, 'bulkAction'])->name('posts.bulk-action');
     Route::resource('categories', CategoryController::class);
     Route::resource('tags', TagController::class);
 

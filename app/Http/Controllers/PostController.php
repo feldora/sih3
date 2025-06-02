@@ -12,10 +12,40 @@ use App\Services\PostService;
 class PostController extends Controller
 {
     // Menampilkan semua post
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Post::with('user', 'category', 'tags')->latest()->paginate(10);
-        return view('admin.posts.index', compact('posts'));
+
+    $query = Post::with(['user', 'category', 'tags']);
+
+    // Search
+    if ($request->filled('search')) {
+        $query->where('title', 'like', '%' . $request->search . '%');
+    }
+    
+    // Filter by category
+    if ($request->filled('category')) {
+        $query->where('category_id', $request->category);
+    }
+    
+    // Filter by status
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+    
+    // Sorting
+    $sortField = $request->get('sort', 'created_at');
+    $sortDirection = $request->get('direction', 'desc');
+    $query->orderBy($sortField, $sortDirection);
+    
+    // Pagination
+    $perPage = $request->get('per_page', 10);
+    $posts = $query->paginate($perPage);
+    
+    $categories = Category::all(); // For filter dropdown
+    
+
+        // $posts = Post::with('user', 'category', 'tags')->latest()->paginate(10);
+        return view('admin.posts.index', compact('posts','categories'));
     }
 
     // Menampilkan form untuk membuat post baru
@@ -73,6 +103,32 @@ class PostController extends Controller
         $post->delete();
         return redirect()->route('admin.posts.index')->with('success', 'Post deleted successfully.');
     }
+
+    public function bulkAction(Request $request)
+    {
+        $selectedPosts = $request->selected_posts;
+        $action = $request->bulk_action;
+        
+        if (empty($selectedPosts) || empty($action)) {
+            return back()->with('error', 'Please select posts and action.');
+        }
+        
+        switch ($action) {
+            case 'publish':
+                Post::whereIn('id', $selectedPosts)->update(['status' => 'published']);
+                return back()->with('success', 'Posts published successfully.');
+                
+            case 'draft':
+                Post::whereIn('id', $selectedPosts)->update(['status' => 'draft']);
+                return back()->with('success', 'Posts set as draft successfully.');
+                
+            case 'delete':
+                Post::whereIn('id', $selectedPosts)->delete();
+                return back()->with('success', 'Posts deleted successfully.');
+        }
+    }
+
+
 
     public function publicIndex()
     {
