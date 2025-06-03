@@ -7,6 +7,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\MediaController;
 
 
 // Route::get('/', function () {
@@ -71,7 +72,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::post('admin.posts.bulk-action', [PostController::class, 'bulkAction'])->name('posts.bulk-action');
     Route::resource('categories', CategoryController::class);
     Route::resource('tags', TagController::class);
-
+    Route::resource('media', MediaController::class);
+    Route::post('media/bulk-delete', [MediaController::class, 'bulkDelete'])->name('media.bulk-delete');
+    Route::get('media/{media}/download', [MediaController::class, 'download'])->name('media.download');
+    
     Route::get('/blank', function () {
         return view('admin.blank');
     })->name('blank');

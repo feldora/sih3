@@ -17,7 +17,7 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.posts.update', $post->id) }}" method="POST">
+    <form action="{{ route('admin.posts.update', $post->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <div class="space-y-6">
@@ -41,6 +41,14 @@
                     <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
                 @enderror
             </div>
+
+            <!-- File Upload Field -->
+            <x-file-input 
+                id="fileUpload" 
+                name="featured_image" 
+                label="Featured Image"
+                :value="old('featured_image', $post->getFirstMediaUrl('featured_image'))"
+            />
 
             <!-- content Field -->
             <x-text-editor 

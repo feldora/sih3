@@ -33,6 +33,11 @@ class PostService
                 $post->tags()->sync($tags);
             }
 
+            if (!empty($data['featured_image'])) {
+                $post->addMedia($data['featured_image'])
+                    ->toMediaCollection('featured_image');
+            }
+
             DB::commit();
             return $post;
         } catch (Exception $e) {
@@ -60,6 +65,12 @@ class PostService
             if (!empty($data['tags'])) {
                 $tags = collect($data['tags'])->flatten()->filter()->all();
                 $post->tags()->sync($tags);
+            }
+            
+            if (!empty($data['featured_image'])) {
+                $post->clearMediaCollection('featured_image');
+                $post->addMedia($data['featured_image'])
+                    ->toMediaCollection('featured_image');
             }
 
             DB::commit();

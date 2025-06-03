@@ -66,6 +66,7 @@ class PostController extends Controller
             'category_id' => 'required|exists:categories,name',
             'status' => 'required|in:draft,published',
             'tags' => 'array|exists:tags,id',
+            // 'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Maksimal 2MB
         ]);
 
         $service->store($request->all());
@@ -90,6 +91,7 @@ class PostController extends Controller
             'category_id' => 'required|exists:categories,name',
             'status' => 'required|in:draft,published',
             'tags' => 'array|exists:tags,id',
+            // 'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Maksimal 2MB
         ]);
 
         $service->update($post, $request->all());

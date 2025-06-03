@@ -21,7 +21,7 @@
 
     <!-- Form untuk membuat post -->
     {{-- <form action="{{ route('admin.posts.store') }}" method="POST"> --}}
-        <form action="/admin/posts" method="POST">
+        <form action="/admin/posts" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="space-y-6">
             <!-- Type Field -->
@@ -45,6 +45,14 @@
                 @enderror
             </div>
 
+            <!-- File Upload Field -->
+            <x-file-input 
+                id="fileUpload" 
+                name="featured_image" 
+                label="Featured Image"
+            />
+
+            
             <!-- content Field -->
             <x-text-editor 
                 name="content"
