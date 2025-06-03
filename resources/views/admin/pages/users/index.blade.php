@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mx-auto p-4 bg-white shadow-md rounded-lg">
-    <a href="{{ route('users.create') }}" class="btn btn-primary mb-4">Tambah User</a>
+    <a href="{{ route('admin.users.create') }}" class="btn btn-primary mb-4">Tambah User</a>
 
     @if(session('success'))
         <div class="alert alert-success mb-4">{{ session('success') }}</div>
@@ -26,8 +26,8 @@
                     {{ $user->roles->pluck('name')->join(', ') }}
                 </td>
                 <td class="border border-gray-300 p-2">
-                    <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="{{ route('users.destroy', $user) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin mau hapus?')">
+                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin mau hapus?')">
                         @csrf
                         @method('DELETE')
                         <button class="btn btn-sm btn-danger" type="submit">Hapus</button>

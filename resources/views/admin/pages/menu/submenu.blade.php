@@ -5,8 +5,8 @@
             <p class="text-sm text-gray-500">{{ $child->url }}</p>
         </div>
         <div class="space-x-2">
-            <a href="{{ route('menus.edit', $child) }}" class="btn btn-sm btn-warning px-4 py-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md">Edit</a>
-            <form action="{{ route('menus.destroy', $child) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus menu ini?')" style="display:inline;">
+            <a href="{{ route('admin.menus.edit', $child) }}" class="btn btn-sm btn-warning px-4 py-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md">Edit</a>
+            <form action="{{ route('admin.menus.destroy', $child) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus menu ini?')" style="display:inline;">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn btn-sm btn-danger px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded-md">Hapus</button>

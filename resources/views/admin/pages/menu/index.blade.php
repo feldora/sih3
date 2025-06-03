@@ -4,7 +4,7 @@
 <div class="container mx-auto p-6 bg-gray-100 shadow-lg rounded-lg">
     <!-- Tombol Tambah Menu -->
     <div class="flex justify-between items-center mb-6">
-        <a href="{{ route('menus.create') }}" class="btn btn-primary px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-200">Tambah Menu</a>
+        <a href="{{ route('admin.menus.create') }}" class="btn btn-primary px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-200">Tambah Menu</a>
 
         <!-- Form Pencarian dan Filter -->
         <div class="flex items-center space-x-4">
@@ -33,8 +33,8 @@
                             <p class="text-sm text-gray-500">{{ $menu->url }}</p>
                         </div>
                         <div class="space-x-2">
-                            <a href="{{ route('menus.edit', $menu) }}" class="btn btn-sm btn-warning px-4 py-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md">Edit</a>
-                            <form action="{{ route('menus.destroy', $menu) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus menu ini?')" style="display:inline;">
+                            <a href="{{ route('admin.menus.edit', $menu) }}" class="btn btn-sm btn-warning px-4 py-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md">Edit</a>
+                            <form action="{{ route('admin.menus.destroy', $menu) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus menu ini?')" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded-md">Hapus</button>

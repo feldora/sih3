@@ -27,10 +27,20 @@ public function run()
     Permission::create(['name' => 'admin.menus']);
     Permission::create(['name' => 'admin.users']);
     Permission::create(['name' => 'admin.settings']);
+    Permission::create(['name' => 'admin.media']);
+    Permission::create(['name' => 'admin.wilayah_sungai']);
 
     // Buat role dan assign permission
     $admin = Role::create(['name' => 'admin']);
-    $admin->givePermissionTo(['admin.dashboard','admin.posts', 'admin.menus', 'admin.users', 'admin.settings']);
+    $admin->givePermissionTo([
+        'admin.dashboard',
+        'admin.posts',
+        'admin.menus',
+        'admin.users',
+        'admin.settings',
+        'admin.media',
+        'admin.wilayah_sungai'
+    ]);
 
     $user = Role::create(['name' => 'user']);
     $user->givePermissionTo('admin.dashboard');

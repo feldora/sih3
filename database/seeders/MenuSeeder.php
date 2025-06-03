@@ -170,5 +170,23 @@ class MenuSeeder extends Seeder
             'permission_name' => null,
             'menu_type' => 'public',
         ]);
+        Menu::create([
+            'title' => 'Galeri',
+            'url' => '/admin/media',
+            'icon' => 'fas fa-images',
+            'parent_id' => null,
+            'order' => 8,
+            'permission_name' => 'admin.media',
+            'menu_type' => 'admin',
+        ]);
+        Menu::create([
+            'title' => 'Wilayah Sungai',
+            'url' => '/admin/wilayah-sungai',
+            'icon' => 'fas fa-water',
+            'parent_id' => null,
+            'order' => 9,
+            'permission_name' => 'admin.wilayah_sungai',
+            'menu_type' => 'admin',
+        ]);
     }
 }
