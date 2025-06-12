@@ -12,5 +12,6 @@ class ViewServiceProvider extends ServiceProvider
     public function boot()
     {
         view()->composer('partials.post-asside', \App\Http\View\Composers\PostAsideComposer::class);
+        view()->composer('pages.home', \App\Http\View\Composers\WilayahSungaiComposer::class);
     }
 }

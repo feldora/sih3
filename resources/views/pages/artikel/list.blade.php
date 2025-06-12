@@ -165,9 +165,13 @@
                         </div>
                         <h3 class="text-2xl font-bold text-gray-800 mb-2">Tidak ada artikel ditemukan</h3>
                         <p class="text-gray-600 mb-6">Belum ada artikel yang dipublikasikan. Silakan cek kembali nanti.</p>
-                        <a href="{{ route('/') }}"
+                        <a href="{{ route('artikel.publicIndex') }}"
                             class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-full hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl">
-                            Kembali ke Beranda
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+                            </svg>
+                            Lihat Semua Artikel
                         </a>
                     </div>
                 </div>

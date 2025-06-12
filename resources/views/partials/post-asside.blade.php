@@ -16,10 +16,10 @@
             @foreach($popularPosts as $index => $pop)
                 <div class="group relative p-4 rounded-xl bg-white/70 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                     <!-- Ranking Badge -->
-                    <div class="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                    {{-- <div class="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
                         {{ $index + 1 }}
                     </div>
-                    
+                     --}}
                     <a href="{{ route('artikel.publicShow', $pop->slug) }}" class="block">
                         <h4 class="text-blue-700 hover:text-blue-800 font-semibold text-sm leading-relaxed mb-2 group-hover:text-blue-900 transition-colors duration-200 line-clamp-2">
                             {{ $pop->title }}

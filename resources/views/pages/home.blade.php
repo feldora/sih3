@@ -83,10 +83,10 @@
                         <h3 class="text-2xl font-bold mb-4 text-primary">Hidrologi</h3>
                         <p class="text-gray-600 leading-relaxed">Mempelajari pergerakan, distribusi, dan kualitas air di bumi untuk pengelolaan sumber daya air yang berkelanjutan.</p>
                         <div class="mt-6">
-                            <button class="btn btn-primary btn-sm hover:scale-105 smooth-transition">
+                            <a href="/artikel?category=hidrologi" class="btn btn-primary btn-sm hover:scale-105 smooth-transition">
                                 <i class="fas fa-arrow-right mr-2"></i>
                                 Pelajari
-                            </button>
+                            </a>
                         </div>
                     </div>
                     
@@ -95,10 +95,10 @@
                         <h3 class="text-2xl font-bold mb-4 text-secondary">Hidrometeorologi</h3>
                         <p class="text-gray-600 leading-relaxed">Mengkaji hubungan antara proses atmosfer dan air di permukaan bumi untuk prediksi cuaca dan iklim.</p>
                         <div class="mt-6">
-                            <button class="btn btn-secondary btn-sm hover:scale-105 smooth-transition">
+                            <a href="/artikel?category=hidrometeorologi" class="btn btn-secondary btn-sm hover:scale-105 smooth-transition">
                                 <i class="fas fa-arrow-right mr-2"></i>
                                 Pelajari
-                            </button>
+                            </a>
                         </div>
                     </div>
                     
@@ -107,10 +107,10 @@
                         <h3 class="text-2xl font-bold mb-4 text-accent">Hidrogeologi</h3>
                         <p class="text-gray-600 leading-relaxed">Fokus pada distribusi dan pergerakan air tanah di dalam tanah dan batuan untuk eksplorasi air bawah tanah.</p>
                         <div class="mt-6">
-                            <button class="btn btn-accent btn-sm hover:scale-105 smooth-transition">
+                            <a href="/artikel?category=hidrogeologi" class="btn btn-accent btn-sm hover:scale-105 smooth-transition">
                                 <i class="fas fa-arrow-right mr-2"></i>
                                 Pelajari
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -125,110 +125,28 @@
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 river-grid">
+                    @foreach ($wilayahSungai as $ws)
                     <div class="river-card rounded-2xl p-6 shadow-lg">
                         <div class="flex items-center space-x-4">
                             <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl">
                                 🏞️
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold text-gray-800">Sungai Bongka</h3>
-                                <p class="text-gray-500">DAS Bongka</p>
+                                <h3 class="text-xl font-bold text-gray-800">{{ $ws->name }}</h3>
+                                <p class="text-gray-500">{{ $ws->description }}</p>
                             </div>
                         </div>
                         <div class="mt-4 flex justify-between items-center">
                             <div class="flex space-x-2">
-                                <span class="badge badge-primary badge-sm">Aktif</span>
-                                <span class="badge badge-outline badge-sm">5 Stasiun</span>
+                                <span class="badge badge-primary badge-sm">{{ $ws->status }}</span>
+                                <span class="badge badge-outline badge-sm">{{ $ws->titikPantau->count() }} Stasiun</span>
                             </div>
                             <button class="btn btn-ghost btn-sm text-primary hover:bg-primary hover:text-white smooth-transition">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
                     </div>
-
-                    <div class="river-card rounded-2xl p-6 shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white text-2xl">
-                                🌿
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800">Sungai Laa</h3>
-                                <p class="text-gray-500">DAS Laa</p>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex justify-between items-center">
-                            <div class="flex space-x-2">
-                                <span class="badge badge-secondary badge-sm">Aktif</span>
-                                <span class="badge badge-outline badge-sm">3 Stasiun</span>
-                            </div>
-                            <button class="btn btn-ghost btn-sm text-secondary hover:bg-secondary hover:text-white smooth-transition">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="river-card rounded-2xl p-6 shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-full flex items-center justify-center text-white text-2xl">
-                                🏔️
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800">Sungai Lariang</h3>
-                                <p class="text-gray-500">DAS Lariang</p>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex justify-between items-center">
-                            <div class="flex space-x-2">
-                                <span class="badge badge-accent badge-sm">Aktif</span>
-                                <span class="badge badge-outline badge-sm">7 Stasiun</span>
-                            </div>
-                            <button class="btn btn-ghost btn-sm text-accent hover:bg-accent hover:text-white smooth-transition">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="river-card rounded-2xl p-6 shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl">
-                                🏙️
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800">Sungai Palu</h3>
-                                <p class="text-gray-500">DAS Palu</p>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex justify-between items-center">
-                            <div class="flex space-x-2">
-                                <span class="badge badge-warning badge-sm">Aktif</span>
-                                <span class="badge badge-outline badge-sm">8 Stasiun</span>
-                            </div>
-                            <button class="btn btn-ghost btn-sm text-warning hover:bg-warning hover:text-white smooth-transition">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="river-card rounded-2xl p-6 shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-16 h-16 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl">
-                                🌊
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800">Sungai Poso</h3>
-                                <p class="text-gray-500">DAS Poso</p>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex justify-between items-center">
-                            <div class="flex space-x-2">
-                                <span class="badge badge-info badge-sm">Aktif</span>
-                                <span class="badge badge-outline badge-sm">6 Stasiun</span>
-                            </div>
-                            <button class="btn btn-ghost btn-sm text-info hover:bg-info hover:text-white smooth-transition">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </section>

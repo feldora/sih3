@@ -15,37 +15,37 @@ class PostController extends Controller
     public function index(Request $request)
     {
 
-    $query = Post::with(['user', 'category', 'tags']);
+        $query = Post::with(['user', 'category', 'tags']);
 
-    // Search
-    if ($request->filled('search')) {
-        $query->where('title', 'like', '%' . $request->search . '%');
-    }
-    
-    // Filter by category
-    if ($request->filled('category')) {
-        $query->where('category_id', $request->category);
-    }
-    
-    // Filter by status
-    if ($request->filled('status')) {
-        $query->where('status', $request->status);
-    }
-    
-    // Sorting
-    $sortField = $request->get('sort', 'created_at');
-    $sortDirection = $request->get('direction', 'desc');
-    $query->orderBy($sortField, $sortDirection);
-    
-    // Pagination
-    $perPage = $request->get('per_page', 10);
-    $posts = $query->paginate($perPage);
-    
-    $categories = Category::all(); // For filter dropdown
-    
+        // Search
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter by category
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Sorting
+        $sortField = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('direction', 'desc');
+        $query->orderBy($sortField, $sortDirection);
+
+        // Pagination
+        $perPage = $request->get('per_page', 10);
+        $posts = $query->paginate($perPage);
+
+        $categories = Category::all(); // For filter dropdown
+
 
         // $posts = Post::with('user', 'category', 'tags')->latest()->paginate(10);
-        return view('admin.posts.index', compact('posts','categories'));
+        return view('admin.posts.index', compact('posts', 'categories'));
     }
 
     // Menampilkan form untuk membuat post baru
@@ -110,20 +110,20 @@ class PostController extends Controller
     {
         $selectedPosts = $request->selected_posts;
         $action = $request->bulk_action;
-        
+
         if (empty($selectedPosts) || empty($action)) {
             return back()->with('error', 'Please select posts and action.');
         }
-        
+
         switch ($action) {
             case 'publish':
                 Post::whereIn('id', $selectedPosts)->update(['status' => 'published']);
                 return back()->with('success', 'Posts published successfully.');
-                
+
             case 'draft':
                 Post::whereIn('id', $selectedPosts)->update(['status' => 'draft']);
                 return back()->with('success', 'Posts set as draft successfully.');
-                
+
             case 'delete':
                 Post::whereIn('id', $selectedPosts)->delete();
                 return back()->with('success', 'Posts deleted successfully.');
@@ -138,14 +138,14 @@ class PostController extends Controller
 
         if ($category = request('category')) {
             $query->whereHas('category', function ($q) use ($category) {
-            $q->where('name', $category);
+                $q->where('name', $category);
             });
         }
 
         $posts = $query->latest()->paginate(10);
         return view('pages.artikel.list', compact('posts'));
     }
-    
+
     public function publicShow($slug)
     {
         $post = Post::where('slug', $slug)->where('status', 'published')->with('user', 'category', 'tags')->firstOrFail();

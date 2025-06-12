@@ -23,8 +23,8 @@ class CategorySeeder extends Seeder
             ],
             [
                 'id' => 2,
-                'name' => 'hidrometeorolo',
-                'slug' => 'hidrometeorolo',
+                'name' => 'hidrometeorologi',
+                'slug' => 'hidrometeorologi',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

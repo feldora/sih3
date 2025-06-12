@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wilayah_sungai', function (Blueprint $table) {
+        Schema::create('pos_pantau', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->text('description')->nullable();
-            $table->string('status')->default('active');
-            $table->json('geojson')->nullable();
+            $table->string('nama_pos');
+            $table->string('alamat');
+            $table->decimal('latitude', 10, 7);
+            $table->decimal('longitude', 10, 7);
+            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wilayah_sungai');
+        Schema::dropIfExists('pos_pantau');
     }
 };

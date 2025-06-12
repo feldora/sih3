@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             TagsTableSeeder::class,
             PostSeeder::class,
+            WilayahSungaiSeeder::class,
         ]);
     }
 }

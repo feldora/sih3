@@ -8,6 +8,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\WilayahSungaiController;
 
 
 // Route::get('/', function () {
@@ -23,13 +24,13 @@ Route::view('/informasi-h3', 'pages.blank_page');
 Route::view('/informasi-h3/info', 'pages.blank_page');
 Route::view('/informasi-h3/data', 'pages.blank_page');
 Route::view('/informasi-h3/neraca-air', 'pages.blank_page');
-Route::view('/geospasial', 'pages.blank_page');
-Route::view('/geospasial/peta', 'pages.blank_page');
-Route::view('/geospasial/monitoring', 'pages.blank_page');
 Route::view('/produk-hukum', 'pages.blank_page');
 Route::view('/kontak', 'pages.blank_page');
 // Route::view('/artikel', 'pages.blank_page');
 Route::view('/berita', 'pages.blank_page');
+Route::view('/geospasial', 'pages.geospasial.index');
+Route::view('/geospasial/peta', 'pages.geospasial.index');
+Route::view('/geospasial/monitoring', 'pages.geospasial.index');
 
 Route::get('/artikel',  PostController::class . '@publicIndex')->name('artikel.publicIndex');
 Route::get('/artikel/{slug}',  PostController::class . '@publicShow')->name('artikel.publicShow');
@@ -46,7 +47,7 @@ require __DIR__.'/auth.php';
 
 Route::get('/', function () {
     return view('pages.home');
-});
+})->name('home');
 
 // Route::get('/artikel', function () {
 //     return view('pages.artikel.list');
@@ -75,7 +76,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::resource('media', MediaController::class);
     Route::post('media/bulk-delete', [MediaController::class, 'bulkDelete'])->name('media.bulk-delete');
     Route::get('media/{media}/download', [MediaController::class, 'download'])->name('media.download');
-    
+    Route::resource('wilayah-sungai', WilayahSungaiController::class);
+
     Route::get('/blank', function () {
         return view('admin.blank');
     })->name('blank');
