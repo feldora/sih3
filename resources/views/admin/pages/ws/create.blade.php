@@ -14,7 +14,7 @@
             <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
             <textarea name="description" id="description" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"></textarea>
         </div>
-        <x-map-route-picker :oldCoordinates="[]"/>
+        <x-map-area-picker :oldCoordinates="old('coordinates', json_decode($wilayahSungai->geojson)->features[0]->geometry->coordinates ?? [])"/>
         
         <div class="flex justify-end">
             <button type="submit" class="btn btn-primary">Simpan</button>

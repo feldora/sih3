@@ -10,17 +10,28 @@ class TitikPantauController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-    }
+        // Ambil parameter search dari request
+        $search = $request->input('search');
 
+        // Query untuk mendapatkan titik pantau, bisa menyesuaikan kolom yang ingin dicari
+        $titikPantau = TitikPantau::when($search, function($query) use ($search) {
+            return $query->where('nama_titik', 'like', '%' . $search . '%')
+                         ->orWhere('alamat', 'like', '%' . $search . '%')
+                         ->orWhere('keterangan', 'like', '%' . $search . '%');
+        })
+        ->paginate(10); // Sesuaikan jumlah item per halaman sesuai kebutuhan
+
+        // Kirim data titik pantau dan query pencarian ke tampilan
+        return view('admin.pages.tp.index', compact('titikPantau'));
+    }
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        //
+        return view('admin.pages.tp.create');
     }
 
     /**
@@ -28,7 +39,35 @@ class TitikPantauController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // pd($request->all());
+        $validated = $request->validate([
+            'nama_titik' => 'required|string|max:255',
+            'alamat' => 'required|string|max:255',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'keterangan' => 'required|string',
+            // 'pos_pantau_id' => 'required|integer|exists:pos_pantau,id',
+            // 'wilayah_sungai_id' => 'required|integer|exists:wilayah_sungai,id',
+            // 'kategori_id' => 'required|integer|exists:kategori,id',
+        ]);
+
+        $dataStore = [
+            'nama_titik' => $request->input('nama_titik'),
+            'alamat' => $request->input('alamat'),
+            'latitude' => $request->input('latitude'),
+            'longitude' => $request->input('longitude'),
+            'keterangan' => $request->input('keterangan'),
+            'pos_pantau_id' => $request->input('pos_pantau_id'),
+            'wilayah_sungai_id' => $request->input('wilayah_sungai_id'),
+            'kategori_id' => $request->input('kategori_id'),
+            'status' => 'active',
+        ];
+
+        // pd($dataStore);
+
+        TitikPantau::create($dataStore);
+
+        return redirect()->route('admin.titik-pantau.index')->with('success', 'Titik Pantau berhasil ditambahkan.');
     }
 
     /**
@@ -36,7 +75,7 @@ class TitikPantauController extends Controller
      */
     public function show(TitikPantau $titikPantau)
     {
-        //
+        return view('admin.pages.tp.show', compact('titikPantau'));
     }
 
     /**
@@ -44,7 +83,12 @@ class TitikPantauController extends Controller
      */
     public function edit(TitikPantau $titikPantau)
     {
-        //
+        // Ambil data relasi untuk dropdown
+        $posPantau = \App\Models\PosPantau::all();
+        $wilayahSungai = \App\Models\WilayahSungai::all();
+        $kategori = [] ;//\App\Models\Kategori::all();
+
+        return view('admin.pages.tp.edit', compact('titikPantau', 'posPantau', 'wilayahSungai', 'kategori'));
     }
 
     /**
@@ -52,7 +96,14 @@ class TitikPantauController extends Controller
      */
     public function update(Request $request, TitikPantau $titikPantau)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+        ]);
+
+        $titikPantau->update($request->all());
+
+        return redirect()->route('admin.titik-pantau.index')->with('success', 'Titik Pantau berhasil diperbarui.');
     }
 
     /**
@@ -60,6 +111,8 @@ class TitikPantauController extends Controller
      */
     public function destroy(TitikPantau $titikPantau)
     {
-        //
+        $titikPantau->delete();
+
+        return redirect()->route('admin.titik-pantau.index')->with('success', 'Titik Pantau berhasil dihapus.');
     }
 }

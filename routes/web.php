@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\WilayahSungaiController;
+use App\Http\Controllers\TitikPantauController;
 
 
 // Route::get('/', function () {
@@ -77,7 +78,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::post('media/bulk-delete', [MediaController::class, 'bulkDelete'])->name('media.bulk-delete');
     Route::get('media/{media}/download', [MediaController::class, 'download'])->name('media.download');
     Route::resource('wilayah-sungai', WilayahSungaiController::class);
-
+    Route::resource('titik-pantau', TitikPantauController::class);
+    Route::resource(('profile'), ProfileController::class)->only(['edit', 'update', 'destroy'])->names([
+        'edit' => 'profile.edit',
+        'update' => 'profile.update',
+        'destroy' => 'profile.destroy',
+    ]);
     Route::get('/blank', function () {
         return view('admin.blank');
     })->name('blank');

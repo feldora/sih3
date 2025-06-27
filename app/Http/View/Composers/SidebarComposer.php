@@ -14,7 +14,7 @@ class SidebarComposer
 
         // Mendapatkan menu admin dengan filter berdasarkan permission
         $menus_admin = Menu::whereNull('parent_id')
-            ->where('menu_type', 'admin')  // Pindahkan 'where' untuk 'menu_type' ke query
+            ->where('zona', 'admin')  // Pindahkan 'where' untuk 'zona' ke query
             ->orderBy('order')
             ->with('children') // Memuat relasi children tanpa filter
             ->get()
@@ -28,7 +28,7 @@ class SidebarComposer
 
         // Mendapatkan menu public tanpa filter permission
         $menus_public = Menu::whereNull('parent_id')
-            ->where('menu_type', 'public')  // Pindahkan 'where' untuk 'menu_type' ke query
+            ->where('zona', 'public')  // Pindahkan 'where' untuk 'zona' ke query
             ->orderBy('order')
             ->with('children')  // Tidak ada filtering untuk public menu
             ->get();

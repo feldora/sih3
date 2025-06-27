@@ -6,7 +6,7 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Create Menu</h2>
 
         <!-- Form Create Menu -->
-        <form action="{{ route('menus.store') }}" method="POST">
+        <form action="{{ route('admin.menus.store') }}" method="POST">
             @csrf
 
             <!-- Nama Menu -->
@@ -32,8 +32,6 @@
             </div>
 
             <x-input-icon label="Icon (Optional)" :name="'icon'" :value="old('icon')" />
-
-
 
             <!-- Parent Menu -->
             <div class="mb-4">
@@ -76,20 +74,20 @@
 
             <!-- Menu Type -->
             <div class="mb-4">
-                <label for="menu_type" class="block text-sm font-medium text-gray-700">Tipe Menu</label>
-                <select name="menu_type" id="menu_type"
+                <label for="zona" class="block text-sm font-medium text-gray-700">Tipe Menu</label>
+                <select name="zona" id="zona"
                     class="form-select mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="admin" {{ old('menu_type') == 'admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="public" {{ old('menu_type') == 'public' ? 'selected' : '' }}>Public</option>
+                    <option value="admin" {{ old('zona') == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="public" {{ old('zona') == 'public' ? 'selected' : '' }}>Public</option>
                 </select>
-                @error('menu_type')
+                @error('zona')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
 
             <!-- Tombol Submit -->
             <div class="flex justify-end space-x-4">
-                <a href="{{ route('menus.index') }}"
+                <a href="{{ route('admin.menus.index') }}"
                     class="btn btn-sm btn-secondary px-4 py-2 text-white bg-gray-500 hover:bg-gray-600 rounded-md">Batal</a>
                 <button type="submit"
                     class="btn btn-sm btn-primary px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md">Simpan</button>

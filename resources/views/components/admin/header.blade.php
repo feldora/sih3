@@ -36,8 +36,8 @@
 
   <div class="relative hidden md:block">
     <button id="user-menu-button" class="flex items-center space-x-2 focus:outline-none user-menu-button" aria-haspopup="true" aria-expanded="false">
-      <img src="https://avatar.iran.liara.run/public/boy?username=Stevens" alt="Avatar" class="w-8 h-8 rounded-full" />
-      <span>Stevens</span>
+      <img src="/images/boy.png" alt="Avatar" class="w-8 h-8 rounded-full" />
+      <span>{{ Auth::user()->name }}</span>
     </button>
 
     @include('components.admin.user-dropdown')

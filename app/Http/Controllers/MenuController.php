@@ -40,12 +40,12 @@ class MenuController extends Controller
             'parent_id' => 'nullable|exists:menus,id',
             'order' => 'required|integer|min:1',
             'permission_name' => 'nullable|string|max:255',
-            'menu_type' => 'required|in:admin,public',
+            'zona' => 'required|in:admin,public',
         ]);
 
         Menu::create($validated);
 
-        return redirect()->route('menus.index')->with('success', 'Menu berhasil dibuat!');
+        return redirect()->route('admin.menus.index')->with('success', 'Menu berhasil dibuat!');
     }
 
     /**
@@ -77,7 +77,7 @@ public function update(Request $request, Menu $menu)
         'parent_id' => 'nullable|exists:menus,id',
         'order' => 'required|integer|min:1',
         'permission_name' => 'nullable|string|max:255',
-        'menu_type' => 'required|in:admin,public',
+        'zona' => 'required|in:admin,public',
     ]);
 
     // Update menu dengan data baru
@@ -88,10 +88,10 @@ public function update(Request $request, Menu $menu)
         'parent_id' => $request->parent_id,
         'order' => $request->order,
         'permission_name' => $request->permission_name,
-        'menu_type' => $request->menu_type,
+        'zona' => $request->zona,
     ]);
 
-    return redirect()->route('menus.index')->with('success', 'Menu berhasil diperbarui!');
+    return redirect()->route('admin.menus.index')->with('success', 'Menu berhasil diperbarui!');
 }
 
 
@@ -103,6 +103,6 @@ public function update(Request $request, Menu $menu)
         $menu = Menu::findOrFail($id);
         $menu->delete();
 
-        return redirect()->route('menus.index')->with('success', 'Menu deleted successfully.');
+        return redirect()->route('admin.menus.index')->with('success', 'Menu deleted successfully.');
     }
 }

@@ -21,7 +21,9 @@ class WilayahSungaiController extends Controller
      */
     public function create()
     {
-        return view('admin.pages.ws.create');
+        return view('admin.pages.ws.create', [
+            'wilayahSungai' => new WilayahSungai(),
+        ]);
     }
 
     /**
@@ -33,14 +35,32 @@ class WilayahSungaiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            // 'coordinates' => 'nullable|array',
         ]);
+
+        $geoJson = [
+            "type" => "FeatureCollection",
+            "features" => [
+                [
+                    "type" => "Feature",
+                    "geometry" => [
+                        "type" => "Polygon",
+                        "coordinates" => json_decode($request['coordinates']) // Mengonversi string JSON menjadi array
+                    ],
+                    "properties" => [
+                        "name" => $request['name'],
+                        "description" => $request['description'],
+                        "luas_area" => $request['luas_area'],
+                        "keliling_area" => $request['keliling_area'],
+                    ]
+                ]
+            ]
+        ];
 
         $storeData = [
             'name' => $validated['name'],
             'description' => $validated['description'],
             'status' => 'active',
-            'geojson' => $request->has('coordinates') ? json_encode($request->input('coordinates')) : null,
+            'geojson' => json_encode($geoJson),
         ];
 
         WilayahSungai::create($storeData);
@@ -72,12 +92,41 @@ class WilayahSungaiController extends Controller
      */
     public function update(Request $request, WilayahSungai $wilayahSungai)
     {
+
+        // pd($request->all());
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
+        
+        $geoJson = [
+            "type" => "FeatureCollection",
+            "features" => [
+                [
+                    "type" => "Feature",
+                    "geometry" => [
+                        "type" => "Polygon",
+                        "coordinates" => json_decode($request['coordinates']) // Mengonversi string JSON menjadi array
+                    ],
+                    "properties" => [
+                        "name" => $request['name'],
+                        "description" => $request['description'],
+                        "luas_area" => $request['luas_area'],
+                        "keliling_area" => $request['keliling_area'],
+                    ]
+                ]
+            ]
+        ];
 
-        $wilayahSungai->update($validated);
+
+        $dataStore = [
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'status' => 'active',
+            'geojson' => json_encode($geoJson),
+        ];
+
+        $wilayahSungai->update($dataStore);
 
         return redirect()->route('admin.wilayah-sungai.index')->with('success', 'Wilayah Sungai berhasil diperbarui.');
     }

@@ -79,6 +79,24 @@
                 :selected="old('tags', [])"
                 placeholder="Select tags..."
             />
+            
+            <div>
+                <label for="tag" class="label">New Tag</label>
+                <small class="text-gray-500">Enter a new tag, separated by commas</small>
+                <input type="text" id="tag" name="tag" class="input input-bordered w-full" value="{{ old('tag') }}" list="tags-datalist">
+                <datalist id="tags-datalist">
+                    @foreach($tags as $tag)
+                        <option value="{{ $tag->name }}">
+                    @endforeach
+                </datalist>
+                <input list="tags-datalist" style="display:none;">
+                <div class="flex flex-wrap gap-2 mt-2" id="tag-list">
+                </div>
+                @error('tag')
+                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+
 
             <!-- Status Field -->
             <div>
@@ -103,6 +121,21 @@
 
 @push('scripts')
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tagInput = document.getElementById('tag');
+        const tagList = document.getElementById('tag-list');
+
+        tagInput.addEventListener('input', function () {
+            const tags = tagInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+            tagList.innerHTML = '';
+            tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium mr-2 mb-2';
+                span.textContent = tag;
+                tagList.appendChild(span);
+            });
+        });
+    });
 </script>
 
 @endpush

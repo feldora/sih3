@@ -73,7 +73,7 @@
         <section class="py-20 gradient-light">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold text-gray-800 mb-4">Bidang Keahlian H3</h2>
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">H3</h2>
                     <p class="text-xl text-gray-600">Tiga pilar utama pengelolaan sumber daya air</p>
                 </div>
                 
@@ -85,7 +85,7 @@
                         <div class="mt-6">
                             <a href="/artikel?category=hidrologi" class="btn btn-primary btn-sm hover:scale-105 smooth-transition">
                                 <i class="fas fa-arrow-right mr-2"></i>
-                                Pelajari
+                                Lihat
                             </a>
                         </div>
                     </div>
@@ -97,7 +97,7 @@
                         <div class="mt-6">
                             <a href="/artikel?category=hidrometeorologi" class="btn btn-secondary btn-sm hover:scale-105 smooth-transition">
                                 <i class="fas fa-arrow-right mr-2"></i>
-                                Pelajari
+                                Lihat
                             </a>
                         </div>
                     </div>
@@ -109,7 +109,7 @@
                         <div class="mt-6">
                             <a href="/artikel?category=hidrogeologi" class="btn btn-accent btn-sm hover:scale-105 smooth-transition">
                                 <i class="fas fa-arrow-right mr-2"></i>
-                                Pelajari
+                                Lihat
                             </a>
                         </div>
                     </div>

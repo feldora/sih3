@@ -9,6 +9,7 @@
                 width: 100%;
                 height: 600px;                
             @endif
+            cursor: crosshair;  /* Ganti dengan cursor tanda tambah */
         }
         
         .map-controls {
@@ -58,11 +59,14 @@
 
     <!-- Hidden input untuk menyimpan koordinat -->
     <input type="hidden" name="{{ $name }}" id="coordinates" value="{{ old($name, json_encode($oldCoordinates)) }}">
-    <input type="text" id="jarak" name="jarak" value="{{ old('jarak', $oldCoordinates ? calculateTotalDistance($oldCoordinates) : 0) }}" hidden>
+    <input type="text" id="jarak" name="jarak" value="{{ old('jarak', 0) }}" hidden>
     <div class="coordinates-info">
         <strong>Total Titik:</strong> <span id="point-count">0</span>
         <div class="distance-info">
             <span id="distance-info">Panjang garis akan dihitung setelah minimal 2 titik</span>
+        </div>
+        <div class="distance-info" style="color:#007bff;">
+            <span id="keliling-info"></span>
         </div>
     </div>
 </div>
@@ -80,6 +84,7 @@
         var markers = [];  // Array untuk kompatibilitas (tidak digunakan)
         var polyline = null;  // Variabel untuk menyimpan polyline
         var coordinates = @json($oldCoordinates ?: []);  // Data koordinat yang sudah ada
+        var marker = null;  // Variabel untuk menyimpan marker titik pertama
 
         // Tidak menambahkan marker visual, hanya menyimpan koordinat
 
@@ -163,6 +168,21 @@
             document.getElementById('point-count').textContent = coordinates.length;
         }
 
+        // Fungsi untuk menghitung keliling polygon
+        function calculateKeliling(coordinates) {
+            if (coordinates.length < 3) return 0;
+            var keliling = 0;
+            for (var i = 0; i < coordinates.length; i++) {
+                var next = (i + 1) % coordinates.length;
+                var lat1 = coordinates[i][1];
+                var lng1 = coordinates[i][0];
+                var lat2 = coordinates[next][1];
+                var lng2 = coordinates[next][0];
+                keliling += calculateDistance(lat1, lng1, lat2, lng2);
+            }
+            return keliling;
+        }
+
         // Fungsi untuk memperbarui informasi jarak
         function updateDistanceInfo() {
             if (coordinates.length >= 2) {
@@ -171,6 +191,13 @@
                 document.getElementById('jarak').value = totalDistance; // Update input jarak
             } else {
                 document.getElementById('distance-info').textContent = 'Panjang garis akan dihitung setelah minimal 2 titik';
+            }
+            // Keliling area
+            if (coordinates.length >= 3) {
+                var keliling = calculateKeliling(coordinates);
+                document.getElementById('keliling-info').textContent = 'Keliling Area: ' + formatDistance(keliling);
+            } else {
+                document.getElementById('keliling-info').textContent = '';
             }
         }
 
@@ -189,6 +216,11 @@
 
             // Menambahkan koordinat baru ke array
             coordinates.push([lng, lat]);
+
+            // Jika ini adalah titik pertama, tambahkan marker
+            if (coordinates.length === 1) {
+                marker = L.marker([lat, lng]).addTo(map);
+            }
 
             // Update polyline dan coordinates
             updatePolyline();
@@ -209,6 +241,12 @@
                     polyline = null;
                 }
 
+                // Hapus marker pertama
+                if (marker) {
+                    map.removeLayer(marker);
+                    marker = null;
+                }
+
                 // Reset array coordinates
                 coordinates = [];
 
@@ -225,6 +263,14 @@
             }
 
             if (confirm('Hapus titik terakhir?')) {
+                // Jika titik pertama dihapus, juga hapus marker
+                if (coordinates.length === 1) {
+                    if (marker) {
+                        map.removeLayer(marker);
+                        marker = null;
+                    }
+                }
+
                 removeLastPoint();
             }
         };

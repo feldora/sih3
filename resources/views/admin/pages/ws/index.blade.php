@@ -2,6 +2,7 @@
 
 @section('content')
 <div class="mx-auto p-4 bg-white shadow-md rounded-lg">
+    <h1 class="text-2xl font-bold mb-4">Daftar Wilayah Sungai</h1>
     <a href="{{ route('admin.wilayah-sungai.create') }}" class="btn btn-primary mb-4">Tambah Wilayah Sungai</a>
 
     @if(session('success'))

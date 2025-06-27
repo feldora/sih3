@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('menus', function (Blueprint $table) {
-            $table->string('menu_type', 10)->default('public')->check("menu_type IN ('public', 'admin')");
+            $table->string('menu_type', 20)->default('link')->check("menu_type IN ( 'link', 'parent', 'child')")->after('icon');
+            $table->string('zona', 10)->default('public')->check("zona IN ('public', 'admin')");
 
         });
     }
@@ -23,6 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('menus', function (Blueprint $table) {
+            $table->dropColumn('zona');
             $table->dropColumn('menu_type');
         });
     }
