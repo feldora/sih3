@@ -8,43 +8,23 @@ use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Services\PostService;
+use Illuminate\Support\Facades\Auth;
+
 
 class PostController extends Controller
 {
     // Menampilkan semua post
-    public function index(Request $request)
+    public function index(Request $request, PostService $service)
     {
-
-        $query = Post::with(['user', 'category', 'tags']);
-
-        // Search
-        if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
-        }
-
-        // Filter by category
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->category);
-        }
-
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Sorting
-        $sortField = $request->get('sort', 'created_at');
-        $sortDirection = $request->get('direction', 'desc');
-        $query->orderBy($sortField, $sortDirection);
-
-        // Pagination
-        $perPage = $request->get('per_page', 10);
-        $posts = $query->paginate($perPage);
-
-        $categories = Category::all(); // For filter dropdown
-
-
-        // $posts = Post::with('user', 'category', 'tags')->latest()->paginate(10);
+        $posts = $service->getPosts([
+            'search' => $request->input('search'),
+            'category' => $request->input('category'),
+            'status' => $request->input('status'),
+            'sort' => $request->input('sort', 'created_at'),
+            'direction' => $request->input('direction', 'desc'),
+            'per_page' => $request->input('per_page', 10),
+        ]);
+        $categories = Category::all();
         return view('admin.posts.index', compact('posts', 'categories'));
     }
 

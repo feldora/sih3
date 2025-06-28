@@ -18,6 +18,16 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@localhost',
             'password' => bcrypt('password'),
         ]);
+        User::factory()->create([
+            'name' => 'Operator BWS Sulawesi III Palu',
+            'email' => 'bws@localhost',
+            'password' => bcrypt('password'),
+        ]);
+        User::factory()->create([
+            'name' => 'Operator BMKG Sulawesi',
+            'email' => 'bmkg@localhost',
+            'password' => bcrypt('password'),
+        ]);
 
         $this->call([
             PermissionRoleMenuSeeder::class,
@@ -26,6 +36,7 @@ class DatabaseSeeder extends Seeder
             TagsTableSeeder::class,
             PostSeeder::class,
             WilayahSungaiSeeder::class,
+            assignRoleToUser::class,
         ]);
     }
 }

@@ -24,7 +24,7 @@ class MenuController extends Controller
      */
     public function create()
     {
-        $menus = Menu::whereNull('parent_id')->get();  // Ambil menu yang tidak memiliki parent
+        $menus = new Menu();
         return view('admin.pages.menu.create', compact('menus'));
     }
 

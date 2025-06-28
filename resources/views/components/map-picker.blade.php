@@ -1,10 +1,13 @@
 @props([
     'latitude' => old('latitude'),
     'longitude' => old('longitude'),
+    'label' => 'Koordinat',
+    'hight' => '800px',
 ])
 
 <div>
-    <div id="map" style="height: 400px;"></div>
+    <label for="maps">{{ $label }}</label>
+    <div id="map" style="height: {{ $hight }};"></div>
 
     <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude') }}">
     <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">

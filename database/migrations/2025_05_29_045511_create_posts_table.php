@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['draft', 'published'])->default('draft');
+            $table->string('role')->nullable();
             $table->timestamps();
         });
     }

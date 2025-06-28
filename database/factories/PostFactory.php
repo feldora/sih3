@@ -22,10 +22,11 @@ class PostFactory extends Factory
             'slug' => Str::slug($this->faker->sentence),
             'content' => $this->faker->paragraph,
             'user_id' => $user ? $user->id : null,
+            'role' => $this->faker->randomElement(['bws', 'bmkg', 'esdm', null]),
             'category_id' => $category ? $category->name : null,
             'status' => $this->faker->randomElement(['draft', 'published']),
             'views' => $this->faker->numberBetween(0, 1000),
             // 'tags' => $tags,
         ];
     }
-}
+};

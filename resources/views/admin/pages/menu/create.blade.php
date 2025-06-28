@@ -39,9 +39,9 @@
                 <select name="parent_id" id="parent_id"
                     class="form-select mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">-- Pilih Parent Menu --</option>
-                    @foreach ($menus as $parent)
+                    @foreach ($menus->whereNull('parent_id')->get() as $parent)
                         <option value="{{ $parent->id }}" {{ old('parent_id') == $parent->id ? 'selected' : '' }}>
-                            {{ $parent->title }}
+                           {{ $parent->title }}
                         </option>
                     @endforeach
                 </select>
@@ -51,11 +51,24 @@
             </div>
 
             <!-- Order (Urutan Menu) -->
-            <div class="mb-4">
+            {{-- <div class="mb-4">
                 <label for="order" class="block text-sm font-medium text-gray-700">Order</label>
                 <input type="number" name="order" id="order" value="{{ old('order') }}"
                     class="form-input mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     min="1">
+                @error('order')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div> --}}
+            <div class="mb-4">
+                <label for="order" class="block text-sm font-medium text-gray-700">Order</label>
+                <select name="order" id="order"
+                    class="choices form-select mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @foreach ($menus->position() as $position)
+                        <option value="{{ $position->value }}">{{$position->value." ".$position->text }}</option>
+                    @endforeach
+                    <option value="{{ $menus->max('order') + 1 }}" selected>Last</option>
+                </select>
                 @error('order')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror

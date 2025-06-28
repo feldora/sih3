@@ -15,7 +15,7 @@ class Post extends Model implements HasMedia
     use HasFactory;
     use InteractsWithMedia;
 
-    protected $fillable = ['title', 'slug', 'content', 'user_id', 'category_id', 'status'];
+    protected $fillable = ['title', 'slug', 'content', 'user_id', 'category_id', 'status', 'role', 'views'];
 
     // Relasi ke User (One-to-Many)
     public function user()

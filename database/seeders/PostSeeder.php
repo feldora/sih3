@@ -23,7 +23,6 @@ class PostSeeder extends Seeder
 
             // Tambahkan tags random
             $data['tags'] = Tag::inRandomOrder()->take(rand(1, 3))->pluck('id')->toArray();
-            $data['views'] = rand(500, 1000); // Tambahkan views random
 
             // Simpan lewat service
             $service->store($data);

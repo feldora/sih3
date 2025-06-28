@@ -1,4 +1,4 @@
-@props(['oldCoordinates' => [], 'name' => 'coordinates', 'style' => ''])
+@props(['oldCoordinates' => [], 'name' => 'coordinates', 'style' => '', 'height' => '800px'])
 
 @push('styles')
     <style>
@@ -54,8 +54,8 @@
             Klik pada peta untuk menambah titik. Hanya garis yang akan ditampilkan.
         </span>
     </div>
-    
-    <div id="map"></div>
+
+    <div id="map" style="height: {{ $height }};"></div>
 
     <!-- Hidden input untuk menyimpan koordinat -->
     <input type="hidden" name="{{ $name }}" id="coordinates" value="{{ old($name, json_encode($oldCoordinates)) }}">

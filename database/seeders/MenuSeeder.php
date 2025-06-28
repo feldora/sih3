@@ -9,13 +9,14 @@ class MenuSeeder extends Seeder
 {
     public function run()
     {
+        $order = 0;
         // Menu Publik
         $informasiH3 = Menu::create([
             'title' => 'Informasi H3',
             'url' => '/informasi-h3',
             'icon' => 'fas fa-info-circle',
             'parent_id' => null,
-            'order' => 1,
+            'order' => $order++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'parent',
@@ -26,7 +27,7 @@ class MenuSeeder extends Seeder
             'url' => '/informasi-h3/info',
             'icon' => 'fas fa-info',
             'parent_id' => $informasiH3->id,
-            'order' => 1,
+            'order' => $order++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'child',
@@ -37,7 +38,7 @@ class MenuSeeder extends Seeder
             'url' => '/informasi-h3/data',
             'icon' => 'fas fa-database',
             'parent_id' => $informasiH3->id,
-            'order' => 2,
+            'order' => $order++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'child',
@@ -48,7 +49,7 @@ class MenuSeeder extends Seeder
             'url' => '/informasi-h3/neraca-air',
             'icon' => 'fas fa-water',
             'parent_id' => $informasiH3->id,
-            'order' => 3,
+            'order' => $order++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'child',
@@ -59,18 +60,19 @@ class MenuSeeder extends Seeder
             'url' => '/geospasial',
             'icon' => 'fas fa-globe',
             'parent_id' => null,
-            'order' => 2,
+            'order' => $order++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'parent',
         ]);
+        $geospasial->orderChildren = 0;
 
         Menu::create([
             'title' => 'Peta Geospasial',
             'url' => '/geospasial/peta',
             'icon' => 'fas fa-map',
             'parent_id' => $geospasial->id,
-            'order' => 1,
+            'order' => $geospasial->orderChildren++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'child',
@@ -81,7 +83,7 @@ class MenuSeeder extends Seeder
             'url' => '/geospasial/monitoring',
             'icon' => 'fas fa-chart-line',
             'parent_id' => $geospasial->id,
-            'order' => 2,
+            'order' => $geospasial->orderChildren++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'child',
@@ -92,7 +94,7 @@ class MenuSeeder extends Seeder
             'url' => '/produk-hukum',
             'icon' => 'fas fa-gavel',
             'parent_id' => null,
-            'order' => 3,
+            'order' => $order++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'link',
@@ -103,7 +105,7 @@ class MenuSeeder extends Seeder
             'url' => '/kontak',
             'icon' => 'fas fa-envelope',
             'parent_id' => null,
-            'order' => 4,
+            'order' => $order++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'link',
@@ -114,7 +116,7 @@ class MenuSeeder extends Seeder
             'url' => '/artikel',
             'icon' => 'fas fa-file-alt',
             'parent_id' => null,
-            'order' => 5,
+            'order' => $order++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'link',
@@ -125,20 +127,21 @@ class MenuSeeder extends Seeder
             'url' => '/berita',
             'icon' => 'fas fa-bullhorn',
             'parent_id' => null,
-            'order' => 6,
+            'order' => $order++,
             'permission_name' => null,
             'zona' => 'public',
             'menu_type' => 'link',
         ]);
 
         // Menu Admin
+        $adminMenuOrder = 0;
         Menu::create([
             'title' => 'Dashboard',
             'url' => '/admin/dashboard',
             'icon' => 'fas fa-tachometer-alt',
             'parent_id' => null,
-            'order' => 1,
-            'permission_name' => 'admin.dashboard',
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'dashboard',
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);
@@ -147,8 +150,8 @@ class MenuSeeder extends Seeder
             'url' => '/admin/posts',
             'icon' => 'fas fa-newspaper',
             'parent_id' => null,
-            'order' => 2,
-            'permission_name' => 'admin.posts',
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'posts',
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);
@@ -159,18 +162,18 @@ class MenuSeeder extends Seeder
             'icon' => 'fas fa-cogs',
             'parent_id' => null,
             'order' => 999,
-            'permission_name' => 'admin.settings',
+            'permission_name' => 'settings',
             'zona' => 'admin',
             'menu_type' => 'parent',
         ]);
-
+        $pengaturan->orderChildren = 0;
         Menu::create([
             'title' => 'Manajemen Menu',
             'url' => '/admin/menus',
             'icon' => 'fas fa-list',
             'parent_id' => $pengaturan->id,
-            'order' => 1,
-            'permission_name' => 'admin.menus',
+            'order' => $pengaturan->orderChildren++,
+            'permission_name' => 'menus',
             'zona' => 'admin',
             'menu_type' => 'child',
         ]);
@@ -180,8 +183,18 @@ class MenuSeeder extends Seeder
             'url' => '/admin/users',
             'icon' => 'fas fa-users',
             'parent_id' => $pengaturan->id,
-            'order' => 2,
-            'permission_name' => 'admin.users',
+            'order' => $pengaturan->orderChildren++,
+            'permission_name' => 'users',
+            'zona' => 'admin',
+            'menu_type' => 'child',
+        ]);
+        Menu::create([
+            'title' => 'Manajemen Peran',
+            'url' => '/admin/akses-role',
+            'icon' => 'fas fa-user-shield',
+            'parent_id' => $pengaturan->id,
+            'order' => $pengaturan->orderChildren++,
+            'permission_name' => 'roles',
             'zona' => 'admin',
             'menu_type' => 'child',
         ]);
@@ -191,18 +204,29 @@ class MenuSeeder extends Seeder
             'url' => '/admin/media',
             'icon' => 'fas fa-images',
             'parent_id' => null,
-            'order' => 4,
-            'permission_name' => 'admin.media',
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'media',
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);
+        Menu::create([
+            'title' => 'Pos Pengamatan',
+            'url' => '/admin/pos-pengamatan',
+            'icon' => 'fas fa-binoculars',
+            'parent_id' => null,
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'pos_pengamatan',
+            'zona' => 'admin',
+            'menu_type' => 'link',
+        ]);
+
         Menu::create([
             'title' => 'Wilayah Sungai',
             'url' => '/admin/wilayah-sungai',
             'icon' => 'fas fa-map',
             'parent_id' => null,
-            'order' => 5,
-            'permission_name' => 'admin.wilayah_sungai',
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'wilayah_sungai',
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);
@@ -211,8 +235,8 @@ class MenuSeeder extends Seeder
             'url' => '/admin/titik-pantau',
             'icon' => 'fas fa-map-marker-alt',
             'parent_id' => null,
-            'order' => 6,
-            'permission_name' => 'admin.tp',
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'titik_pantau',
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);
@@ -221,8 +245,8 @@ class MenuSeeder extends Seeder
             'url' => '/admin/sungai',
             'icon' => 'fas fa-water',
             'parent_id' => null,
-            'order' => 7,
-            'permission_name' => 'admin.sungai',
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'sungai',
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);

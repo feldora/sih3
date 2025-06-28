@@ -22,43 +22,40 @@ public function run()
     DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
     // Buat permission
-    Permission::create(['name' => 'admin.dashboard']);
-    Permission::create(['name' => 'admin.posts']);
-    Permission::create(['name' => 'admin.menus']);
-    Permission::create(['name' => 'admin.users']);
-    Permission::create(['name' => 'admin.settings']);
-    Permission::create(['name' => 'admin.media']);
-    Permission::create(['name' => 'admin.wilayah_sungai']);
-    Permission::create(['name' => 'admin.tp']);
-    Permission::create(['name' => 'admin.sungai']);
+    Permission::create(['name' => 'dashboard']);
+    Permission::create(['name' => 'posts']);
+    Permission::create(['name' => 'menus']);
+    Permission::create(['name' => 'users']);
+    Permission::create(['name' => 'settings']);
+    Permission::create(['name' => 'media']);
+    Permission::create(['name' => 'pos_pengamatan']);
+    Permission::create(['name' => 'wilayah_sungai']);
+    Permission::create(['name' => 'titik_pantau']);
+    Permission::create(['name' => 'sungai']);
 
     // Buat role dan assign permission
     $admin = Role::create(['name' => 'admin']);
     $admin->givePermissionTo([
-        'admin.dashboard',
-        'admin.posts',
-        'admin.menus',
-        'admin.users',
-        'admin.settings',
-        'admin.media',
-        'admin.wilayah_sungai',
-        'admin.tp',
-        'admin.sungai',
+        'dashboard',
+        'posts',
+        'menus',
+        'users',
+        'settings',
+        'media',
+        'wilayah_sungai',
+        'titik_pantau',
+        'sungai',
+        'pos_pengamatan',
     ]);
 
-    // $user = Role::create(['name' => 'user']);
-    // $user->givePermissionTo('admin.dashboard');
+    $roles = ['bws', 'bmkg', 'esdm'];
+    $permissions = ['dashboard', 'posts', 'media', 'pos_pengamatan', 'wilayah_sungai', 'titik_pantau'];
 
-    $user_bws = Role::create(['name' => 'bws']);
-    $user_bws->givePermissionTo('admin.dashboard');
+    foreach ($roles as $roleName) {
+        $role = Role::create(['name' => $roleName]);
+        $role->givePermissionTo($permissions);
+    }
 
-    $user_bmkg = Role::create(['name' => 'bmkg']);
-    $user_bmkg->givePermissionTo('admin.dashboard');
-
-    $user_esdm = Role::create(['name' => 'esdm']);
-    $user_esdm->givePermissionTo('admin.dashboard');
-
-    // Assign role ke user id 1
     $adminUser = User::find(1);
     if ($adminUser) {
         $adminUser->assignRole('admin');

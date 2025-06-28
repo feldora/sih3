@@ -10,6 +10,8 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\WilayahSungaiController;
 use App\Http\Controllers\TitikPantauController;
+use App\Http\Controllers\AksesRoleController;
+use App\Http\Controllers\PosPantauController;
 
 
 // Route::get('/', function () {
@@ -64,6 +66,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('admin.dashboard');
+    })->name('index');
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
@@ -84,6 +89,25 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         'update' => 'profile.update',
         'destroy' => 'profile.destroy',
     ]);
+    Route::resource('akses-role', AksesRoleController::class)->names([
+        'index' => 'akses-role.index',
+        'create' => 'akses-role.create',
+        'store' => 'akses-role.store',
+        'show' => 'akses-role.show',
+        'edit' => 'akses-role.edit',
+        'update' => 'akses-role.update',
+        'destroy' => 'akses-role.destroy',
+    ]);
+    Route::resource('pos-pengamatan', PosPantauController::class)->names([
+        'index' => 'pos-pengamatan.index',
+        'create' => 'pos-pengamatan.create',
+        'store' => 'pos-pengamatan.store',
+        'show' => 'pos-pengamatan.show',
+        'edit' => 'pos-pengamatan.edit',
+        'update' => 'pos-pengamatan.update',
+        'destroy' => 'pos-pengamatan.destroy',
+    ]);
+
     Route::get('/blank', function () {
         return view('admin.blank');
     })->name('blank');

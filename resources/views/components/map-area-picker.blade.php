@@ -1,4 +1,4 @@
-@props(['oldCoordinates' => [], 'name' => 'coordinates', 'style' => ''])
+@props(['oldCoordinates' => [], 'name' => 'coordinates', 'style' => '', 'height' => '800px'])
 
 @push('styles')
     <style>
@@ -7,7 +7,7 @@
                 {{ $style }}
             @else
                 width: 100%;
-                height: 600px;
+                height: {{ $height }};
             @endif
             cursor: crosshair;
         }
@@ -58,7 +58,7 @@
         </span>
     </div>
 
-    <div id="map-polygon"></div>
+    <div id="map-polygon" height="{{ $height }}"></div>
 
     <!-- Hidden input untuk menyimpan koordinat -->
     <input type="hidden" name="{{ $name }}" id="coordinates-polygon"

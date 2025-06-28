@@ -10,6 +10,39 @@ use Exception;
 
 class PostService
 {
+    public function getPosts(array $filters = [])
+    {
+
+
+        if (in_array('admin', Auth::user()->getRoleNames()->toArray())) {
+            $query = Post::with(['user', 'category', 'tags']);
+        } else {
+            $query = Post::with(['user', 'category', 'tags'])
+                ->whereIn('role', Auth::user()->getRoleNames()->toArray())
+                ->orWhere('role', null);
+        }
+
+        // Apply filters
+        if (!empty($filters['search'])) {
+            $query->where('title', 'like', '%' . $filters['search'] . '%');
+        }
+        if (!empty($filters['category'])) {
+            $query->where('category_id', $filters['category']);
+        }
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Sorting
+        $sortField = $filters['sort'] ?? 'created_at';
+        $sortDirection = $filters['direction'] ?? 'desc';
+        $query->orderBy($sortField, $sortDirection);
+
+        // Pagination
+        $perPage = $filters['per_page'] ?? 10;
+        return $query->paginate($perPage);
+    }
+
     public function store(array $data)
     {
         DB::beginTransaction();
@@ -23,6 +56,7 @@ class PostService
                 'user_id' => $data['user_id'] ?? Auth::id(),
                 'category_id' => $category->id,
                 'status' => $data['status'],
+                'role' => $data['role'] ?? null,
                 'views' => $data['views'] ?? 0,
             ];
 
