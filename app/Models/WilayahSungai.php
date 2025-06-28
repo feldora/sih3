@@ -16,8 +16,8 @@ class WilayahSungai extends Model
     protected $table = 'wilayah_sungai';
     protected $primaryKey = 'id';
 
-    public function titikPantau()
-    {
-        return $this->hasMany(TitikPantau::class, 'wilayah_sungai_id', 'id');
-    }
+    // public function titikPantau()
+    // {
+    //     return $this->hasMany(TitikPantau::class, 'wilayah_sungai_id', 'id');
+    // }
 }

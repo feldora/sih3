@@ -1,7 +1,7 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
-
+import "choices.js/src/styles/choices";
 import "choices.js/public/assets/styles/choices.css";
 
 import '@fortawesome/fontawesome-free/css/all.min.css';

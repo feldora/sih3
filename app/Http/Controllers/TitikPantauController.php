@@ -31,7 +31,15 @@ class TitikPantauController extends Controller
      */
     public function create()
     {
-        return view('admin.pages.tp.create');
+        $posPantau = \App\Models\PosPantau::all();
+        $wilayahSungai = \App\Models\WilayahSungai::all();
+        $kategori = \App\Models\Kategori::all();
+        // pd([
+        //     'posPantau' => $posPantau,
+        //     'wilayahSungai' => $wilayahSungai,
+        //     'kategori' => $kategori
+        // ]);
+        return view('admin.pages.tp.create', compact('posPantau', 'wilayahSungai', 'kategori'));
     }
 
     /**
@@ -86,7 +94,7 @@ class TitikPantauController extends Controller
         // Ambil data relasi untuk dropdown
         $posPantau = \App\Models\PosPantau::all();
         $wilayahSungai = \App\Models\WilayahSungai::all();
-        $kategori = [] ;//\App\Models\Kategori::all();
+        $kategori = \App\Models\Kategori::all();
 
         return view('admin.pages.tp.edit', compact('titikPantau', 'posPantau', 'wilayahSungai', 'kategori'));
     }
@@ -97,8 +105,15 @@ class TitikPantauController extends Controller
     public function update(Request $request, TitikPantau $titikPantau)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
+            'nama_titik' => 'required|string|max:255',
+            'alamat' => 'nullable|string|max:255',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'keterangan' => 'nullable|string',
+            'pos_pantau_id' => 'nullable|integer|exists:pos_pantau,id',
+            'wilayah_sungai_id' => 'nullable|integer|exists:wilayah_sungai,id',
+            'kategori_id' => 'nullable|integer|exists:categories,id',
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
         $titikPantau->update($request->all());

@@ -27,39 +27,28 @@
                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
             @enderror
         </div>
-        <div class="mb-4">
-            <label for="pos_pantau_id" class="block text-sm font-medium text-gray-700">Pos Pantau</label>
-            <select name="pos_pantau_id" id="pos_pantau_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 @error('pos_pantau_id') border-red-500 @enderror">
-                {{-- @foreach($posPantau as $pos) --}}
-                {{-- <option value="{{ $pos->id }}" {{ old('pos_pantau_id') == $pos->id ? 'selected' : '' }}>{{ $pos->nama }}</option> --}}
-                {{-- @endforeach --}}
-            </select>
-            @error('pos_pantau_id')
-                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-        <div class="mb-4">
-            <label for="wilayah_sungai_id" class="block text-sm font-medium text-gray-700">Wilayah Sungai</label>
-            <select name="wilayah_sungai_id" id="wilayah_sungai_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 @error('wilayah_sungai_id') border-red-500 @enderror">
-                {{-- @foreach($wilayahSungai as $wilayah) --}}
-                {{-- <option value="{{ $wilayah->id }}" {{ old('wilayah_sungai_id') == $wilayah->id ? 'selected' : '' }}>{{ $wilayah->nama }}</option> --}}
-                {{-- @endforeach --}}
-            </select>
-            @error('wilayah_sungai_id')
-                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-        <div class="mb-4">
-            <label for="kategori_id" class="block text-sm font-medium text-gray-700">Kategori</label>
-            <select name="kategori_id" id="kategori_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 @error('kategori_id') border-red-500 @enderror">
-                {{-- @foreach($kategori as $kat) --}}
-                {{-- <option value="{{ $kat->id }}" {{ old('kategori_id') == $kat->id ? 'selected' : '' }}>{{ $kat->nama }}</option> --}}
-                {{-- @endforeach --}}
-            </select>
-            @error('kategori_id')
-                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+        
+        <x-choices 
+            name="pos_pantau_id" 
+            :options="$posPantau->map(fn($pos) => ['value' => $pos->id, 'label' => $pos->nama_pos])->toArray()" 
+            label="Pos Pantau" 
+            :selected="old('pos_pantau_id')" 
+        />
+        
+        <x-choices 
+            name="wilayah_sungai_id" 
+            :options="$wilayahSungai->map(fn($ws) => ['value' => $ws->id, 'label' => $ws->name])->toArray()" 
+            label="Wilayah Sungai" 
+            :selected="old('wilayah_sungai_id')" 
+        />
+        
+        <x-choices 
+            name="kategori_id" 
+            :options="$kategori->map(fn($kat) => ['value' => $kat->id, 'label' => $kat->name])->toArray()" 
+            label="Kategori" 
+            :selected="old('kategori_id')" 
+        />
+
         <div class="mb-4">
             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
             <select name="status" id="status" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 @error('status') border-red-500 @enderror">
@@ -77,3 +66,8 @@
     </form>
 </div>
 @endsection
+
+
+@push('scripts')
+
+@endpush
