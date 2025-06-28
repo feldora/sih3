@@ -1,4 +1,15 @@
 {
+  "_tinymce-6zXiAPn4.css": {
+    "file": "assets/tinymce-6zXiAPn4.css",
+    "src": "_tinymce-6zXiAPn4.css"
+  },
+  "_tinymce-B65lqzh_.js": {
+    "file": "assets/tinymce-B65lqzh_.js",
+    "name": "tinymce",
+    "css": [
+      "assets/tinymce-6zXiAPn4.css"
+    ]
+  },
   "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf": {
     "file": "assets/fa-brands-400-D1LuMI3I.ttf",
     "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf"
@@ -44,7 +55,7 @@
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CYitBZs3.css",
+    "file": "assets/app-BRvtO-28.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -54,12 +65,15 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-cxO6serV.js",
+    "file": "assets/app-B1SSQDsA.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
+    "imports": [
+      "_tinymce-B65lqzh_.js"
+    ],
     "css": [
-      "assets/app-BoLK9JwP.css"
+      "assets/app-C0wBJw6w.css"
     ],
     "assets": [
       "assets/fa-brands-400-D_cYUPeE.woff2",

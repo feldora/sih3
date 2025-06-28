@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 
+import path from 'path'; // Jika belum mengimpor path
+
 export default defineConfig({
     plugins: [
         laravel({
@@ -12,13 +14,19 @@ export default defineConfig({
             refresh: true,
         }),
     ],
-    // resolve: {
-    //     alias: {
-    //         '~': path.join(__dirname, '/node_modules/'),
-    //     }
-    // },
-    // build: {
-    //     chunkSizeWarningLimit: 1600,
-    // },
-
+    build: {
+        chunkSizeWarningLimit: 1600, // Menyesuaikan ukuran chunk warning
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules/tinymce')) {
+                        return 'tinymce'; // Pisahkan TinyMCE menjadi chunk terpisah
+                    }
+                    if (id.includes('node_modules/daisyui')) {
+                        return 'daisyui'; // Pisahkan daisyUI menjadi chunk terpisah
+                    }
+                }
+            }
+        }
+    },
 });
