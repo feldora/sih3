@@ -3,17 +3,24 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\WilayahSungai;
+use App\Repositories\Contracts\WilayahSungaiRepositoryInterface;
 use Illuminate\Http\Request;
 
 class WilayahSungaiController extends Controller
 {
+    protected $wilayahSungaiRepository;
+
+    public function __construct(WilayahSungaiRepositoryInterface $wilayahSungaiRepository)
+    {
+        $this->wilayahSungaiRepository = $wilayahSungaiRepository;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $wilayahSungais = WilayahSungai::select('id', 'name', 'description')->paginate(10);
+        $wilayahSungais = $this->wilayahSungaiRepository->paginate(10, ['id', 'name', 'description']);
         return view('admin.pages.ws.index', compact('wilayahSungais'));
     }
 
@@ -23,7 +30,7 @@ class WilayahSungaiController extends Controller
     public function create()
     {
         return view('admin.pages.ws.create', [
-            'wilayahSungai' => new WilayahSungai(),
+            'wilayahSungai' => null,
         ]);
     }
 
@@ -64,7 +71,7 @@ class WilayahSungaiController extends Controller
             'geojson' => json_encode($geoJson),
         ];
 
-        WilayahSungai::create($storeData);
+        $this->wilayahSungaiRepository->create($storeData);
 
         return redirect()->route('admin.wilayah-sungai.index')
                         ->with('success', 'Wilayah Sungai berhasil ditambahkan.');
@@ -74,8 +81,9 @@ class WilayahSungaiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(WilayahSungai $wilayahSungai)
+    public function show($id)
     {
+        $wilayahSungai = $this->wilayahSungaiRepository->find($id);
 
         return view('admin.pages.ws.show', compact('wilayahSungai'));
     }
@@ -83,15 +91,17 @@ class WilayahSungaiController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(WilayahSungai $wilayahSungai)
+    public function edit($id)
     {
+        $wilayahSungai = $this->wilayahSungaiRepository->find($id);
+
         return view('admin.pages.ws.edit', compact('wilayahSungai'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, WilayahSungai $wilayahSungai)
+    public function update(Request $request, $id)
     {
 
         // pd($request->all());
@@ -127,7 +137,7 @@ class WilayahSungaiController extends Controller
             'geojson' => json_encode($geoJson),
         ];
 
-        $wilayahSungai->update($dataStore);
+        $this->wilayahSungaiRepository->update($id, $dataStore);
 
         return redirect()->route('admin.wilayah-sungai.index')->with('success', 'Wilayah Sungai berhasil diperbarui.');
     }
@@ -135,9 +145,9 @@ class WilayahSungaiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(WilayahSungai $wilayahSungai)
+    public function destroy($id)
     {
-        $wilayahSungai->delete();
+        $this->wilayahSungaiRepository->delete($id);
 
         return redirect()->route('admin.wilayah-sungai.index')->with('success', 'Wilayah Sungai berhasil dihapus.');
     }

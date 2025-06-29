@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\Contracts\PosPantauRepositoryInterface;
 use App\Repositories\PosPantauRepository;
+use App\Repositories\Contracts\WilayahSungaiRepositoryInterface;
+use App\Repositories\WilayahSungaiRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,6 +16,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(PosPantauRepositoryInterface::class, PosPantauRepository::class);
+        $this->app->bind(WilayahSungaiRepositoryInterface::class, WilayahSungaiRepository::class);
     }
 
     /**
