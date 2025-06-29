@@ -7,6 +7,8 @@ use App\Repositories\Contracts\PosPantauRepositoryInterface;
 use App\Repositories\PosPantauRepository;
 use App\Repositories\Contracts\WilayahSungaiRepositoryInterface;
 use App\Repositories\WilayahSungaiRepository;
+use App\Repositories\Contracts\TitikPantauRepositoryInterface;
+use App\Repositories\TitikPantauRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(PosPantauRepositoryInterface::class, PosPantauRepository::class);
         $this->app->bind(WilayahSungaiRepositoryInterface::class, WilayahSungaiRepository::class);
+        $this->app->bind(TitikPantauRepositoryInterface::class, TitikPantauRepository::class);
     }
 
     /**

@@ -3,11 +3,18 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\TitikPantau;
+use App\Repositories\Contracts\TitikPantauRepositoryInterface;
 use Illuminate\Http\Request;
 
 class TitikPantauController extends Controller
 {
+    protected $titikPantauRepository;
+
+    public function __construct(TitikPantauRepositoryInterface $titikPantauRepository)
+    {
+        $this->titikPantauRepository = $titikPantauRepository;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -16,17 +23,12 @@ class TitikPantauController extends Controller
         // Ambil parameter search dari request
         $search = $request->input('search');
 
-        // Query untuk mendapatkan titik pantau, bisa menyesuaikan kolom yang ingin dicari
-        $titikPantau = TitikPantau::when($search, function($query) use ($search) {
-            return $query->where('nama_titik', 'like', '%' . $search . '%')
-                         ->orWhere('alamat', 'like', '%' . $search . '%')
-                         ->orWhere('keterangan', 'like', '%' . $search . '%');
-        })
-        ->paginate(10); // Sesuaikan jumlah item per halaman sesuai kebutuhan
+        $titikPantau = $this->titikPantauRepository->paginate(10);
 
         // Kirim data titik pantau dan query pencarian ke tampilan
         return view('admin.pages.tp.index', compact('titikPantau'));
     }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -74,7 +76,7 @@ class TitikPantauController extends Controller
 
         // pd($dataStore);
 
-        TitikPantau::create($dataStore);
+        $this->titikPantauRepository->create($dataStore);
 
         return redirect()->route('admin.titik-pantau.index')->with('success', 'Titik Pantau berhasil ditambahkan.');
     }
@@ -82,16 +84,19 @@ class TitikPantauController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(TitikPantau $titikPantau)
+    public function show($id)
     {
+        $titikPantau = $this->titikPantauRepository->find($id);
+
         return view('admin.pages.tp.show', compact('titikPantau'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TitikPantau $titikPantau)
+    public function edit($id)
     {
+        $titikPantau = $this->titikPantauRepository->find($id);
         // Ambil data relasi untuk dropdown
         $posPantau = \App\Models\PosPantau::all();
         $wilayahSungai = \App\Models\WilayahSungai::all();
@@ -103,7 +108,7 @@ class TitikPantauController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TitikPantau $titikPantau)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'nama_titik' => 'required|string|max:255',
@@ -117,7 +122,7 @@ class TitikPantauController extends Controller
             'status' => 'required|in:aktif,nonaktif',
         ]);
 
-        $titikPantau->update($request->all());
+        $this->titikPantauRepository->update($id, $request->all());
 
         return redirect()->route('admin.titik-pantau.index')->with('success', 'Titik Pantau berhasil diperbarui.');
     }
@@ -125,9 +130,9 @@ class TitikPantauController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TitikPantau $titikPantau)
+    public function destroy($id)
     {
-        $titikPantau->delete();
+        $this->titikPantauRepository->delete($id);
 
         return redirect()->route('admin.titik-pantau.index')->with('success', 'Titik Pantau berhasil dihapus.');
     }
