@@ -20,14 +20,16 @@ class PostService
 
     public function getPosts(array $filters = [])
     {
+        $user = Auth::user();
 
-
-        if (in_array('admin', Auth::user()->getRoleNames()->toArray())) {
+        if ($user && in_array('admin', $user->getRoleNames()->toArray())) {
             $query = Post::with(['user', 'category', 'tags']);
-        } else {
+        } else if ($user) {
             $query = Post::with(['user', 'category', 'tags'])
-                ->whereIn('role', Auth::user()->getRoleNames()->toArray())
+                ->whereIn('role', $user->getRoleNames()->toArray())
                 ->orWhere('role', null);
+        } else {
+            $query = Post::with(['user', 'category', 'tags']);
         }
 
         // Apply filters

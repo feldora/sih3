@@ -34,4 +34,9 @@ class PosPantauRepository implements PosPantauRepositoryInterface
         $posPantau = $this->find($id);
         return $posPantau->delete();
     }
+    
+    public function paginate($perPage = 10, $columns = ['*'])
+    {
+        return PosPantau::select($columns)->paginate($perPage);
+    }
 }

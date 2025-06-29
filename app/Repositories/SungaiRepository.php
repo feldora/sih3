@@ -14,7 +14,7 @@ class SungaiRepository implements SungaiRepositoryInterface
 
     public function paginate($perPage = 10, $columns = ['*'])
     {
-        return Sungai::select($columns)->latest()->paginate($perPage);
+        return Sungai::select($columns)->paginate($perPage);
     }
 
     public function find($id)

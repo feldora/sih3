@@ -6,6 +6,11 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Http\\Controllers\\Api\\PosPantauController' => $baseDir . '/app/Http/Controllers/Api/PosPantauController.php',
+    'App\\Http\\Controllers\\Api\\PostController' => $baseDir . '/app/Http/Controllers/Api/PostController.php',
+    'App\\Http\\Controllers\\Api\\SungaiController' => $baseDir . '/app/Http/Controllers/Api/SungaiController.php',
+    'App\\Http\\Controllers\\Api\\TitikPantauController' => $baseDir . '/app/Http/Controllers/Api/TitikPantauController.php',
+    'App\\Http\\Controllers\\Api\\WilayahSungaiController' => $baseDir . '/app/Http/Controllers/Api/WilayahSungaiController.php',
     'App\\Http\\Controllers\\Auth\\AuthenticatedSessionController' => $baseDir . '/app/Http/Controllers/Auth/AuthenticatedSessionController.php',
     'App\\Http\\Controllers\\Auth\\ConfirmablePasswordController' => $baseDir . '/app/Http/Controllers/Auth/ConfirmablePasswordController.php',
     'App\\Http\\Controllers\\Auth\\EmailVerificationNotificationController' => $baseDir . '/app/Http/Controllers/Auth/EmailVerificationNotificationController.php',
@@ -51,6 +56,15 @@ return array(
     'App\\Models\\WilayahSungai' => $baseDir . '/app/Models/WilayahSungai.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'App\\Providers\\ViewServiceProvider' => $baseDir . '/app/Providers/ViewServiceProvider.php',
+    'App\\Repositories\\Contracts\\PosPantauRepositoryInterface' => $baseDir . '/app/Repositories/Contracts/PosPantauRepositoryInterface.php',
+    'App\\Repositories\\Contracts\\SungaiRepositoryInterface' => $baseDir . '/app/Repositories/Contracts/SungaiRepositoryInterface.php',
+    'App\\Repositories\\Contracts\\TitikPantauRepositoryInterface' => $baseDir . '/app/Repositories/Contracts/TitikPantauRepositoryInterface.php',
+    'App\\Repositories\\Contracts\\WilayahSungaiRepositoryInterface' => $baseDir . '/app/Repositories/Contracts/WilayahSungaiRepositoryInterface.php',
+    'App\\Repositories\\PosPantauRepository' => $baseDir . '/app/Repositories/PosPantauRepository.php',
+    'App\\Repositories\\SungaiRepository' => $baseDir . '/app/Repositories/SungaiRepository.php',
+    'App\\Repositories\\TitikPantauRepository' => $baseDir . '/app/Repositories/TitikPantauRepository.php',
+    'App\\Repositories\\WilayahSungaiRepository' => $baseDir . '/app/Repositories/WilayahSungaiRepository.php',
+    'App\\Services\\MediaService' => $baseDir . '/app/Services/MediaService.php',
     'App\\Services\\PostService' => $baseDir . '/app/Services/PostService.php',
     'App\\Services\\WilayahSungaiService' => $baseDir . '/app/Services/WilayahSungaiService.php',
     'App\\View\\Components\\AppLayout' => $baseDir . '/app/View/Components/AppLayout.php',

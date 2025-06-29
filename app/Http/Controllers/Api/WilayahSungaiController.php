@@ -16,9 +16,10 @@ class WilayahSungaiController extends Controller
     }
 
     // GET /api/wilayah-sungai
-    public function index()
+    public function index(Request $request)
     {
-        $data = $this->wilayahSungaiRepository->all(['id', 'name', 'description', 'geojson', 'status']);
+        $perPage = $request->input('per_page', 10);
+        $data = $this->wilayahSungaiRepository->paginate($perPage, ['id', 'name', 'description', 'geojson', 'status']);
         return response()->json($data);
     }
 

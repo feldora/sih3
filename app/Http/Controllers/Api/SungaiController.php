@@ -16,9 +16,10 @@ class SungaiController extends Controller
     }
 
     // GET /api/sungai
-    public function index()
+    public function index(Request $request)
     {
-        $data = $this->sungaiRepository->all();
+        $perPage = $request->input('per_page', 10);
+        $data = $this->sungaiRepository->paginate($perPage);
         return response()->json($data);
     }
 

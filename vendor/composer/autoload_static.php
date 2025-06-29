@@ -649,6 +649,11 @@ class ComposerStaticInit88970a0117c062eed55fa8728fc43833
     );
 
     public static $classMap = array (
+        'App\\Http\\Controllers\\Api\\PosPantauController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/PosPantauController.php',
+        'App\\Http\\Controllers\\Api\\PostController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/PostController.php',
+        'App\\Http\\Controllers\\Api\\SungaiController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/SungaiController.php',
+        'App\\Http\\Controllers\\Api\\TitikPantauController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/TitikPantauController.php',
+        'App\\Http\\Controllers\\Api\\WilayahSungaiController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/WilayahSungaiController.php',
         'App\\Http\\Controllers\\Auth\\AuthenticatedSessionController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/AuthenticatedSessionController.php',
         'App\\Http\\Controllers\\Auth\\ConfirmablePasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/ConfirmablePasswordController.php',
         'App\\Http\\Controllers\\Auth\\EmailVerificationNotificationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/EmailVerificationNotificationController.php',
@@ -694,6 +699,15 @@ class ComposerStaticInit88970a0117c062eed55fa8728fc43833
         'App\\Models\\WilayahSungai' => __DIR__ . '/../..' . '/app/Models/WilayahSungai.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Providers\\ViewServiceProvider' => __DIR__ . '/../..' . '/app/Providers/ViewServiceProvider.php',
+        'App\\Repositories\\Contracts\\PosPantauRepositoryInterface' => __DIR__ . '/../..' . '/app/Repositories/Contracts/PosPantauRepositoryInterface.php',
+        'App\\Repositories\\Contracts\\SungaiRepositoryInterface' => __DIR__ . '/../..' . '/app/Repositories/Contracts/SungaiRepositoryInterface.php',
+        'App\\Repositories\\Contracts\\TitikPantauRepositoryInterface' => __DIR__ . '/../..' . '/app/Repositories/Contracts/TitikPantauRepositoryInterface.php',
+        'App\\Repositories\\Contracts\\WilayahSungaiRepositoryInterface' => __DIR__ . '/../..' . '/app/Repositories/Contracts/WilayahSungaiRepositoryInterface.php',
+        'App\\Repositories\\PosPantauRepository' => __DIR__ . '/../..' . '/app/Repositories/PosPantauRepository.php',
+        'App\\Repositories\\SungaiRepository' => __DIR__ . '/../..' . '/app/Repositories/SungaiRepository.php',
+        'App\\Repositories\\TitikPantauRepository' => __DIR__ . '/../..' . '/app/Repositories/TitikPantauRepository.php',
+        'App\\Repositories\\WilayahSungaiRepository' => __DIR__ . '/../..' . '/app/Repositories/WilayahSungaiRepository.php',
+        'App\\Services\\MediaService' => __DIR__ . '/../..' . '/app/Services/MediaService.php',
         'App\\Services\\PostService' => __DIR__ . '/../..' . '/app/Services/PostService.php',
         'App\\Services\\WilayahSungaiService' => __DIR__ . '/../..' . '/app/Services/WilayahSungaiService.php',
         'App\\View\\Components\\AppLayout' => __DIR__ . '/../..' . '/app/View/Components/AppLayout.php',
