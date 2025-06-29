@@ -3,17 +3,24 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\PosPantau;
+use App\Repositories\Contracts\PosPantauRepositoryInterface;
 use Illuminate\Http\Request;
 
 class PosPantauController extends Controller
 {
+    protected $posPantauRepository;
+
+    public function __construct(PosPantauRepositoryInterface $posPantauRepository)
+    {
+        $this->posPantauRepository = $posPantauRepository;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $posPantau = PosPantau::all();
+        $posPantau = $this->posPantauRepository->all();
         return view('admin.pages.pos_pantau.index', compact('posPantau'));
     }
 
@@ -44,17 +51,9 @@ class PosPantauController extends Controller
             'kewenangan' => 'nullable|string|max:255',
         ]);
 
-        PosPantau::create($request->all());
+        $this->posPantauRepository->create($request->all());
 
         return redirect()->route('admin.pos-pengamatan.index')->with('success', 'Pos Pantau created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(PosPantau $pos_pengamatan)
-    {
-        //
     }
 
     /**
@@ -62,20 +61,20 @@ class PosPantauController extends Controller
      */
     public function edit(string $id)
     {
-        $posPantau = PosPantau::findOrFail($id);
+        $posPantau = $this->posPantauRepository->find($id);
         return view('admin.pages.pos_pantau.edit', compact('posPantau'));
     }
     
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PosPantau $pos_pengamatan)
+    public function update(Request $request, $id)
     {
         $data = $request->all();
         if (array_key_exists('tahun_pembangunan', $data) && empty($data['tahun_pembangunan'])) {
             $data['tahun_pembangunan'] = null;
         }
-        $pos_pengamatan->update($data);
+        $this->posPantauRepository->update($id, $data);
 
         return redirect()->route('admin.pos-pengamatan.index')->with('success', 'Data Pos Pantau berhasil diupdate.');
     }
@@ -83,9 +82,9 @@ class PosPantauController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PosPantau $pos_pengamatan)
+    public function destroy($id)
     {
-        $pos_pengamatan->delete();
+        $this->posPantauRepository->delete($id);
 
         return redirect()->route('admin.pos-pengamatan.index')->with('success', 'Data Pos Pantau berhasil dihapus.');
     }
