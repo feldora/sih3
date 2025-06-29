@@ -1,19 +1,37 @@
 <?php
 namespace App\Services;
 
-use App\Models\WilayahSungai;
-use Illuminate\Support\Collection;
+use App\Repositories\Contracts\WilayahSungaiRepositoryInterface;
 
 class WilayahSungaiService
 {
+    protected $repository;
+
+    public function __construct(WilayahSungaiRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Get all Wilayah Sungai records.
      *
      * @return Collection
      */
-    public function getAll(): Collection
+    public function all($columns = ['*'])
     {
-        return WilayahSungai::all();
+        return $this->repository->all($columns);
+    }
+
+    /**
+     * Paginate Wilayah Sungai records.
+     *
+     * @param int $perPage
+     * @param array $columns
+     * @return LengthAwarePaginator
+     */
+    public function paginate($perPage = 10, $columns = ['*'])
+    {
+        return $this->repository->paginate($perPage, $columns);
     }
 
     /**
@@ -22,9 +40,9 @@ class WilayahSungaiService
      * @param int $id
      * @return WilayahSungai|null
      */
-    public function findById(int $id): ?WilayahSungai
+    public function find($id)
     {
-        return WilayahSungai::find($id);
+        return $this->repository->find($id);
     }
 
     /**
@@ -33,9 +51,9 @@ class WilayahSungaiService
      * @param array $data
      * @return WilayahSungai
      */
-    public function create(array $data): WilayahSungai
+    public function create(array $data)
     {
-        return WilayahSungai::create($data);
+        return $this->repository->create($data);
     }
 
     /**
@@ -45,13 +63,9 @@ class WilayahSungaiService
      * @param array $data
      * @return WilayahSungai|null
      */
-    public function update(int $id, array $data): ?WilayahSungai
+    public function update($id, array $data)
     {
-        $wilayahSungai = WilayahSungai::find($id);
-        if ($wilayahSungai) {
-            $wilayahSungai->update($data);
-        }
-        return $wilayahSungai;
+        return $this->repository->update($id, $data);
     }
 
     /**
@@ -60,12 +74,8 @@ class WilayahSungaiService
      * @param int $id
      * @return bool
      */
-    public function delete(int $id): bool
+    public function delete($id)
     {
-        $wilayahSungai = WilayahSungai::find($id);
-        if ($wilayahSungai) {
-            return $wilayahSungai->delete();
-        }
-        return false;
+        return $this->repository->delete($id);
     }
 }
