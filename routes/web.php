@@ -1,18 +1,18 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\MenuController;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\TagController;
-use App\Http\Controllers\MediaController;
-use App\Http\Controllers\WilayahSungaiController;
-use App\Http\Controllers\TitikPantauController;
-use App\Http\Controllers\AksesRoleController;
-use App\Http\Controllers\PosPantauController;
-use App\Http\Controllers\SungaiController;
+use App\Http\Controllers\Web\ProfileController;
+use App\Http\Controllers\Web\UserManagementController;
+use App\Http\Controllers\Web\MenuController;
+use App\Http\Controllers\Web\PostController;
+use App\Http\Controllers\Web\CategoryController;
+use App\Http\Controllers\Web\TagController;
+use App\Http\Controllers\Web\MediaController;
+use App\Http\Controllers\Web\WilayahSungaiController;
+use App\Http\Controllers\Web\TitikPantauController;
+use App\Http\Controllers\Web\AksesRoleController;
+use App\Http\Controllers\Web\PosPantauController;
+use App\Http\Controllers\Web\SungaiController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -35,7 +35,7 @@ Route::view('/geospasial', 'pages.geospasial.index');
 Route::view('/geospasial/peta', 'pages.geospasial.index');
 Route::view('/geospasial/monitoring', 'pages.geospasial.index');
 
-Route::get('/artikel',  PostController::class . '@publicIndex')->name('artikel.publicIndex');
+Route::get('/artikel', [PostController::class, 'publicIndex'])->name('artikel.publicIndex');
 Route::get('/artikel/{slug}',  PostController::class . '@publicShow')->name('artikel.publicShow');
 
 
@@ -121,3 +121,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         return view('admin.blank');
     })->name('blank');
 });
+
+// Route::prefix('api')->name('public-api.')->group(function () {
+    
+// }); 

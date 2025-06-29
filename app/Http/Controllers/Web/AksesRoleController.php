@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -10,7 +11,6 @@ use App\Models\Menu;
 // use Spatie\Permission\Models\User;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-
 
 class AksesRoleController extends Controller
 {
