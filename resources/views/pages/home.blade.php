@@ -139,7 +139,7 @@
                         <div class="mt-4 flex justify-between items-center">
                             <div class="flex space-x-2">
                                 <span class="badge badge-primary badge-sm">{{ $ws->status }}</span>
-                                <span class="badge badge-outline badge-sm">{{ $ws->titikPantau->count() }} Stasiun</span>
+                                <span class="badge badge-outline badge-sm">{{ $ws->titikPantau ? $ws->titikPantau->count() : 0 }} Stasiun</span>
                             </div>
                             <button class="btn btn-ghost btn-sm text-primary hover:bg-primary hover:text-white smooth-transition">
                                 <i class="fas fa-eye"></i>

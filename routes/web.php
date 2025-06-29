@@ -12,7 +12,7 @@ use App\Http\Controllers\WilayahSungaiController;
 use App\Http\Controllers\TitikPantauController;
 use App\Http\Controllers\AksesRoleController;
 use App\Http\Controllers\PosPantauController;
-
+use App\Http\Controllers\SungaiController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -106,6 +106,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         'edit' => 'pos-pengamatan.edit',
         'update' => 'pos-pengamatan.update',
         'destroy' => 'pos-pengamatan.destroy',
+    ]);
+    Route::resource('sungai', SungaiController::class)->names([
+        'index' => 'sungai.index',
+        'create' => 'sungai.create',
+        'store' => 'sungai.store',
+        'show' => 'sungai.show',
+        'edit' => 'sungai.edit',
+        'update' => 'sungai.update',
+        'destroy' => 'sungai.destroy',
     ]);
 
     Route::get('/blank', function () {
