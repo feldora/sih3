@@ -109,5 +109,6 @@ return array(
     'Carbon\\Doctrine\\' => array($vendorDir . '/carbonphp/carbon-doctrine-types/src/Carbon/Doctrine'),
     'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
     'Brick\\Math\\' => array($vendorDir . '/brick/math/src'),
+    'App\\Repositories\\' => array($baseDir . '/app/Repositories'),
     'App\\' => array($baseDir . '/app', $vendorDir . '/laravel/pint/app'),
 );

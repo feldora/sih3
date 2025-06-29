@@ -211,6 +211,7 @@ class ComposerStaticInit88970a0117c062eed55fa8728fc43833
         ),
         'A' => 
         array (
+            'App\\Repositories\\' => 17,
             'App\\' => 4,
         ),
     );
@@ -636,6 +637,10 @@ class ComposerStaticInit88970a0117c062eed55fa8728fc43833
         array (
             0 => __DIR__ . '/..' . '/brick/math/src',
         ),
+        'App\\Repositories\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/app/Repositories',
+        ),
         'App\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app',
@@ -654,6 +659,19 @@ class ComposerStaticInit88970a0117c062eed55fa8728fc43833
         'App\\Http\\Controllers\\Auth\\RegisteredUserController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/RegisteredUserController.php',
         'App\\Http\\Controllers\\Auth\\VerifyEmailController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/VerifyEmailController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\Web\\AksesRoleController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/AksesRoleController.php',
+        'App\\Http\\Controllers\\Web\\CategoryController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/CategoryController.php',
+        'App\\Http\\Controllers\\Web\\MediaController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/MediaController.php',
+        'App\\Http\\Controllers\\Web\\MenuController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/MenuController.php',
+        'App\\Http\\Controllers\\Web\\PosPantauController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/PosPantauController.php',
+        'App\\Http\\Controllers\\Web\\PostController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/PostController.php',
+        'App\\Http\\Controllers\\Web\\Profile' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/Profile.php',
+        'App\\Http\\Controllers\\Web\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/ProfileController.php',
+        'App\\Http\\Controllers\\Web\\SungaiController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/SungaiController.php',
+        'App\\Http\\Controllers\\Web\\TagController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/TagController.php',
+        'App\\Http\\Controllers\\Web\\TitikPantauController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/TitikPantauController.php',
+        'App\\Http\\Controllers\\Web\\UserManagementController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/UserManagementController.php',
+        'App\\Http\\Controllers\\Web\\WilayahSungaiController' => __DIR__ . '/../..' . '/app/Http/Controllers/Web/WilayahSungaiController.php',
         'App\\Http\\Requests\\Auth\\LoginRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Auth/LoginRequest.php',
         'App\\Http\\Requests\\ProfileUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProfileUpdateRequest.php',
         'App\\Http\\Resources\\SungaiResource' => __DIR__ . '/../..' . '/app/Http/Resources/SungaiResource.php',
@@ -677,7 +695,9 @@ class ComposerStaticInit88970a0117c062eed55fa8728fc43833
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Providers\\ViewServiceProvider' => __DIR__ . '/../..' . '/app/Providers/ViewServiceProvider.php',
         'App\\Services\\PostService' => __DIR__ . '/../..' . '/app/Services/PostService.php',
+        'App\\Services\\WilayahSungaiService' => __DIR__ . '/../..' . '/app/Services/WilayahSungaiService.php',
         'App\\View\\Components\\AppLayout' => __DIR__ . '/../..' . '/app/View/Components/AppLayout.php',
+        'App\\View\\Components\\ArticleCard' => __DIR__ . '/../..' . '/app/View/Components/ArticleCard.php',
         'App\\View\\Components\\ChoicesMultiple' => __DIR__ . '/../..' . '/app/View/Components/ChoicesMultiple.php',
         'App\\View\\Components\\GuestLayout' => __DIR__ . '/../..' . '/app/View/Components/GuestLayout.php',
         'App\\View\\Components\\Input' => __DIR__ . '/../..' . '/app/View/Components/Input.php',
