@@ -16,7 +16,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    {{-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> --}}
     
     <style>
         .main-container {
@@ -343,6 +343,10 @@
                         </div>
                     </div>
                 </div>
+                <!-- Clear Cache Button -->
+                <div style="padding: 20px 0 10px 0; text-align: center;">
+                    <button id="clearCacheBtn" style="background: #ff4d4f; color: white; border: none; border-radius: 6px; padding: 10px 24px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: background 0.2s;">🗑️ Bersihkan Cache</button>
+                </div>
             </div>
         </div>
         
@@ -356,7 +360,7 @@
     </main>
         
     <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    {{-- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> --}}
     
     <script>
         window.addEventListener('load', function() {
@@ -366,7 +370,190 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize map
             const map = L.map('map').setView([-0.8917, 119.8707], 8);
+// Helper: localStorage with expiry
+function setWithExpiry(key, value, ttl) {
+    const now = new Date();
+    const item = {
+        value: value,
+        expiry: now.getTime() + ttl,
+    };
+    localStorage.setItem(key, JSON.stringify(item));
+}
+function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key);
+    if (!itemStr) return null;
+    const item = JSON.parse(itemStr);
+    const now = new Date();
+    if (now.getTime() > item.expiry) {
+        localStorage.removeItem(key);
+        return null;
+    }
+    return item.value;
+}
 
+// Layer references
+let wsLayer;
+let posLayer;
+let tpLayer;
+
+// Wilayah Sungai
+const wsCheckbox = document.getElementById('wilayahsungai');
+if (wsCheckbox) {
+    wsCheckbox.addEventListener('change', async function(e) {
+        if (e.target.checked) {
+            let data = getWithExpiry('ws_data');
+            
+            if (!data) {
+                const res = await fetch('/api/wilayah-sungai');
+                data = await res.json();
+                setWithExpiry('ws_data', data, 24 * 60 * 60 * 1000); // 24 jam
+            }
+            if (wsLayer) map.removeLayer(wsLayer);
+            wsLayer = L.layerGroup();
+            data.forEach(item => {
+                if (item.geojson) {
+                    let geojson = JSON.parse(item.geojson);
+                    console.log(geojson);
+                    
+                    geojson.features.forEach(f => {
+                        if (f.geometry && f.geometry.type === 'Polygon') {
+                            // Cek jika sudah [ [ [lat, lng], ... ] ]
+                            if (
+                                Array.isArray(f.geometry.coordinates) &&
+                                Array.isArray(f.geometry.coordinates[0]) &&
+                                Array.isArray(f.geometry.coordinates[0][0]) &&
+                                typeof f.geometry.coordinates[0][0][0] === 'number' &&
+                                typeof f.geometry.coordinates[0][0][1] === 'number'
+                            ) {
+                                // Sudah benar, tidak perlu diubah
+                            } else {
+                                // Fallback: parsing dari [ [lng, lat], ... ]
+                                if (Array.isArray(f.geometry.coordinates) && f.geometry.coordinates.length > 0 && !Array.isArray(f.geometry.coordinates[0][0])) {
+                                    f.geometry.coordinates = [
+                                        f.geometry.coordinates
+                                            .map(coord => {
+                                                if (Array.isArray(coord) && coord.length === 2) {
+                                                    const lng = parseFloat(coord[0]);
+                                                    const lat = parseFloat(coord[1]);
+                                                    return (!isNaN(lat) && !isNaN(lng)) ? [lat, lng] : null;
+                                                }
+                                                return null;
+                                            })
+                                            .filter(coord => coord !== null)
+                                    ];
+                                } else {
+                                    f.geometry.coordinates = f.geometry.coordinates
+                                        .map(ring =>
+                                            ring
+                                                .map(coord => {
+                                                    if (Array.isArray(coord) && coord.length === 2) {
+                                                        const lng = parseFloat(coord[0]);
+                                                        const lat = parseFloat(coord[1]);
+                                                        return (!isNaN(lat) && !isNaN(lng)) ? [lat, lng] : null;
+                                                    }
+                                                    return null;
+                                                })
+                                                .filter(coord => coord !== null)
+                                        )
+                                        .filter(ring => ring.length > 0);
+                                }
+                            }
+                        }
+                    });
+                    // Tampilkan polygon manual untuk debug
+                    geojson.features.forEach(f => {
+                        if (f.geometry && f.geometry.type === 'Polygon') {
+                            const latlngs = f.geometry.coordinates[0];
+                            if (latlngs && latlngs.length >= 3) {
+                                L.polygon(latlngs, { color: 'red', weight: 1, fillOpacity: 0.1 }).addTo(wsLayer);
+                            }
+                        }
+                    });
+                    L.geoJSON(geojson, {
+                        style: { color: '#0074D9', weight: 1, fillOpacity: 0.2 },
+                        onEachFeature: function (feature, layer) {
+                            layer.bindPopup(
+                                `<b>${feature.properties?.name || item.name}</b><br>${feature.properties?.description || item.description || ''}`
+                            );
+                        }
+                    }).addTo(wsLayer);
+                }
+            });
+            wsLayer.addTo(map);
+        } else {
+            if (wsLayer) map.removeLayer(wsLayer);
+        }
+    });
+}
+
+// Pos Pantau
+const posIcon = L.icon({
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    iconSize: [13, 21], // setengah dari 25x41
+    iconAnchor: [6, 21],
+    popupAnchor: [1, -17],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [21, 21]
+});
+
+// Titik Pantau: marker merah
+const titikPantauIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+    iconSize: [13, 21], // setengah dari 25x41
+    iconAnchor: [6, 21],
+    popupAnchor: [1, -17],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [21, 21]
+});
+
+
+// Pos Pantau
+document.getElementById('pospantau').addEventListener('change', async function(e) {
+    if (e.target.checked) {
+        let data = getWithExpiry('pos_data');
+        if (!data) {
+            const res = await fetch('/api/pos-pantau');
+            data = await res.json();
+            setWithExpiry('pos_data', data, 24 * 60 * 60 * 1000);
+        }
+        if (posLayer) map.removeLayer(posLayer);
+        posLayer = L.layerGroup();
+        data.forEach(item => {
+            if (item.latitude && item.longitude) {
+                L.marker([item.latitude, item.longitude], { icon: posIcon })
+                    .bindPopup(`<b>${item.nama_pos || 'Pos Pantau'}</b><br>${item.alamat || ''}`)
+                    .addTo(posLayer);
+            }
+        });
+        posLayer.addTo(map);
+    } else {
+        if (posLayer) map.removeLayer(posLayer);
+    }
+});
+
+// Titik Pantau
+document.getElementById('titikPantau').addEventListener('change', async function(e) {
+    if (e.target.checked) {
+        let data = getWithExpiry('tp_data');
+        if (!data) {
+            const res = await fetch('/api/titik-pantau');
+            data = await res.json();
+            setWithExpiry('tp_data', data, 24 * 60 * 60 * 1000);
+        }
+        if (tpLayer) map.removeLayer(tpLayer);
+        tpLayer = L.layerGroup();
+        data.forEach(item => {
+            if (item.latitude && item.longitude) {
+                L.marker([item.latitude, item.longitude], { icon: titikPantauIcon })
+                    .bindPopup(`<b>${item.nama_titik || 'Titik Pantau'}</b><br>${item.alamat || ''}`)
+                    .addTo(tpLayer);
+            }
+        });
+        tpLayer.addTo(map);
+    } else {
+        if (tpLayer) map.removeLayer(tpLayer);
+    }
+});
             // Default tile layer
             let currentLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
@@ -472,22 +659,30 @@
             });
 
             // Search functionality
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    const query = this.value;
-                    if (query) {
-                        // Simple search implementation - you can integrate with a geocoding service
-                        console.log('Searching for:', query);
-                        alert(`Searching for: ${query}\nIntegrate with geocoding service for real functionality.`);
-                    }
-                }
-            });
+            // const searchInput = document.getElementById('searchInput');
+            // searchInput.addEventListener('keypress', function(e) {
+            //     if (e.key === 'Enter') {
+            //         const query = this.value;
+            //         if (query) {
+            //             // Simple search implementation - you can integrate with a geocoding service
+            //             console.log('Searching for:', query);
+            //             alert(`Searching for: ${query}\nIntegrate with geocoding service for real functionality.`);
+            //         }
+            //     }
+            // });
         });
 
         // Home button functionality
         document.getElementById('homeButton').addEventListener('click', function() {
             location.href = '/';
+        });
+        // Clear Cache button functionality
+        document.getElementById('clearCacheBtn').addEventListener('click', function() {
+            // Hapus cache data peta yang digunakan
+            localStorage.removeItem('ws_data');
+            localStorage.removeItem('pos_data');
+            localStorage.removeItem('tp_data');
+            alert('Cache data peta berhasil dibersihkan!');
         });
     </script>
 </body>

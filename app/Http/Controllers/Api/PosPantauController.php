@@ -16,10 +16,9 @@ class PosPantauController extends Controller
     }
 
     // GET /api/pos-pantau
-    public function index(Request $request)
+    public function index()
     {
-        $perPage = $request->input('per_page', 10);
-        $data = $this->posPantauRepository->paginate($perPage);
+        $data = $this->posPantauRepository->all();
         return response()->json($data);
     }
 

@@ -7,9 +7,9 @@ use App\Models\PosPantau;
 
 class PosPantauRepository implements PosPantauRepositoryInterface
 {
-    public function all()
+    public function all($columns = ['*'])
     {
-        return PosPantau::all();
+        return PosPantau::all($columns);
     }
 
     public function find($id)

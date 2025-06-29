@@ -16,10 +16,9 @@ class TitikPantauController extends Controller
     }
 
     // GET /api/titik-pantau
-    public function index(Request $request)
+    public function index()
     {
-        $perPage = $request->input('per_page', 10);
-        $data = $this->titikPantauRepository->paginate($perPage);
+        $data = $this->titikPantauRepository->all();
         return response()->json($data);
     }
 
