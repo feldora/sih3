@@ -3,20 +3,26 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\Sungai;
+use App\Repositories\Contracts\SungaiRepositoryInterface;
 use App\Models\WilayahSungai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class SungaiController extends Controller
 {
+    protected $sungaiRepository;
+
+    public function __construct(SungaiRepositoryInterface $sungaiRepository)
+    {
+        $this->sungaiRepository = $sungaiRepository;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $sungai = Sungai::latest()->paginate(10);
-        
+        $sungai = $this->sungaiRepository->paginate(10);
         return view('admin.pages.sungai.index', compact('sungai'));
     }
 
@@ -64,8 +70,7 @@ class SungaiController extends Controller
         }
 
         try {
-            Sungai::create($request->all());
-
+            $this->sungaiRepository->create($request->all());
             return redirect()->route('admin.sungai.index')
                 ->with('success', 'Data sungai berhasil ditambahkan');
         } catch (\Exception $e) {
@@ -78,16 +83,18 @@ class SungaiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Sungai $sungai)
+    public function show($id)
     {
+        $sungai = $this->sungaiRepository->find($id);
         return view('admin.pages.sungai.show', compact('sungai'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Sungai $sungai)
+    public function edit($id)
     {
+        $sungai = $this->sungaiRepository->find($id);
         $wilayahSungai = WilayahSungai::all();
         return view('admin.pages.sungai.edit', compact('sungai', 'wilayahSungai'));
     }
@@ -95,7 +102,7 @@ class SungaiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Sungai $sungai)
+    public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'nama_sungai' => 'required|string|max:255',
@@ -127,8 +134,7 @@ class SungaiController extends Controller
         }
 
         try {
-            $sungai->update($request->all());
-
+            $this->sungaiRepository->update($id, $request->all());
             return redirect()->route('admin.sungai.index')
                 ->with('success', 'Data sungai berhasil diperbarui');
         } catch (\Exception $e) {
@@ -141,11 +147,10 @@ class SungaiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Sungai $sungai)
+    public function destroy($id)
     {
         try {
-            $sungai->delete();
-
+            $this->sungaiRepository->delete($id);
             return redirect()->route('admin.sungai.index')
                 ->with('success', 'Data sungai berhasil dihapus');
         } catch (\Exception $e) {
