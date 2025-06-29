@@ -15,8 +15,6 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/pages/geospasial-map.css', 'resources/js/pages/geospasial-map.js'])
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 
 <body class="bg-gradient-to-br from-slate-50 to-blue-50">
@@ -45,11 +43,12 @@
                 <!-- Search Section -->
                 <div class="sidebar-section">
                     <h3>Cari</h3>
-                    <input type="text" class="search-input px-2 py-1 text-xs rounded w-32" placeholder="Cari tempat..." id="searchInput">
+                    <input type="text" class="search-input px-2 py-1 text-xs rounded w-32"
+                        placeholder="Cari tempat..." id="searchInput">
 
                     <div class="sidebar-section hidden" id="searchResultsSection">
                         <small>Hasil pencarian</small>
-                        <div class="bg-white bg-opacity-10 p-4 rounded-lg">
+                        <div class="bg-white bg-opacity-10 p-2 rounded-lg">
                             <ul id="searchResults" class="list-none p-0 m-0">
                             </ul>
                         </div>
@@ -131,8 +130,6 @@
                             <span id="currentZoom">8</span>
                         </div>
                     </div>
-                    <div class="divider"></div>
-
                     <div id="markerInfo" class="bg-white bg-opacity-10 p-2 rounded-lg text-xs">
                     </div>
                 </div>
@@ -154,12 +151,29 @@
             </div>
         </div>
     </main>
+<footer id="mobileFooter" class="block md:hidden fixed bottom-0 left-0 w-full bg-white bg-opacity-90 text-slate-700 text-center py-2 z-50 shadow border-t border-slate-200">
+    <div id="footerMarkInfo"></div>
+    SIH3 SULTENG &copy; 2025
+</footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    {{-- <script>
-        ...seluruh script JS dipindahkan ke resources/js/pages/geospasial-map.js --}}
+            const observer = new MutationObserver(() => {
+                const visible = sidebar.classList.contains('open');
+                if (visible) {
+                    sidebarToggle.classList.add('invisible');
+                } else {
+                    sidebarToggle.classList.remove('invisible');
+                }
+            });
+            observer.observe(sidebar, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        });
+    </script>
 </body>
 
 </html>

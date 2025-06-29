@@ -24,7 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (loader) loader.style.display = 'none';
 
     // Map init
-    const map = L.map('map').setView([-0.8917, 119.8707], 8);
+    const map = L.map('map', { zoomControl: false }).setView([-0.8917, 119.8707], 8);
+    // Tambahkan zoom control di kanan atas
+    L.control.zoom({ position: 'topright' }).addTo(map);
     let wsLayer, posLayer, tpLayer;
     let currentLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
@@ -47,7 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Helper untuk menampilkan info ke sidebar
     function showMarkerInfo(html) {
         const infoDiv = document.getElementById('markerInfo');
+        const footerMarkInfo = document.getElementById('footerMarkInfo');
+
         if (infoDiv) infoDiv.innerHTML = html;
+        if (footerMarkInfo) footerMarkInfo.innerHTML = html;
     }
 
     // Wilayah Sungai
@@ -64,9 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (wsLayer) map.removeLayer(wsLayer);
                 wsLayer = L.layerGroup();
                 
-                
                 data.forEach(item => {
-                    
                     
                     if (item.geojson && item.geojson.features) {
                         // Clone geojson agar tidak mengubah data asli
@@ -257,8 +260,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         results.forEach(item => {
             const li = document.createElement('li');
-            li.className = 'py-2 px-2 hover:bg-white hover:bg-opacity-20 hover:text-gray-800 rounded cursor-pointer';
-            li.innerHTML = `<b>${item.name}</b> <span class='text-xs text-gray-300'>(${item.type})</span><br><span class='text-xs text-gray-200'>${item.description || ''}</span>`;
+            li.className = 'py-1 px-2 hover:bg-white hover:bg-opacity-50 hover:text-gray-800 rounded cursor-pointer';
+            li.innerHTML = `<span class='text-sm'>${item.name}</span> <span class='text-xs text-gray-300'>(${item.type})</span><br><span class='text-xs text-gray-200 hidden'>${item.description || ''}</span>`;
             li.addEventListener('click', function() {
                 // Zoom ke lokasi jika ada koordinat
                 if (item.latitude && item.longitude) {
