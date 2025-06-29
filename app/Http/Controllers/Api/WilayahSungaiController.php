@@ -19,6 +19,13 @@ class WilayahSungaiController extends Controller
     public function index()
     {
         $data = $this->wilayahSungaiRepository->all(['id', 'name', 'description', 'geojson', 'status']);
+        // Pastikan geojson sudah didecode ke array/object
+        $data = collect($data)->map(function($item) {
+            if (isset($item['geojson']) && is_string($item['geojson'])) {
+                $item['geojson'] = json_decode($item['geojson'], true);
+            }
+            return $item;
+        });
         return response()->json($data);
     }
 
