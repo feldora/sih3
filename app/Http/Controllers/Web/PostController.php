@@ -3,14 +3,10 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\Post;
 use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use App\Services\PostService;
-use Illuminate\Support\Facades\Auth;
-
 
 class PostController extends Controller
 {
@@ -56,7 +52,7 @@ class PostController extends Controller
     }
 
     // Menampilkan form untuk mengedit post
-    public function edit(Post $post)
+    public function edit(\App\Models\Post $post)
     {
         $categories = Category::all();
         $tags = Tag::all();
@@ -64,7 +60,7 @@ class PostController extends Controller
     }
 
     // Mengupdate post yang ada
-    public function update(Request $request, Post $post, PostService $service)
+    public function update(Request $request, \App\Models\Post $post, PostService $service)
     {
         $request->validate([
             'title' => 'required|string|max:255',
@@ -81,57 +77,29 @@ class PostController extends Controller
     }
 
     // Menghapus post
-    public function destroy(Post $post)
+    public function destroy(\App\Models\Post $post, PostService $service)
     {
-        $post->delete();
+        $service->delete($post);
         return redirect()->route('admin.posts.index')->with('success', 'Post deleted successfully.');
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(Request $request, PostService $service)
     {
-        $selectedPosts = $request->selected_posts;
-        $action = $request->bulk_action;
-
-        if (empty($selectedPosts) || empty($action)) {
-            return back()->with('error', 'Please select posts and action.');
-        }
-
-        switch ($action) {
-            case 'publish':
-                Post::whereIn('id', $selectedPosts)->update(['status' => 'published']);
-                return back()->with('success', 'Posts published successfully.');
-
-            case 'draft':
-                Post::whereIn('id', $selectedPosts)->update(['status' => 'draft']);
-                return back()->with('success', 'Posts set as draft successfully.');
-
-            case 'delete':
-                Post::whereIn('id', $selectedPosts)->delete();
-                return back()->with('success', 'Posts deleted successfully.');
-        }
+        $result = $service->bulkAction($request->selected_posts, $request->bulk_action);
+        return back()->with($result['status'], $result['message']);
     }
 
 
 
-    public function publicIndex()
+    public function publicIndex(PostService $service)
     {
-        $query = Post::where('status', 'published')->with('user', 'category', 'tags');
-
-        if ($category = request('category')) {
-            $query->whereHas('category', function ($q) use ($category) {
-                $q->where('name', $category);
-            });
-        }
-
-        $posts = $query->latest()->paginate(10);
+        $posts = $service->getPublicPosts(request('category'));
         return view('pages.artikel.list', compact('posts'));
     }
 
-    public function publicShow($slug)
+    public function publicShow($slug, PostService $service)
     {
-        $post = Post::where('slug', $slug)->where('status', 'published')->with('user', 'category', 'tags')->firstOrFail();
-        $popularPosts = Post::where('status', 'published')->with('user', 'category', 'tags')->latest()->take(5)->get();
-        $post->increment('views');
+        [$post, $popularPosts] = $service->getPublicPostDetail($slug);
         return view('pages.artikel.show', compact('post', 'popularPosts'));
     }
 }

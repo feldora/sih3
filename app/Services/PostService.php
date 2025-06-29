@@ -7,9 +7,17 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Services\MediaService;
 
 class PostService
 {
+    protected $mediaService;
+
+    public function __construct(MediaService $mediaService)
+    {
+        $this->mediaService = $mediaService;
+    }
+
     public function getPosts(array $filters = [])
     {
 
@@ -68,8 +76,11 @@ class PostService
             }
 
             if (!empty($data['featured_image'])) {
-                $post->addMedia($data['featured_image'])
-                    ->toMediaCollection('featured_image');
+                $this->mediaService->attachMedia(
+                    $post, 
+                    $data['featured_image'], 
+                    'featured_image', 
+                    'media');
             }
 
             DB::commit();
@@ -102,9 +113,7 @@ class PostService
             }
             
             if (!empty($data['featured_image'])) {
-                $post->clearMediaCollection('featured_image');
-                $post->addMedia($data['featured_image'])
-                    ->toMediaCollection('featured_image');
+                $this->mediaService->attachMedia($post, $data['featured_image'], 'featured_image', 'media', true);
             }
 
             DB::commit();
@@ -113,5 +122,49 @@ class PostService
             DB::rollBack();
             throw $e;
         }
+    }
+
+    public function delete(Post $post)
+    {
+        $post->delete();
+        return true;
+    }
+
+    public function bulkAction($selectedPosts, $action)
+    {
+        if (empty($selectedPosts) || empty($action)) {
+            return ['status' => 'error', 'message' => 'Please select posts and action.'];
+        }
+        switch ($action) {
+            case 'publish':
+                Post::whereIn('id', $selectedPosts)->update(['status' => 'published']);
+                return ['status' => 'success', 'message' => 'Posts published successfully.'];
+            case 'draft':
+                Post::whereIn('id', $selectedPosts)->update(['status' => 'draft']);
+                return ['status' => 'success', 'message' => 'Posts set as draft successfully.'];
+            case 'delete':
+                Post::whereIn('id', $selectedPosts)->delete();
+                return ['status' => 'success', 'message' => 'Posts deleted successfully.'];
+        }
+        return ['status' => 'error', 'message' => 'Invalid action.'];
+    }
+
+    public function getPublicPosts($category = null)
+    {
+        $query = Post::where('status', 'published')->with('user', 'category', 'tags');
+        if ($category) {
+            $query->whereHas('category', function ($q) use ($category) {
+                $q->where('name', $category);
+            });
+        }
+        return $query->latest()->paginate(10);
+    }
+
+    public function getPublicPostDetail($slug)
+    {
+        $post = Post::where('slug', $slug)->where('status', 'published')->with('user', 'category', 'tags')->firstOrFail();
+        $popularPosts = Post::where('status', 'published')->with('user', 'category', 'tags')->latest()->take(5)->get();
+        $post->increment('views');
+        return [$post, $popularPosts];
     }
 }
