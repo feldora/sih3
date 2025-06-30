@@ -1,4 +1,5 @@
 import { setWithExpiry, getWithExpiry } from './geospasial-utils';
+import L from 'leaflet';
 
 // Custom marker icons
 const posIcon = L.icon({

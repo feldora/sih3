@@ -11,6 +11,7 @@ use App\Repositories\Contracts\TitikPantauRepositoryInterface;
 use App\Repositories\TitikPantauRepository;
 use App\Repositories\Contracts\SungaiRepositoryInterface;
 use App\Repositories\SungaiRepository;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,5 +36,6 @@ class AppServiceProvider extends ServiceProvider
         view()->composer('partials.header', \App\Http\View\Composers\SidebarComposer::class);
         view()->composer('partials.post-asside', \App\Http\View\Composers\PostAsideComposer::class);
         view()->composer('pages.home', \App\Http\View\Composers\WilayahSungaiComposer::class);
+        URL::forceScheme('https');
     }
 }

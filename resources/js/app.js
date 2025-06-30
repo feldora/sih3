@@ -26,6 +26,8 @@ import 'tinymce/skins/ui/oxide/skin.min.css';
 import 'tinymce/skins/ui/oxide/content.css';
 import 'tinymce/skins/ui/oxide/content.min.css';
 
+import '../css/pages/geospasial-map.css';
+import './pages/geospasial-map.js';
 
 
 // Configure TinyMCE to use the correct skin and content CSS paths

@@ -55,7 +55,7 @@
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-BRvtO-28.css",
+    "file": "assets/app-C24uk0gA.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -64,16 +64,23 @@
     "src": "resources/css/mod.css",
     "isEntry": true
   },
+  "resources/css/pages/geospasial-map.css": {
+    "file": "assets/geospasial-map-C5cX5rw5.css",
+    "src": "resources/css/pages/geospasial-map.css",
+    "isEntry": true
+  },
   "resources/js/app.js": {
-    "file": "assets/app-B1SSQDsA.js",
+    "file": "assets/app-rQ18JWiS.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
+      "resources/js/pages/geospasial-map.js",
       "_tinymce-B65lqzh_.js"
     ],
     "css": [
-      "assets/app-C0wBJw6w.css"
+      "assets/app-Bm8TaW6m.css",
+      "assets/geospasial-map-C5cX5rw5.css"
     ],
     "assets": [
       "assets/fa-brands-400-D_cYUPeE.woff2",
@@ -87,6 +94,15 @@
       "assets/layers-BWBAp2CZ.png",
       "assets/layers-2x-Bpkbi35X.png",
       "assets/marker-icon-hN30_KVU.png"
+    ]
+  },
+  "resources/js/pages/geospasial-map.js": {
+    "file": "assets/geospasial-map-DWtI4ugr.js",
+    "name": "geospasial-map",
+    "src": "resources/js/pages/geospasial-map.js",
+    "isEntry": true,
+    "imports": [
+      "_tinymce-B65lqzh_.js"
     ]
   }
 }
