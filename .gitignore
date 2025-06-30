@@ -50,3 +50,5 @@ Thumbs.db
 
 .env
 public/hot
+vendor
+public/storage
