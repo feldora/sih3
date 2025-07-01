@@ -9,7 +9,9 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/mod.css',
-                'resources/js/app.js'
+                'resources/js/app.js',
+                'resources/css/pages/geospasial-map.css',
+                'resources/js/pages/geospasial-map.js',
             ],
             refresh: true,
         }),
