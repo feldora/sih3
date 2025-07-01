@@ -97,12 +97,9 @@
     ]
   },
   "resources/js/pages/geospasial-map.js": {
-    "file": "assets/geospasial-map-DWtI4ugr.js",
+    "file": "assets/geospasial-map-CnE2VkH4.js",
     "name": "geospasial-map",
     "src": "resources/js/pages/geospasial-map.js",
-    "isEntry": true,
-    "imports": [
-      "_tinymce-B65lqzh_.js"
-    ]
+    "isEntry": true
   }
 }
