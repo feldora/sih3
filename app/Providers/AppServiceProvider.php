@@ -36,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
         view()->composer('partials.header', \App\Http\View\Composers\SidebarComposer::class);
         view()->composer('partials.post-asside', \App\Http\View\Composers\PostAsideComposer::class);
         view()->composer('pages.home', \App\Http\View\Composers\WilayahSungaiComposer::class);
-        URL::forceScheme('https');
+        if (env('APP_SCHEME') === 'https') {
+            URL::forceScheme('https');
+        }
     }
 }

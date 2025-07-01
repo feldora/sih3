@@ -23,7 +23,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Loader
     const loader = document.getElementById('loader');
     if (loader) loader.style.display = 'none';
+    if (document.getElementById('map')) {
+        initMap();
+    }
+});
 
+function initMap() {
     // Map init
     const map = L.map('map', { zoomControl: false }).setView([-0.8917, 119.8707], 8);
     // Tambahkan zoom control di kanan atas
@@ -32,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
-
+    
     // Sidebar toggle
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
@@ -46,16 +51,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
+    
     // Helper untuk menampilkan info ke sidebar
     function showMarkerInfo(html) {
         const infoDiv = document.getElementById('markerInfo');
         const footerMarkInfo = document.getElementById('footerMarkInfo');
-
+    
         if (infoDiv) infoDiv.innerHTML = html;
         if (footerMarkInfo) footerMarkInfo.innerHTML = html;
     }
-
+    
     // Wilayah Sungai
     const wsCheckbox = document.getElementById('wilayahsungai');
     if (wsCheckbox) {
@@ -111,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
+    
     // Pos Pantau
     document.getElementById('pospantau').addEventListener('change', async function(e) {
         if (e.target.checked) {
@@ -138,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (posLayer) map.removeLayer(posLayer);
         }
     });
-
+    
     // Titik Pantau
     document.getElementById('titikPantau').addEventListener('change', async function(e) {
         if (e.target.checked) {
@@ -165,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (tpLayer) map.removeLayer(tpLayer);
         }
     });
-
+    
     // Layer switching
     const layerItems = document.querySelectorAll('[data-layer]');
     const layers = {
@@ -189,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
             currentLayer.addTo(map);
         });
     });
-
+    
     // Map info
     function updateMapInfo() {
         const center = map.getCenter();
@@ -200,11 +205,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (zoomEl) zoomEl.textContent = zoom;
     }
     map.on('moveend zoomend', updateMapInfo);
-
+    
     // Home button
     const homeBtn = document.getElementById('homeButton');
     if (homeBtn) homeBtn.addEventListener('click', function() { location.href = '/'; });
-
+    
     // Clear cache
     const clearCacheBtn = document.getElementById('clearCacheBtn');
     if (clearCacheBtn) {
@@ -215,12 +220,12 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Cache data peta berhasil dibersihkan!');
         });
     }
-
+    
     // --- SEARCH FUNCTIONALITY ---
     const searchInput = document.getElementById('searchInput');
     const searchResultsSection = document.getElementById('searchResultsSection');
     const searchResults = document.getElementById('searchResults');
-
+    
     function getAllSearchData() {
         const ws = getWithExpiry('ws_data') || [];
         const pos = getWithExpiry('pos_data') || [];
@@ -251,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }));
         return [...wsList, ...posList, ...tpList];
     }
-
+    
     function renderSearchResults(results) {
         if (!searchResults) return;
         searchResults.innerHTML = '';
@@ -294,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
             searchResults.appendChild(li);
         });
     }
-
+    
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
             const keyword = e.target.value.trim().toLowerCase();
@@ -311,4 +316,5 @@ document.addEventListener('DOMContentLoaded', function() {
             searchResultsSection.classList.remove('hidden');
         });
     }
-});
+
+}
