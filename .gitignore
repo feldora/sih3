@@ -49,6 +49,14 @@ Thumbs.db
 *.wmv
 
 .env
+vendor/
 public/hot
-vendor
+public/build
+public/dist
+public/mix-manifest.json
 public/storage
+bootstrap/cache/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+storage/logs/

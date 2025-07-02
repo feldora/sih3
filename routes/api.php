@@ -1,9 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-    // Route::apiResource('/', function () {
-    //     return response()->json(['message' => 'API works']);
-    // });
+
     Route::apiResource('pos-pantau', App\Http\Controllers\Api\PosPantauController::class)->only(['index', 'show']);
     Route::apiResource('wilayah-sungai', App\Http\Controllers\Api\WilayahSungaiController::class)->only(['index', 'show']);
     Route::apiResource('titik-pantau', App\Http\Controllers\Api\TitikPantauController::class)->only(['index', 'show']);

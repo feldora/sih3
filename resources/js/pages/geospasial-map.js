@@ -1,4 +1,5 @@
 import { setWithExpiry, getWithExpiry } from './geospasial-utils';
+import { decimalToDMS, DMSToDecimal } from '../utiliti.js';
 import L from 'leaflet';
 
 // Custom marker icons
@@ -201,7 +202,7 @@ function initMap() {
         const zoom = map.getZoom();
         const coords = document.getElementById('currentCoords');
         const zoomEl = document.getElementById('currentZoom');
-        if (coords) coords.textContent = `${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}`;
+        if (coords) coords.textContent = decimalToDMS(center.lat) + ', ' + decimalToDMS(center.lng) + ' || ' + center.lat.toFixed(5) + ', ' + center.lng.toFixed(5);
         if (zoomEl) zoomEl.textContent = zoom;
     }
     map.on('moveend zoomend', updateMapInfo);
