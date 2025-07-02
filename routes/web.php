@@ -13,6 +13,7 @@ use App\Http\Controllers\Web\TitikPantauController;
 use App\Http\Controllers\Web\AksesRoleController;
 use App\Http\Controllers\Web\PosPantauController;
 use App\Http\Controllers\Web\SungaiController;
+use App\Http\Controllers\Web\LoadShpController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -116,7 +117,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         'update' => 'sungai.update',
         'destroy' => 'sungai.destroy',
     ]);
-
+    Route::resource('loadshp', LoadShpController::class);
     Route::get('/blank', function () {
         return view('admin.blank');
     })->name('blank');

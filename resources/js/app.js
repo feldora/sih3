@@ -1,5 +1,5 @@
 import './bootstrap';
-
+import $ from 'jquery';
 import Alpine from 'alpinejs';
 import "choices.js/src/styles/choices";
 import "choices.js/public/assets/styles/choices.css";
@@ -10,7 +10,6 @@ import L from 'leaflet';
 import 'leaflet.awesome-markers';
 import tinymce from 'tinymce';
 import 'tinymce/models/dom';
-
 
 import 'tinymce/themes/silver';
 import 'tinymce/plugins/advlist';
@@ -29,6 +28,9 @@ import 'tinymce/skins/ui/oxide/content.min.css';
 import '../css/pages/geospasial-map.css';
 import './pages/geospasial-map.js';
 
+import DataTable from 'datatables.net-dt';
+import 'datatables.net-dt/css/dataTables.dataTables.css';
+
 // Configure TinyMCE to use the correct skin and content CSS paths
 window.tinymce = tinymce;
 window.tinymceInitOptions = {
@@ -37,7 +39,9 @@ window.tinymceInitOptions = {
 };
 
 window.L = L;
+window.$ = $;
+window.jQuery = $;
 
 window.Alpine = Alpine;
-
+window.DataTable = DataTable;
 Alpine.start();
