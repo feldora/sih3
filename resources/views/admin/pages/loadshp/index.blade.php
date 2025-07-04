@@ -7,7 +7,13 @@
         <!-- Upload Section -->
         <div class="card bg-base-100 shadow-xl mb-6">
             <div class="card-body">
-                <h2 class="card-title text-2xl mb-4">Load Shapefile</h2>
+                {{-- <h2 class="card-title text-2xl">Load Shapefile </h2> --}}
+                @if (!empty($data['form_type']))
+                    <h2 class="card-title text-2xl mb-4">{{ $data['form_type'] }}</h2>
+                @else
+                    <h2 class="card-title text-2xl mb-4">Load Shapefile </h2>
+                @endif
+
 
                 @if (session('success'))
                     <div class="alert alert-success mb-4">
@@ -38,7 +44,7 @@
                             <span class="label-text">Upload Shapefile</span>
                         </label>
                         <input type="file" class="file-input file-input-bordered w-full" id="shp_file" name="shp_file"
-                            accept=".shp,.zip" required>
+                            accept=".zip" required>
                         <label class="label">
                             <span class="label-text-alt">Upload file .shp atau .zip yang berisi shapefile lengkap (shp, shx,
                                 dbf, prj)</span>
@@ -55,7 +61,13 @@
                             Load Shapefile
                         </button>
 
+                        <button type="button" class="btn btn-info btn-sm" id="saveVisibilityFeatures">
+                            <i class="fa-solid fa-save"></i>
+                            simpan
+                        </button>
+
                         <button type="button" class="btn btn-success btn-sm" id="downloadGeoJson">
+                            <i class="fa-solid fa-cloud-arrow-down"></i>
                             Download GeoJSON
                         </button>
                     </div>
@@ -68,15 +80,19 @@
         <div class="card bg-base-100 shadow-xl mb-6">
             <div class="card-body">
                 <h2 class="card-title mb-4">Map Visualization</h2>
-                <div id="shpmap" style="height: 500px; width: 100%; border-radius: 0.5rem;"></div>
+                <div id="shpmap" style="height: 800px; width: 100%; border-radius: 0.5rem;"></div>
             </div>
-            <div class="tabeljson m-5 ">
-                <span id="countFeatures"></span>
-                <table class="table w-full" id="FeatureCollection">
+            <div class="tabeljson m-5 overflow-x-auto w-full">
+                <span id="countFeatures" class="block mb-2"></span>
+                <table class="table w-full whitespace-nowrap" id="FeatureCollection">
                     <thead>
-                        <tr id="tabel-header"></tr>
+                        <tr id="tabel-header">
+                            <!-- Header kolom akan diisi lewat JavaScript -->
+                        </tr>
                     </thead>
-                    <tbody id="tabel-body"></tbody>
+                    <tbody id="tabel-body">
+                        <!-- Isi tabel akan diisi lewat JavaScript -->
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -134,6 +150,7 @@
         let visibleFeatures = []; // Status visibilitas
         let currentGeoJsonLayer; // Layer grup (untuk fitBounds)
         let dataTableInstance = null;
+        let newFeatures = [];
 
         document.addEventListener('DOMContentLoaded', function() {
             map = L.map('shpmap').setView([-0.8917, 119.8707], 10);
@@ -160,11 +177,14 @@
                 .then(data => {
                     hideLoadingModal();
                     if (data.success) {
-                        currentGeoJsonData = data.geojson;
+                        currentGeoJsonData = normalizeGeoJson(data.geojson);
                         displayGeoJson(currentGeoJsonData);
                         rendertabelFeatures(currentGeoJsonData);
                         showToast('Shapefile berhasil diload dan dikonversi ke GeoJSON!', 'success');
                     } else {
+                        if(data.list){
+                            console.log(data.list);
+                        }
                         showToast(data.message || 'Terjadi kesalahan saat memproses file', 'error');
                     }
                 })
@@ -174,6 +194,12 @@
                     showToast('Terjadi kesalahan saat memproses file', 'error');
                 });
         });
+
+        document.getElementById('saveVisibilityFeatures').addEventListener('click', function(e){
+            let x = getVisibleFeatures();
+            console.log(x);
+            
+        })
 
         function showLoadingModal() {
             document.getElementById('loading-modal').checked = true;
@@ -279,7 +305,9 @@
                 tbody.appendChild(tr);
             });
 
-            dataTableInstance = new DataTable('#FeatureCollection');
+            dataTableInstance = new DataTable('#FeatureCollection', {
+                scrollX: true
+            });
             dataTableInstance.columns().every(function(index) {
                 // Abaikan kolom terakhir (misalnya kolom "action")
                 if (index === dataTableInstance.columns().count() - 1) {
@@ -311,12 +339,22 @@
             if (isVisible) {
                 map.removeLayer(layer);
                 visibleFeatures[index] = false;
+
+                // Hapus index dari newFeatures
+                newFeatures = newFeatures.filter(i => i !== index);
             } else {
                 layer.addTo(map);
                 visibleFeatures[index] = true;
+
+                // Tambahkan index ke newFeatures jika belum ada
+                if (!newFeatures.includes(index)) {
+                    newFeatures.push(index);
+                }
             }
 
             toggleEyeIcon(index, visibleFeatures[index]);
+            console.log(newFeatures);
+            
         }
 
         function toggleEyeIcon(index, isVisible) {
@@ -330,6 +368,12 @@
                     button.classList.add('text-gray-400');
                 }
             }
+        }
+
+        function getVisibleFeatures() {
+            if (!currentGeoJsonData || !currentGeoJsonData.features) return [];
+
+            return newFeatures.map(index => currentGeoJsonData.features[index]);
         }
 
         document.getElementById('downloadGeoJson').addEventListener('click', function() {
@@ -366,7 +410,7 @@
             ${icon}
             <span>${message}</span>
             <button class="btn btn-sm btn-ghost" onclick="this.parentElement.remove()">×</button>
-        `;
+            `;
 
             document.body.appendChild(toast);
             setTimeout(() => {
@@ -379,5 +423,20 @@
                 }, 300);
             }, 5000);
         }
+
+        function normalizeGeoJson(geojson) {
+            if (geojson.type === 'FeatureCollection') {
+                geojson.features.forEach(feature => {
+                    if (feature.geometry.type === 'PointM') {
+                        feature.geometry.type = 'Point';
+                        // Buang koordinat 3 dan 4 (z, m), hanya ambil x, y
+                        feature.geometry.coordinates = feature.geometry.coordinates.slice(0, 2);
+                    }
+                    // Kalau ada tipe lain yang perlu normalisasi bisa ditambah di sini
+                });
+            }
+            return geojson;
+        }
+
     </script>
 @endpush

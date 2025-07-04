@@ -16,13 +16,13 @@ class LoadShpController extends Controller
     {
         return view('admin.pages.loadshp.index');
     }
-
+    
     public function store(Request $request)
     {
         $request->validate([
-            'shp_file' => 'required|file|mimes:zip|max:10240',
+            'shp_file' => 'required|file|mimes:zip|max:10240',  // hanya ZIP
         ]);
-
+        
         try {
             $file = $request->file('shp_file');
 
@@ -31,41 +31,46 @@ class LoadShpController extends Controller
             }
 
             $timestamp = time();
-            $tmpName = $timestamp . '_' . $file->getClientOriginalName();
-            $tmpZipPath = "/tmp/{$tmpName}";
-            $file->move('/tmp', $tmpName);
-            Log::info("Uploaded ZIP saved to: {$tmpZipPath}");
+            $originalName = $file->getClientOriginalName();
+            $tmpPath = "/tmp/{$timestamp}_{$originalName}";
+            $file->move('/tmp', "{$timestamp}_{$originalName}");
+
+            Log::info("Uploaded file saved to: {$tmpPath}");
 
             $extractPath = "/tmp/extracted_{$timestamp}";
-            File::makeDirectory($extractPath, 0755, true);
 
-            $zip = new ZipArchive;
-            $res = $zip->open($tmpZipPath);
+            // Hanya ekstrak ZIP, hapus bagian RAR dan SHP
+            File::makeDirectory($extractPath, 0755, true);
+            $zip = new \ZipArchive;
+            $res = $zip->open($tmpPath);
             if ($res !== true) {
-                Log::error("ZipArchive->open() failed, code={$res}");
                 return response()->json(['success' => false, 'message' => "Gagal membuka ZIP (kode $res)"], 400);
             }
-
             $zip->extractTo($extractPath);
             $zip->close();
             Log::info("ZIP berhasil diekstrak ke: {$extractPath}");
 
-            $shpFile = $this->findShpInDir($extractPath);
-            if (!$shpFile) {
-                return response()->json(['success' => false, 'message' => 'File .shp tidak ditemukan dalam ZIP'], 400);
+            $shpFilePath = $this->findShpInDir($extractPath);
+            if (!$shpFilePath || !file_exists($shpFilePath)) {
+                return response()->json(['success' => false, 'message' => 'File .shp tidak ditemukan di dalam ZIP.'], 400);
             }
 
-            $geoJson = $this->convertShpToGeoJson($shpFile);
+            $geoJson = $this->convertShpToGeoJson($shpFilePath);
 
-            File::delete($tmpZipPath);
-            File::deleteDirectory($extractPath);
-            // return $geoJson;
+            // Hapus file sementara dan folder ekstrak
+            File::delete($tmpPath);
+            if (File::isDirectory($extractPath)) {
+                File::deleteDirectory($extractPath);
+            }
+
             return response()->json(['success' => true, 'geojson' => $geoJson]);
+
         } catch (\Exception $e) {
             Log::error("Error proses shapefile: {$e->getMessage()}");
             return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
+
 
     private function findShpInDir(string $dir): ?string
     {

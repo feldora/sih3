@@ -1,9 +1,20 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import dotenv from 'dotenv';
+dotenv.config();
 
-import path from 'path'; // Jika belum mengimpor path
+const host = process.env.VITE_HOST || 'localhost';
+const port = process.env.VITE_PORT || 5173;
 
 export default defineConfig({
+    server: {
+        host: host,
+        port: port,
+        strictPort: true,
+        hmr: {
+            host: host,
+    }
+    },
     plugins: [
         laravel({
             input: [

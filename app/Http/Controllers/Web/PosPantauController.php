@@ -5,14 +5,16 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Repositories\Contracts\PosPantauRepositoryInterface;
 use Illuminate\Http\Request;
+use App\Services\NominatimGeocodingService;
 
 class PosPantauController extends Controller
 {
     protected $posPantauRepository;
-
+    
     public function __construct(PosPantauRepositoryInterface $posPantauRepository)
     {
         $this->posPantauRepository = $posPantauRepository;
+        // $this->nominatim = new NominatimGeocodingService('sih3@sultengprov.go.id');
     }
 
     /**
