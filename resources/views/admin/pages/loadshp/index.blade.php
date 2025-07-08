@@ -96,26 +96,30 @@
                 </table>
             </div>
         </div>
+    </div>
+    {{-- Form Save modal --}}
+    <dialog id="my_modal_1" class="modal">
+        <div class="modal-box w-1/2 max-w-full relative overflow-visible">
+            <h3 class="text-lg font-bold mb-2">Mapping Field</h3>
 
-        <!-- GeoJSON Output -->
-        <div class="card bg-base-100 shadow-xl" id="geoJsonSection" style="display: none;">
-            <div class="card-body">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="card-title">GeoJSON Output</h2>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Download GeoJSON
-                    </button>
+            <!-- Form utama -->
+            <form id="fieldMappingForm" method="POST" action="{{ route('admin.loadshp.saveGeo') }}">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4" id="mapping-fields">
+                    <!-- Akan diisi lewat JavaScript -->
                 </div>
-                <div class="mockup-code">
-                    <pre id="geoJsonOutput" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap;"></pre>
+
+                <div class="modal-action mt-6">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
+            </form>
+
+            <!-- Tombol Close berada di luar form -->
+            <div class="modal-action">
+                <button type="button" class="btn" onclick="document.getElementById('my_modal_1').close()">Tutup</button>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- Loading Modal -->
     <input type="checkbox" id="loading-modal" class="modal-toggle" />
@@ -142,6 +146,24 @@
     </style>
 @endpush
 
+@once
+    @push('styles')
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+        <style>
+            /* Optional: pastikan form tidak memotong */
+            #fieldMappingForm {
+                overflow: visible !important;
+            }
+            #mapping-fields > div {
+                margin-bottom: 1rem;
+            }
+        </style>
+    @endpush
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    @endpush
+@endonce
+
 @push('scripts')
     <script>
         let map;
@@ -151,6 +173,7 @@
         let currentGeoJsonLayer; // Layer grup (untuk fitBounds)
         let dataTableInstance = null;
         let newFeatures = [];
+        const type = @json($data['type'] ?? null);
 
         document.addEventListener('DOMContentLoaded', function() {
             map = L.map('shpmap').setView([-0.8917, 119.8707], 10);
@@ -182,7 +205,7 @@
                         rendertabelFeatures(currentGeoJsonData);
                         showToast('Shapefile berhasil diload dan dikonversi ke GeoJSON!', 'success');
                     } else {
-                        if(data.list){
+                        if (data.list) {
                             console.log(data.list);
                         }
                         showToast(data.message || 'Terjadi kesalahan saat memproses file', 'error');
@@ -195,10 +218,17 @@
                 });
         });
 
-        document.getElementById('saveVisibilityFeatures').addEventListener('click', function(e){
+        document.getElementById('saveVisibilityFeatures').addEventListener('click', function(e) {
+            if(!currentGeoJsonData){
+                showToast('Load File SHP terlebihdahulu','warning')
+                return false
+            }
             let x = getVisibleFeatures();
-            console.log(x);
-            
+            if (x.length === 0) {
+                showToast('Pilih Data yang akan di simpan terlebih dahulu dengan mengklik ikon mata pda tabel.', 'warning')
+                return false;
+            }
+            getFormSave(type);
         })
 
         function showLoadingModal() {
@@ -354,7 +384,7 @@
 
             toggleEyeIcon(index, visibleFeatures[index]);
             console.log(newFeatures);
-            
+
         }
 
         function toggleEyeIcon(index, isVisible) {
@@ -437,6 +467,116 @@
             }
             return geojson;
         }
+
+        function getFormSave(type) {
+            if (!type) {
+                showToast("Tidak dapat menyimpan maps", "warning");
+                return;
+            }
+
+            fetch(`{{ route('admin.formFields') }}?type=${encodeURIComponent(type)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const mappingContainer = document.getElementById('mapping-fields');
+                    mappingContainer.innerHTML = '';
+
+                    if (!data.success) {
+                        showToast('Gagal memuat field.', 'error');
+                        return;
+                    }
+
+                    const fillable = data.fillable || {};
+                    const geoProps = currentGeoJsonData?.features?.[0]?.properties || {};
+
+                    Object.entries(fillable).forEach(([field, mode]) => {
+                        const wrapper = document.createElement('div');
+                        wrapper.classList.add('relative'); // z-index diatur dinamis
+                        wrapper.style.zIndex = 1; // z-index awal
+
+                        if (mode === 'input') {
+                            // Input teks biasa
+                            wrapper.innerHTML = `
+                                <label class="label">${field}</label>
+                                <input type="text" name="${field}" class="input input-bordered w-full" />
+                            `;
+                        } else {
+                            // Select multiple (mapping)
+                            const selectId = `select-${field}`;
+                            wrapper.innerHTML = `
+                                <label class="label">${field}</label>
+                                <select id="${selectId}" name="mapped[${field}][]" class="w-full" multiple></select>
+                            `;
+                        }
+
+                        mappingContainer.appendChild(wrapper);
+
+                        if (mode !== 'input') {
+                            const selectEl = wrapper.querySelector('select');
+                            Object.keys(geoProps).forEach(prop => {
+                                const option = document.createElement('option');
+                                option.value = `properties.${prop}`;
+                                option.text = `properties.${prop}`;
+                                selectEl.appendChild(option);
+                            });
+
+                            const choicesInstance = new Choices(selectEl, {
+                                removeItemButton: true,
+                                placeholder: true,
+                                placeholderValue: 'Pilih field dari properties...',
+                                searchEnabled: true,
+                                shouldSort: false,
+                            });
+
+                            selectEl.addEventListener('showDropdown', function() {
+                                wrapper.style.zIndex = 9999;
+                            }, false);
+
+                            selectEl.addEventListener('hideDropdown', function() {
+                                wrapper.style.zIndex = 1;
+                            }, false);
+                        }
+                    });
+
+                    document.getElementById('my_modal_1').showModal();
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    showToast('Terjadi kesalahan saat memuat form field', 'error');
+                });
+        }
+
+        document.getElementById('fieldMappingForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // cegah reload halaman
+
+            const form = this;
+            const formData = new FormData(form);
+            const visibleFeatures = getVisibleFeatures();
+
+            formData.append('visibleFeatures', JSON.stringify(visibleFeatures));
+            formData.append('pos_type', type);
+
+            fetch(form.action, {
+                method: form.method,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    // Kalau form pakai multipart/form-data, jangan set Content-Type manual
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                document.getElementById('my_modal_1').close();
+                showToast(data.message, 'success')
+                // Lakukan sesuatu dengan response, misalnya tampilkan pesan sukses
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('my_modal_1').close();
+                showToast(error, 'warning')
+                // Tampilkan pesan error
+            });
+        });
 
     </script>
 @endpush

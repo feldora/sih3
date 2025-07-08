@@ -55,8 +55,33 @@
                     </div>
                 </div>
 
+                <!-- Filter Section -->
+                <div class="sidebar-section">
+                    <h3 class="text-sm">Wilayah Administratif</h3>
+                    <form id="filterForm" class="space-y-2">
+                        <select id="provinsi" name="provinsi" class="filter-select w-full text-xs p-1 rounded bg-white bg-opacity-20">
+                            <option value="">Pilih Provinsi</option>
+                        </select>
+                        <select id="kabupaten" name="kabupaten" class="filter-select w-full text-xs p-1 rounded bg-white bg-opacity-20" disabled>
+                            <option value="">Pilih Kabupaten</option>
+                        </select>
+                        <select id="kecamatan" name="kecamatan" class="filter-select w-full text-xs p-1 rounded bg-white bg-opacity-20" disabled>
+                            <option value="">Pilih Kecamatan</option>
+                        </select>
+                        <select id="desa" name="desa" class="filter-select w-full text-xs p-1 rounded bg-white bg-opacity-20" disabled>
+                            <option value="">Pilih Desa</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm w-full text-white">Filter</button>
+                    </form>
+                </div>
+
                 <div class="sidebar-section">
                     <h3 class="text-sm">Pilih Data</h3>
+                    <div class="sidebar-item flex items-center py-1">
+                        <input type="checkbox" id="all_features" name="all_features"
+                            class="mr-2 w-3 h-3 align-middle" checked>
+                        <label for="all_features" class="text-xs align-middle">Semua Fitur</label>
+                    </div>
                     <div class="sidebar-item flex items-center py-1">
                         <input type="checkbox" id="wilayahsungai" name="wilayahsungai"
                             class="mr-2 w-3 h-3 align-middle">

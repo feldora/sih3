@@ -9,6 +9,7 @@
         "php": "^8.2",
         "ext-exif": "*",
         "ext-mbstring": "*",
+        "elasticsearch/elasticsearch": "^9.0",
         "gasparesganga/php-shapefile": "^3.4",
         "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^12.0",

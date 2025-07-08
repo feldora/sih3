@@ -6,6 +6,7 @@
 <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Daftar Pos Pantau</h1>
+        <a href="{{ route('admin.loadshp.index') }}?type=Pos Pantau" class="btn btn-success">Tambah Dari SHP</a>
         <a href="{{ route('admin.pos-pengamatan.create') }}" class="btn btn-primary">+ Tambah Pos Pantau</a>
     </div>
     @if (session('success'))

@@ -12,6 +12,7 @@ use App\Repositories\TitikPantauRepository;
 use App\Repositories\Contracts\SungaiRepositoryInterface;
 use App\Repositories\SungaiRepository;
 use Illuminate\Support\Facades\URL;
+use App\Services\ElasticsearchService;
 
 class AppServiceProvider extends ServiceProvider
 {

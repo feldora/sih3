@@ -1,4 +1,3 @@
-import { setWithExpiry, getWithExpiry } from './geospasial-utils';
 import { decimalToDMS, DMSToDecimal } from '../utiliti.js';
 import L from 'leaflet';
 
@@ -20,302 +19,507 @@ const titikPantauIcon = L.icon({
     shadowSize: [21, 21]
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Loader
+document.addEventListener('DOMContentLoaded', function () {
     const loader = document.getElementById('loader');
     if (loader) loader.style.display = 'none';
-    if (document.getElementById('map')) {
-        initMap();
-    }
+    if (document.getElementById('map')) initMap();
 });
 
 function initMap() {
-    // Map init
     const map = L.map('map', { zoomControl: false }).setView([-0.8917, 119.8707], 8);
-    // Tambahkan zoom control di kanan atas
     L.control.zoom({ position: 'topright' }).addTo(map);
-    let wsLayer, posLayer, tpLayer;
+
+    let wsLayer, posLayer, tpLayer, allFeatureLayer;
+    const allFeaturesCheckbox = document.getElementById('all_features');
     let currentLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
-    
-    // Sidebar toggle
+
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
     if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('open');
-        });
-        document.addEventListener('click', function(e) {
+        sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        document.addEventListener('click', e => {
             if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
                 sidebar.classList.remove('open');
             }
         });
     }
-    
-    // Helper untuk menampilkan info ke sidebar
+
     function showMarkerInfo(html) {
         const infoDiv = document.getElementById('markerInfo');
         const footerMarkInfo = document.getElementById('footerMarkInfo');
-    
         if (infoDiv) infoDiv.innerHTML = html;
         if (footerMarkInfo) footerMarkInfo.innerHTML = html;
     }
-    
+
+    // Semua Fitur checkbox
+    if (allFeaturesCheckbox) {
+        allFeaturesCheckbox.addEventListener('change', async e => {
+            if (e.target.checked) {
+                if (allFeatureLayer) map.removeLayer(allFeatureLayer);
+                allFeatureLayer = L.layerGroup();
+
+                let data;
+                try {
+                    const formData = new FormData(filterForm);
+                    const params = new URLSearchParams();
+                    for (const pair of formData) {
+                        if (pair[1]) {
+                            params.append(pair[0], pair[1]);
+                        }
+                    }
+                    const res = await fetch(`/api/geo-features?${params.toString()}`);
+                    const json = await res.json();
+                    data = json.features || [];
+
+                    // Fit map to bounds of the new data
+                    if (data.length > 0) {
+                        const tempLayer = L.geoJSON(data);
+                        map.fitBounds(tempLayer.getBounds());
+                    }
+
+                } catch (err) {
+                    console.error('Gagal memuat geo features:', err);
+                    return;
+                }
+
+                data.forEach(feature => {
+                    if (!feature || !feature.geometry) return;
+
+                    const layer = L.geoJSON(feature, {
+                        onEachFeature: (feature, layer) => {
+                            const name = feature.properties?.name || 'Fitur';
+                            const popup = `<b>${name}</b><br>${
+                                Object.entries(feature.properties?.properties || {})
+                                      .map(([k, v]) => `<b>${k}</b>: ${v}`)
+                                      .join('<br>')
+                            }`;
+                            layer.bindPopup(popup);
+                            layer.on('click', () => showMarkerInfo(popup));
+                        },
+                        pointToLayer: (feature, latlng) => L.marker(latlng, { icon: posIcon }),
+                        style: { color: '#28a745', weight: 1, fillOpacity: 0.3 }
+                    });
+
+                    layer.addTo(allFeatureLayer);
+                });
+
+                allFeatureLayer.addTo(map);
+            } else {
+                if (allFeatureLayer) map.removeLayer(allFeatureLayer);
+            }
+        });
+    }
+
     // Wilayah Sungai
     const wsCheckbox = document.getElementById('wilayahsungai');
     if (wsCheckbox) {
-        wsCheckbox.addEventListener('change', async function(e) {
+        wsCheckbox.addEventListener('change', async e => {
             if (e.target.checked) {
-                let data = getWithExpiry('ws_data');
-                if (!data) {
+                let data;
+                try {
                     const res = await fetch('/api/wilayah-sungai');
                     data = await res.json();
-                    setWithExpiry('ws_data', data, 24 * 60 * 60 * 1000);
+                } catch (err) {
+                    console.error('Gagal memuat data wilayah sungai:', err);
+                    return;
                 }
                 if (wsLayer) map.removeLayer(wsLayer);
                 wsLayer = L.layerGroup();
-                
+
                 data.forEach(item => {
-                    
-                    if (item.geojson && item.geojson.features) {
-                        // Clone geojson agar tidak mengubah data asli
+                    if (item.geojson?.features) {
                         let geojson = JSON.parse(JSON.stringify(item.geojson));
                         geojson.features.forEach(f => {
-                            if (f.geometry && f.geometry.type === 'Polygon') {
-                                // Konversi array koordinat string [lng, lat] ke number [lng, lat] (urutan TIDAK dibalik!) dan bungkus ke array ring
-                                const ring = f.geometry.coordinates.map(coord => [
-                                    parseFloat(coord[0]), // lng
-                                    parseFloat(coord[1])  // lat
-                                ]);
-                                // Pastikan minimal 3 titik
+                            if (f.geometry?.type === 'Polygon') {
+                                const ring = f.geometry.coordinates.map(c => [parseFloat(c[0]), parseFloat(c[1])]);
                                 f.geometry.coordinates = ring.length > 2 ? [ring] : [];
                             }
                         });
                         L.geoJSON(geojson, {
                             style: { color: '#0074D9', weight: 1, fillOpacity: 0.2 },
-                            onEachFeature: function (feature, layer) {
-                                layer.bindPopup(
-                                    `<b>${feature.properties?.name || item.name}</b><br>${feature.properties?.description || item.description || ''}`
-                                );
-                                layer.on('click', function(e) {
-                                    const infoHtml =
-                                        `<b>${feature.properties?.name || item.name}</b><br>` +
-                                        (feature.properties?.luas_area ? `Luas Area: ${feature.properties.luas_area}<br>` : '') +
-                                        (feature.properties?.keliling_area ? `Keliling: ${feature.properties.keliling_area}<br>` : '') +
-                                        `${feature.properties?.description || item.description || ''}`;
-                                    
-                                    showMarkerInfo(infoHtml);
+                            onEachFeature: (feature, layer) => {
+                                layer.bindPopup(`<b>${feature.properties?.name || item.name}</b><br>${feature.properties?.description || item.description || ''}`);
+                                layer.on('click', () => {
+                                    const p = feature.properties;
+                                    const html = `<b>${p?.name || item.name}</b><br>` +
+                                        (p?.luas_area ? `Luas Area: ${p.luas_area}<br>` : '') +
+                                        (p?.keliling_area ? `Keliling: ${p.keliling_area}<br>` : '') +
+                                        (p?.description || item.description || '');
+                                    showMarkerInfo(html);
                                 });
                             }
                         }).addTo(wsLayer);
                     }
                 });
                 wsLayer.addTo(map);
-            } else {
-                if (wsLayer) map.removeLayer(wsLayer);
-            }
+            } else if (wsLayer) map.removeLayer(wsLayer);
         });
     }
-    
+
     // Pos Pantau
-    document.getElementById('pospantau').addEventListener('change', async function(e) {
+    document.getElementById('pospantau').addEventListener('change', async e => {
         if (e.target.checked) {
-            let data = getWithExpiry('pos_data');
-            if (!data) {
+            let data;
+            try {
                 const res = await fetch('/api/pos-pantau');
                 data = await res.json();
-                setWithExpiry('pos_data', data, 24 * 60 * 60 * 1000);
+            } catch (err) {
+                console.error('Gagal memuat data pos pantau:', err);
+                return;
             }
             if (posLayer) map.removeLayer(posLayer);
             posLayer = L.layerGroup();
+
             data.forEach(item => {
                 if (item.latitude && item.longitude) {
                     L.marker([item.latitude, item.longitude], { icon: posIcon })
                         .bindPopup(`<b>${item.nama_pos || 'Pos Pantau'}</b><br>${item.alamat || ''}`)
-                        .on('click', function(e) {
-                            showMarkerInfo(`<b>${item.nama_pos || 'Pos Pantau'}</b><br>${item.alamat || ''}`);
-                        })
+                        .on('click', () => showMarkerInfo(`<b>${item.nama_pos || 'Pos Pantau'}</b><br>${item.alamat || ''}`))
                         .addTo(posLayer);
                 }
             });
             posLayer.addTo(map);
-        } else {
-            if (posLayer) map.removeLayer(posLayer);
-        }
+        } else if (posLayer) map.removeLayer(posLayer);
     });
-    
+
     // Titik Pantau
-    document.getElementById('titikPantau').addEventListener('change', async function(e) {
+    document.getElementById('titikPantau').addEventListener('change', async e => {
         if (e.target.checked) {
-            let data = getWithExpiry('tp_data');
-            if (!data) {
+            let data;
+            try {
                 const res = await fetch('/api/titik-pantau');
                 data = await res.json();
-                setWithExpiry('tp_data', data, 24 * 60 * 60 * 1000);
+            } catch (err) {
+                console.error('Gagal memuat data titik pantau:', err);
+                return;
             }
             if (tpLayer) map.removeLayer(tpLayer);
             tpLayer = L.layerGroup();
+
             data.forEach(item => {
                 if (item.latitude && item.longitude) {
                     L.marker([item.latitude, item.longitude], { icon: titikPantauIcon })
                         .bindPopup(`<b>${item.nama_titik || 'Titik Pantau'}</b><br>${item.alamat || ''}`)
-                        .on('click', function(e) {
-                            showMarkerInfo(`<b>${item.nama_titik || 'Titik Pantau'}</b><br>${item.alamat || ''}`);
-                        })
+                        .on('click', () => showMarkerInfo(`<b>${item.nama_titik || 'Titik Pantau'}</b><br>${item.alamat || ''}`))
                         .addTo(tpLayer);
                 }
             });
             tpLayer.addTo(map);
-        } else {
-            if (tpLayer) map.removeLayer(tpLayer);
-        }
+        } else if (tpLayer) map.removeLayer(tpLayer);
     });
-    
-    // Layer switching
+
+    // Layer switching controls
     const layerItems = document.querySelectorAll('[data-layer]');
     const layers = {
-        street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }),
-        satellite: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenTopoMap contributors'
-        }),
-        terrain: L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        })
+        street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }),
+        satellite: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution: '© OpenTopoMap contributors' }),
+        terrain: L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' })
     };
     layerItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const layerType = this.getAttribute('data-layer');
+        item.addEventListener('click', function () {
             layerItems.forEach(li => li.classList.remove('active'));
             this.classList.add('active');
             map.removeLayer(currentLayer);
-            currentLayer = layers[layerType];
+            currentLayer = layers[this.getAttribute('data-layer')];
             currentLayer.addTo(map);
         });
     });
-    
-    // Map info
-    function updateMapInfo() {
+
+    // Update map info (coords & zoom)
+    map.on('moveend zoomend', () => {
         const center = map.getCenter();
         const zoom = map.getZoom();
-        const coords = document.getElementById('currentCoords');
+        const coordsEl = document.getElementById('currentCoords');
         const zoomEl = document.getElementById('currentZoom');
-        if (coords) coords.textContent = decimalToDMS(center.lat) + ', ' + decimalToDMS(center.lng) + ' || ' + center.lat.toFixed(5) + ', ' + center.lng.toFixed(5);
+        if (coordsEl) coordsEl.textContent = `${decimalToDMS(center.lat)}, ${decimalToDMS(center.lng)} || ${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`;
         if (zoomEl) zoomEl.textContent = zoom;
-    }
-    map.on('moveend zoomend', updateMapInfo);
-    
-    // Home button
-    const homeBtn = document.getElementById('homeButton');
-    if (homeBtn) homeBtn.addEventListener('click', function() { location.href = '/'; });
-    
-    // Clear cache
+    });
+
+    // Home and clear-cache buttons
+    document.getElementById('homeButton')?.addEventListener('click', () => location.href = '/');
     const clearCacheBtn = document.getElementById('clearCacheBtn');
-    if (clearCacheBtn) {
-        clearCacheBtn.addEventListener('click', function() {
-            localStorage.removeItem('ws_data');
-            localStorage.removeItem('pos_data');
-            localStorage.removeItem('tp_data');
-            alert('Cache data peta berhasil dibersihkan!');
-        });
-    }
-    
-    // --- SEARCH FUNCTIONALITY ---
+    if(clearCacheBtn) clearCacheBtn.style.display = 'none';
+
+    // Search functionality (unchanged)
     const searchInput = document.getElementById('searchInput');
     const searchResultsSection = document.getElementById('searchResultsSection');
     const searchResults = document.getElementById('searchResults');
-    
-    function getAllSearchData() {
-        const ws = getWithExpiry('ws_data') || [];
-        const pos = getWithExpiry('pos_data') || [];
-        const tp = getWithExpiry('tp_data') || [];
-        // Gabungkan dan beri type
-        const wsList = ws.map(item => ({
-            type: 'Wilayah Sungai',
-            name: item.name,
-            description: item.description,
-            id: item.id,
-            geojson: item.geojson
-        }));
-        const posList = pos.map(item => ({
-            type: 'Pos Pantau',
-            name: item.nama_pos,
-            description: item.alamat,
-            id: item.id,
-            latitude: item.latitude,
-            longitude: item.longitude
-        }));
-        const tpList = tp.map(item => ({
-            type: 'Titik Pantau',
-            name: item.nama_titik,
-            description: item.alamat,
-            id: item.id,
-            latitude: item.latitude,
-            longitude: item.longitude
-        }));
-        return [...wsList, ...posList, ...tpList];
-    }
-    
+
+
     function renderSearchResults(results) {
         if (!searchResults) return;
         searchResults.innerHTML = '';
-        if (results.length === 0) {
+        if (!results.length) {
             searchResults.innerHTML = '<li class="text-gray-400">Tidak ada hasil</li>';
             return;
         }
         results.forEach(item => {
             const li = document.createElement('li');
             li.className = 'py-1 px-2 hover:bg-white hover:bg-opacity-50 hover:text-gray-800 rounded cursor-pointer';
-            li.innerHTML = `<span class='text-sm'>${item.name}</span> <span class='text-xs text-gray-300'>(${item.type})</span><br><span class='text-xs text-gray-200 hidden'>${item.description || ''}</span>`;
-            li.addEventListener('click', function() {
-                // Zoom ke lokasi jika ada koordinat
+            li.innerHTML = `<span class='text-sm'>${item.name}</span> <span class='text-xs text-gray-300'>(${item.type})</span>`;
+            li.addEventListener('click', () => {
                 if (item.latitude && item.longitude) {
                     map.setView([item.latitude, item.longitude], 14);
                     const tempIcon = item.type === 'Titik Pantau' ? titikPantauIcon : posIcon;
                     const tempMarker = L.marker([item.latitude, item.longitude], { icon: tempIcon }).addTo(map);
                     tempMarker.bindPopup(`<b>${item.name}</b><br>${item.description || ''}`).openPopup();
                     showMarkerInfo(`<b>${item.name}</b><br>${item.description || ''}`);
-                    tempMarker.on('popupclose', function() {
-                        map.removeLayer(tempMarker);
-                    });
+                    tempMarker.on('popupclose', () => map.removeLayer(tempMarker));
                 } else if (item.geojson) {
                     try {
-                        const geo = JSON.parse(item.geojson);
-                        if (geo.features && geo.features[0] && geo.features[0].geometry && geo.features[0].geometry.coordinates) {
-                            const coords = geo.features[0].geometry.coordinates[0];
-                            if (coords && coords.length > 0) {
-                                map.setView([coords[0][0], coords[0][1]], 12);
-                                L.popup()
-                                    .setLatLng([coords[0][0], coords[0][1]])
-                                    .setContent(`<b>${item.name}</b><br>${item.description || ''}`)
-                                    .openOn(map);
-                                showMarkerInfo(`<b>${item.name}</b><br>${item.description || ''}`);
-                            }
+                        const geo = item.geojson; // Already an object
+                        let layer;
+
+                        if (geo.type === 'Feature') {
+                            layer = L.geoJSON(geo);
+                        } else if (geo.type === 'FeatureCollection') {
+                            layer = L.geoJSON(geo);
                         }
-                    } catch (e) {}
+
+                        if (layer) {
+                            layer.addTo(map);
+                            const bounds = layer.getBounds();
+                            if (bounds.isValid()) {
+                                map.fitBounds(bounds);
+                            }
+                            
+                            let descriptionHtml = '';
+                            try {
+                                const properties = JSON.parse(item.description);
+                                descriptionHtml = Object.entries(properties)
+                                    .map(([key, value]) => `<b>${key}</b>: ${value}`)
+                                    .join('<br>');
+                            } catch (e) {
+                                descriptionHtml = item.description || '';
+                            }
+
+                            const popupContent = `<b>${item.name}</b><br>${descriptionHtml}`;
+                            
+                            // Find a representative point for the popup
+                            let popupLatLng = bounds.getCenter();
+                            if (geo.type === 'Feature' && geo.geometry.type === 'Point') {
+                                popupLatLng = [geo.geometry.coordinates[1], geo.geometry.coordinates[0]];
+                            }
+
+                            L.popup()
+                                .setLatLng(popupLatLng)
+                                .setContent(popupContent)
+                                .openOn(map);
+                            showMarkerInfo(popupContent);
+
+                            // Remove the layer when the popup is closed
+                            layer.on('popupclose', () => map.removeLayer(layer));
+                        }
+                    } catch (e) {
+                        console.error("Error processing geojson:", e);
+                    }
                 }
             });
             searchResults.appendChild(li);
         });
     }
-    
+
     if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
-            const keyword = e.target.value.trim().toLowerCase();
-            if (keyword.length === 0) {
+        searchInput.addEventListener('input', async () => {
+            const kw = searchInput.value.trim();
+            if (kw.length < 3) {
                 searchResultsSection.classList.add('hidden');
                 return;
             }
-            const allData = getAllSearchData();
-            const filtered = allData.filter(item =>
-                (item.name && item.name.toLowerCase().includes(keyword)) ||
-                (item.description && item.description.toLowerCase().includes(keyword))
-            );
-            renderSearchResults(filtered);
-            searchResultsSection.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`/api/geospasial/search?keyword=${kw}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const results = await response.json();
+                renderSearchResults(results);
+                searchResultsSection.classList.remove('hidden');
+            } catch (error) {
+                console.error('Search error:', error);
+                if (searchResults) searchResults.innerHTML = '<li class="text-gray-400">Gagal melakukan pencarian.</li>';
+                searchResultsSection.classList.remove('hidden');
+            }
         });
     }
 
+    // Filter functionality
+    const filterForm = document.getElementById('filterForm');
+    const provinsiSelect = document.getElementById('provinsi');
+    const kabupatenSelect = document.getElementById('kabupaten');
+    const kecamatanSelect = document.getElementById('kecamatan');
+    const desaSelect = document.getElementById('desa');
+
+    async function populateProvinsi() {
+        provinsiSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
+        try {
+            const response = await fetch('/api/geo-features/provinsi');
+            const provinsis = await response.json();
+            provinsis.forEach(prov => {
+                const option = document.createElement('option');
+                option.value = prov.id;
+                option.textContent = prov.nama;
+                provinsiSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error fetching provinsi:', error);
+        }
+    }
+
+    async function populateKabupaten(provinsi_id) {
+        kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten</option>';
+        kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+        desaSelect.innerHTML = '<option value="">Pilih Desa</option>';
+        kabupatenSelect.disabled = true;
+        kecamatanSelect.disabled = true;
+        desaSelect.disabled = true;
+        if (!provinsi_id) return;
+
+        try {
+            const response = await fetch(`/api/geo-features/kabupaten?provinsi_id=${provinsi_id}`);
+            const kabupatens = await response.json();
+            kabupatens.forEach(kab => {
+                const option = document.createElement('option');
+                option.value = kab.id;
+                option.textContent = kab.nama;
+                kabupatenSelect.appendChild(option);
+            });
+            kabupatenSelect.disabled = false;
+        } catch (error) {
+            console.error('Error fetching kabupaten:', error);
+        }
+    }
+
+    async function populateKecamatan(kabupaten_id) {
+        kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+        desaSelect.innerHTML = '<option value="">Pilih Desa</option>';
+        kecamatanSelect.disabled = true;
+        desaSelect.disabled = true;
+        if (!kabupaten_id) return;
+
+        try {
+            const response = await fetch(`/api/geo-features/kecamatan?kabupaten_id=${kabupaten_id}`);
+            const kecamatans = await response.json();
+            kecamatans.forEach(kec => {
+                const option = document.createElement('option');
+                option.value = kec.id;
+                option.textContent = kec.nama;
+                kecamatanSelect.appendChild(option);
+            });
+            kecamatanSelect.disabled = false;
+        } catch (error) {
+            console.error('Error fetching kecamatan:', error);
+        }
+    }
+
+    async function populateDesa(kecamatan_id) {
+        desaSelect.innerHTML = '<option value="">Pilih Desa</option>';
+        desaSelect.disabled = true;
+        if (!kecamatan_id) return;
+
+        try {
+            const response = await fetch(`/api/geo-features/desa?kecamatan_id=${kecamatan_id}`);
+            const desas = await response.json();
+            desas.forEach(desa => {
+                const option = document.createElement('option');
+                option.value = desa.kode;
+                option.textContent = desa.nama;
+                desaSelect.appendChild(option);
+            });
+            desaSelect.disabled = false;
+        } catch (error) {
+            console.error('Error fetching desa:', error);
+        }
+    }
+
+    if (provinsiSelect) {
+        populateProvinsi();
+        provinsiSelect.addEventListener('change', (e) => {
+            populateKabupaten(e.target.value);
+        });
+    }
+
+    if (kabupatenSelect) {
+        kabupatenSelect.addEventListener('change', (e) => {
+            populateKecamatan(e.target.value);
+        });
+    }
+
+    if (kecamatanSelect) {
+        kecamatanSelect.addEventListener('change', (e) => {
+            populateDesa(e.target.value);
+        });
+    }
+
+    async function loadFilteredFeatures() {
+        if (allFeatureLayer) {
+            map.removeLayer(allFeatureLayer);
+        }
+        allFeatureLayer = L.layerGroup();
+
+        let data;
+        try {
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams();
+            // Only add 'desa' to params, as it's the only one used for filtering
+            // const desaValue = formData.get('desa');
+            // if (desaValue) {
+            //     params.append('desa', desaValue);
+            // }
+            const provinsi = formData.get('provinsi');
+            const kabupaten = formData.get('kabupaten');
+            const kecamatan = formData.get('kecamatan');
+            const desa = formData.get('desa');
+
+            if (provinsi) params.append('provinsi', provinsi);
+            if (kabupaten) params.append('kabupaten', kabupaten);
+            if (kecamatan) params.append('kecamatan', kecamatan);
+            if (desa) params.append('desa', desa);
+
+
+            const res = await fetch(`/api/geo-features/filter?${params.toString()}`);
+            const json = await res.json();
+            data = json.features || [];
+
+            // Fit map to bounds of the new data
+            if (data.length > 0) {
+                const tempLayer = L.geoJSON(data);
+                map.fitBounds(tempLayer.getBounds());
+            }
+
+        } catch (err) {
+            console.error('Gagal memuat geo features:', err);
+            return;
+        }
+
+        data.forEach(feature => {
+            if (!feature || !feature.geometry) return;
+
+            const layer = L.geoJSON(feature, {
+                onEachFeature: (feature, layer) => {
+                    const name = feature.properties?.name || 'Fitur';
+                    const popup = `<b>${name}</b><br>${
+                        Object.entries(feature.properties?.properties || {})
+                              .map(([k, v]) => `<b>${k}</b>: ${v}`)
+                              .join('<br>')
+                    }`;
+                    layer.bindPopup(popup);
+                    layer.on('click', () => showMarkerInfo(popup));
+                },
+                pointToLayer: (feature, latlng) => L.marker(latlng, { icon: posIcon }),
+                style: { color: '#28a745', weight: 1, fillOpacity: 0.3 }
+            });
+
+            layer.addTo(allFeatureLayer);
+        });
+
+        allFeatureLayer.addTo(map);
+    }
+
+    if (filterForm) {
+        filterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            loadFilteredFeatures();
+        });
+    }
 }

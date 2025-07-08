@@ -14,6 +14,7 @@ use App\Http\Controllers\Web\AksesRoleController;
 use App\Http\Controllers\Web\PosPantauController;
 use App\Http\Controllers\Web\SungaiController;
 use App\Http\Controllers\Web\LoadShpController;
+use App\Http\Controllers\Web\FormFieldsController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -118,6 +119,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         'destroy' => 'sungai.destroy',
     ]);
     Route::resource('loadshp', LoadShpController::class);
+    Route::post('loadshp/saveGeo', [LoadShpController::class, 'saveGeo'])->name('loadshp.saveGeo');
+    Route::get('formFields', [FormFieldsController::class, 'getFields'])->name('formFields');
     Route::get('/blank', function () {
         return view('admin.blank');
     })->name('blank');

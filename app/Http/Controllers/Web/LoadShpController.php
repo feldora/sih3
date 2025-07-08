@@ -3,26 +3,39 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Services\GeoFeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Shapefile\ShapefileReader;
 use Shapefile\ShapefileException;
 use ZipArchive;
+use Illuminate\Support\Facades\DB;
 
 class LoadShpController extends Controller
 {
-    public function index()
+    protected $geoFeatureService;
+
+    public function __construct(GeoFeatureService $geoFeatureService)
     {
-        return view('admin.pages.loadshp.index');
+        $this->geoFeatureService = $geoFeatureService;
     }
-    
+
+    public function index(Request $request)
+    {
+        $data = [];
+        if (isset($request->type)) {
+            $data = ['type' => $request->type];
+        }
+        return view('admin.pages.loadshp.index', compact('data'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'shp_file' => 'required|file|mimes:zip|max:10240',  // hanya ZIP
+            'shp_file' => 'required|file|mimes:zip',
         ]);
-        
+
         try {
             $file = $request->file('shp_file');
 
@@ -38,8 +51,6 @@ class LoadShpController extends Controller
             Log::info("Uploaded file saved to: {$tmpPath}");
 
             $extractPath = "/tmp/extracted_{$timestamp}";
-
-            // Hanya ekstrak ZIP, hapus bagian RAR dan SHP
             File::makeDirectory($extractPath, 0755, true);
             $zip = new \ZipArchive;
             $res = $zip->open($tmpPath);
@@ -48,6 +59,7 @@ class LoadShpController extends Controller
             }
             $zip->extractTo($extractPath);
             $zip->close();
+
             Log::info("ZIP berhasil diekstrak ke: {$extractPath}");
 
             $shpFilePath = $this->findShpInDir($extractPath);
@@ -57,7 +69,6 @@ class LoadShpController extends Controller
 
             $geoJson = $this->convertShpToGeoJson($shpFilePath);
 
-            // Hapus file sementara dan folder ekstrak
             File::delete($tmpPath);
             if (File::isDirectory($extractPath)) {
                 File::deleteDirectory($extractPath);
@@ -70,7 +81,6 @@ class LoadShpController extends Controller
             return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
-
 
     private function findShpInDir(string $dir): ?string
     {
@@ -101,6 +111,106 @@ class LoadShpController extends Controller
             return ['type' => 'FeatureCollection', 'features' => $features];
         } catch (ShapefileException $e) {
             throw new \Exception('Error reading SHP: ' . $e->getMessage());
+        }
+    }
+
+    public function saveGeo(Request $request)
+    {
+        $tabel = $request->pos_type;
+
+        switch ($tabel) {
+            case 'Pos Pantau':
+                return $this->savePosPantau($request);
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Permintaan tidak dapat diproses.'
+                ], 400);
+        }
+    }
+
+    private function saveGeoJsonFeatureToDatabase(array $feature): string
+    {
+        if ($this->geoFeatureService->exists($feature)) {
+            $geometry = json_encode($feature['geometry']);
+            $propertiesArray = $feature['properties']['properties'] ?? [];
+            $signatureData = $geometry . json_encode($propertiesArray, JSON_UNESCAPED_UNICODE);
+            return hash('sha256', $signatureData);
+        }
+
+        $newFeature = $this->geoFeatureService->createFromGeoJson($feature);
+        return $newFeature->signature;
+    }
+
+    private function savePosPantau(Request $request)
+    {
+        $features = json_decode($request->input('visibleFeatures'), true);
+        $mapped = $request->input('mapped', []);
+
+        if (!$features || !is_array($features)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data fitur tidak valid.'
+            ], 400);
+        }
+
+        try {
+            DB::transaction(function () use ($features, $mapped, $request) {
+                foreach ($features as $feature) {
+                    $data = [];
+
+                    $coordinates = $feature['geometry']['coordinates'] ?? [null, null];
+                    $data['longitude'] = $coordinates[0];
+                    $data['latitude'] = $coordinates[1];
+                    $data['jenis_pos'] = $request->input('jenis_pos');
+                    $data['kewenangan'] = $request->input('kewenangan');
+
+                    $desa= $this->geoFeatureService->findFeatureContainingPoint( $coordinates[0], $coordinates[1]);
+                    if(!empty($desa)){
+                        $properties = json_decode($desa->properties, true);
+                        $data['desa'] = $properties['WADMKD'];
+                        $data['kecamatan'] = $properties['WADMKC'];
+                        $data['kabupaten'] = $properties['WADMKK'];
+                    }
+                    foreach ($mapped as $field => $mappingOptions) {
+                        $mappedKey = $mappingOptions[0] ?? null;
+
+                        if ($mappedKey && str_starts_with($mappedKey, 'properties.') && isset($feature['properties'])) {
+                            $propName = str_replace('properties.', '', $mappedKey);
+                            $data[$field] = $feature['properties'][$propName] ?? null;
+                        }
+                    }
+
+                    // Mempersiapkan data untuk disimpan sebagai GeoFeature
+                    // Strukturnya harus cocok dengan yang diharapkan oleh GeoFeatureService
+                    $featureToSave = [
+                        'type' => 'Feature',
+                        'geometry' => $feature['geometry'],
+                        'properties' => [
+                            // 'name' dan 'tag' berada di level atas 'properties'
+                            'name' => $data['nama_pos'] ?? null,
+                            'tag' => $request->input('jenis_pos'),
+                            // 'properties' asli dari shapefile di-nest di dalam 'properties'
+                            'properties' => $feature['properties']
+                        ]
+                    ];
+
+                    $signature = $this->saveGeoJsonFeatureToDatabase($featureToSave);
+                    $data['geo_feature_signature'] = $signature;
+
+                    \App\Models\PosPantau::create($data);
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => count($features) . ' data berhasil disimpan.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan data: ' . $e->getMessage(),
+            ], 500);
         }
     }
 }

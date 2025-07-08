@@ -2,7 +2,7 @@
 
 @push('styles')
     <style>
-        #map {
+        #map-line {
             @if ($style)
                 {{ $style }}
             @else
@@ -55,7 +55,7 @@
         </span>
     </div>
 
-    <div id="map" style="height: {{ $height }};"></div>
+    <div id="map-line" style="height: {{ $height }};"></div>
 
     <!-- Hidden input untuk menyimpan koordinat -->
     <input type="hidden" name="{{ $name }}" id="coordinates" value="{{ old($name, json_encode($oldCoordinates)) }}">
@@ -74,7 +74,7 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var map = L.map('map').setView([-0.89722, 119.86627], 13);
+        var map = L.map('map-line').setView([-0.89722, 119.86627], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:

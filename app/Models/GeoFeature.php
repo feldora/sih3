@@ -11,10 +11,18 @@ class GeoFeature extends Model
     protected $fillable = [
         'name',
         'properties',
+        'tag',
         'geom',
+        'signature'
     ];
 
     protected $casts = [
         'properties' => 'array',
     ];
+
+    public function posPantaus()
+    {
+        return $this->hasMany(PosPantau::class, 'geo_feature_signature', 'signature');
+    }
+
 }

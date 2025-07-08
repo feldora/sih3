@@ -6,8 +6,8 @@
 ])
 
 <div>
-    <label for="maps">{{ $label }}</label>
-    <div id="map" style="height: {{ $hight }};"></div>
+    <label for="map-point">{{ $label }}</label>
+    <div id="map-point" style="height: {{ $hight }};"></div>
 
     <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude') }}">
     <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">
@@ -15,7 +15,7 @@
 
 @push('styles')
     <style>
-    #map {
+    #map-point {
         cursor: crosshair;  /* Ganti dengan cursor tanda tambah */
     }
 </style>
@@ -30,7 +30,7 @@
         var initialLatNum = parseFloat(initialLat) || -0.89722;
         var initialLngNum = parseFloat(initialLng) || 119.86627;
 
-        var map = L.map('map').setView([initialLatNum, initialLngNum], 13);
+        var map = L.map('map-point').setView([initialLatNum, initialLngNum], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:

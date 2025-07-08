@@ -11,11 +11,13 @@ class CreateGeoFeaturesTable extends Migration
         Schema::create('geo_features', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
+            $table->string('tag')->nullable();
             $table->json('properties')->nullable();
+            // $table->json('geojson');
             $table->geometry('geom');
             $table->timestamps();
-            $table->spatialIndex('geom');
         });
+
     }
 
     /**

@@ -20,7 +20,8 @@ class PosPantau extends Model
         'nama_pengamat',
         'tahun_pembangunan',
         'kewenangan',
-        'status'
+        'status',
+        'geo_feature_signature'
     ];
 
     public $timestamps = true;
@@ -29,4 +30,10 @@ class PosPantau extends Model
     {
         return $this->hasMany(TitikPantau::class, 'pos_pantau_id');
     }
+    
+    public function geoFeature()
+    {
+        return $this->belongsTo(GeoFeature::class, 'geo_feature_signature', 'signature');
+    }
+
 }
