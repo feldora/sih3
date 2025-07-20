@@ -3,11 +3,12 @@
 @section('title', 'Daftar Pos Pantau')
 
 @section('content')
-<div class="container mx-auto p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Daftar Pos Pantau</h1>
-        <a href="{{ route('admin.loadshp.index') }}?type=Pos Pantau" class="btn btn-success">Tambah Dari SHP</a>
-        <a href="{{ route('admin.pos-pengamatan.create') }}" class="btn btn-primary">+ Tambah Pos Pantau</a>
+<div class="contmx-auto p-4 bg-white shadow-md rounded-lg">
+    <h1 class="text-2xl font-bold mb-4">Daftar Pos Pantau</h1>
+    <div class="flex justify-end items-center mb-6 gap-5">
+        <a href="{{ route('admin.loadshp.index') }}?type=Pos Pantau" class="btn btn-sm mb-4 btn-info">Tambah Dari SHP</a>
+        <a href="{{ route('admin.pos-pengamatan.import-excel') }}" class="btn btn-sm mb-4 btn-success">Tambah Dari Excel</a>
+        <a href="{{ route('admin.pos-pengamatan.create') }}" class="btn btn-sm mb-4 btn-primary">+ Tambah Pos Pantau</a>
     </div>
     @if (session('success'))
         <div class="alert alert-success mb-4">
@@ -35,7 +36,7 @@
                     <td>{{ $pos->nama_pos }}</td>
                     <td>{{ $pos->jenis_pos }}</td>
                     <td>{{ $pos->alamat }}</td>
-                    <td>{{ $pos->kabupaten }}</td>
+                    <td>{{ $pos->kabupaten->nama }}</td>
                     <td>{{ $pos->kewenangan }}</td>
                     <td>{{ $pos->status }}</td>
                     <td>

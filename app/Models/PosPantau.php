@@ -14,9 +14,9 @@ class PosPantau extends Model
         'latitude',
         'longitude',
         'alamat',
-        'kabupaten',
-        'kecamatan',
-        'desa',
+        'kabupaten_id',
+        'kecamatan_id',
+        'desa_id',
         'nama_pengamat',
         'tahun_pembangunan',
         'kewenangan',
@@ -34,6 +34,11 @@ class PosPantau extends Model
     public function geoFeature()
     {
         return $this->belongsTo(GeoFeature::class, 'geo_feature_signature', 'signature');
+    }
+
+    public function kabupaten()
+    {
+        return $this->hasOne(Kabupaten::class, 'id', 'kabupaten_id');
     }
 
 }

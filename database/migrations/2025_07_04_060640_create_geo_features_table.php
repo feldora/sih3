@@ -14,7 +14,7 @@ class CreateGeoFeaturesTable extends Migration
             $table->string('tag')->nullable();
             $table->json('properties')->nullable();
             // $table->json('geojson');
-            $table->geometry('geom');
+            $table->geometry('geom', 4326)->spatialIndex();
             $table->timestamps();
         });
 

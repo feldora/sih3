@@ -42,3 +42,15 @@ if (! function_exists('pd')) {
         }
     }
 }
+
+/**
+ * response json
+ *
+ * @return response()
+ */
+if (! function_exists('pd')) {
+    function je($args)
+    {
+        return json_encode($args);
+    }
+}

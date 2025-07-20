@@ -3,13 +3,19 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\PosPantau;
 use App\Repositories\Contracts\PosPantauRepositoryInterface;
 use Illuminate\Http\Request;
 use App\Services\NominatimGeocodingService;
+use App\Services\GeoFeatureService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
 
 class PosPantauController extends Controller
 {
     protected $posPantauRepository;
+    // protected $nominatim;
     
     public function __construct(PosPantauRepositoryInterface $posPantauRepository)
     {
@@ -23,6 +29,9 @@ class PosPantauController extends Controller
     public function index()
     {
         $posPantau = $this->posPantauRepository->all();
+        // $posPantau = new PosPantau();
+        // $pos = $posPantau->with('kabupaten')->get();
+        // dd($pos);
         return view('admin.pages.pos_pantau.index', compact('posPantau'));
     }
 
@@ -90,4 +99,113 @@ class PosPantauController extends Controller
 
         return redirect()->route('admin.pos-pengamatan.index')->with('success', 'Data Pos Pantau berhasil dihapus.');
     }
+
+    public function importExcel(){
+        return view('admin.pages.pos_pantau.importExcel');
+    }
+
+    public function templateExcel() {
+        return "oke";
+    }
+
+    public function prcImport(Request $request)
+    {
+        $GeoFeatureService = new GeoFeatureService();
+
+        try {
+            $postData = $request->input('data');
+            $data = json_decode($postData, true);
+
+            if (!is_array($data)) {
+                throw new \Exception("Data harus berupa array.");
+            }
+
+            $features = [];
+            $dataPosPantau = [];
+            $signatures = [];
+
+            foreach ($data as $value) {
+                $lat = $value['latitude'];
+                $lon = $value['longitude'];
+
+                $dataArray = json_decode(json_encode($value), true);
+                $feature = $GeoFeatureService->geoJsonFormat($dataArray);
+
+                $feature['properties']['tag'] = "pos pantau";
+                $feature['properties']['name'] = $dataArray['nama_pos'];
+
+                $signature = $GeoFeatureService->signature($feature['geometry'], $feature['properties']);
+                $feature['__signature'] = $signature;
+                $signatures[] = $signature;
+
+                $features[] = $feature;
+                $dataArray['geo_feature_signature'] = $signature;
+                $dataPosPantau[$signature] = $dataArray;
+            }
+
+            // Cek yang sudah ada
+            $existing = $GeoFeatureService->existsBulk($signatures);
+            $toInsert = [];
+            $results = [];
+
+            foreach ($features as $feature) {
+                $sig = $feature['__signature'];
+                if (!isset($existing[$sig])) {
+                    $toInsert[] = $feature;
+                }
+
+                $results[] = [
+                    "nama" => $feature['properties']['name'] ?? '-',
+                    "signature" => $sig,
+                    "status" => !isset($existing[$sig]),
+                ];
+            }
+
+            DB::beginTransaction();
+
+            if (count($toInsert)) {
+                $GeoFeatureService->bulkCreateFromGeoJson($toInsert);
+            }
+
+            foreach ($results as &$res) {
+                $sig = $res['signature'];
+                $dataInsert = $dataPosPantau[$sig];
+
+                // Pastikan dataInsert memiliki koordinat
+                if (!empty($dataInsert['latitude']) && !empty($dataInsert['longitude'])) {
+                    $lon = $dataInsert['longitude'];
+                    $lat = $dataInsert['latitude'];
+
+                    // Cari fitur kabupaten berdasarkan koordinat
+                    $kecamatan = $GeoFeatureService->findFeatureContainingPoint($lon, $lat, 'kecamatan');
+                    // $kecamatan = $GeoFeatureService->findContainingPointInPolygon('-0.856096', '123.041325',  'kecamatan');
+                    
+                    if (!empty($kecamatan)) {
+                        $properties = json_decode($kecamatan->properties, true);
+                        $dataInsert['kabupaten_id'] = $properties['KDWKB'] ?? null;
+                        $dataInsert['kecamatan_id'] = $properties['KDWKC'] ?? null;
+                    }
+                }
+
+                // Simpan data pos pantau
+                $inserted = $this->posPantauRepository->create($dataInsert);
+                $res['status'] = $inserted ? true : false;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                "success" => true,
+                "data" => $results,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                "success" => false,
+                "message" => "Terjadi kesalahan saat memproses data: " . $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }

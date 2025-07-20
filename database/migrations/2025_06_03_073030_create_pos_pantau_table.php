@@ -18,9 +18,9 @@ class CreatePosPantauTable extends Migration
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
             $table->string('alamat')->nullable();
-            $table->string('kabupaten')->nullable();
-            $table->string('kecamatan')->nullable();
-            $table->string('desa')->nullable();
+            $table->string('kabupaten_id')->nullable();
+            $table->string('kecamatan_id')->nullable();
+            $table->string('desa_id')->nullable();
             $table->string('nama_pengamat')->nullable();
             $table->year('tahun_pembangunan')->nullable();
             $table->string('kewenangan')->nullable();

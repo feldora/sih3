@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Repositories\Contracts\PosPantauRepositoryInterface;
 use Illuminate\Http\Request;
+use App\Models\PosPantau;
 
 class PosPantauController extends Controller
 {
@@ -19,6 +20,7 @@ class PosPantauController extends Controller
     public function index()
     {
         $data = $this->posPantauRepository->all();
+        // $data = PosPantau::limit(10)->get();
         return response()->json($data);
     }
 

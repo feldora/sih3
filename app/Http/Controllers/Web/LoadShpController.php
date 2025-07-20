@@ -131,15 +131,18 @@ class LoadShpController extends Controller
 
     private function saveGeoJsonFeatureToDatabase(array $feature): string
     {
-        if ($this->geoFeatureService->exists($feature)) {
-            $geometry = json_encode($feature['geometry']);
-            $propertiesArray = $feature['properties']['properties'] ?? [];
-            $signatureData = $geometry . json_encode($propertiesArray, JSON_UNESCAPED_UNICODE);
-            return hash('sha256', $signatureData);
+        $signature = null;
+        $existFeature = $this->geoFeatureService->exists($feature);
+        if ($existFeature) {
+            $signature = $existFeature->signature;
+        } else {
+            $newFeature = $this->geoFeatureService->createFromGeoJson($feature);
+            if ($newFeature) {
+                $signature = $newFeature->signature;
+            }
         }
 
-        $newFeature = $this->geoFeatureService->createFromGeoJson($feature);
-        return $newFeature->signature;
+        return $signature;
     }
 
     private function savePosPantau(Request $request)
@@ -153,7 +156,7 @@ class LoadShpController extends Controller
                 'message' => 'Data fitur tidak valid.'
             ], 400);
         }
-
+        $datas=[];
         try {
             DB::transaction(function () use ($features, $mapped, $request) {
                 foreach ($features as $feature) {
@@ -164,14 +167,18 @@ class LoadShpController extends Controller
                     $data['latitude'] = $coordinates[1];
                     $data['jenis_pos'] = $request->input('jenis_pos');
                     $data['kewenangan'] = $request->input('kewenangan');
+                    $tag = 'kabupaten';
+                    $kabupaten= $this->geoFeatureService->findFeatureContainingPoint( $coordinates[0], $coordinates[1], $tag);
+                    if(!empty($kabupaten)){
+                        $properties = json_decode($kabupaten->properties, true);
+                        Log::info("KDWKB " . $properties['KDWKB']);
+                        Log::info("KDWKC " . $properties['KDWKC']);
 
-                    $desa= $this->geoFeatureService->findFeatureContainingPoint( $coordinates[0], $coordinates[1]);
-                    if(!empty($desa)){
-                        $properties = json_decode($desa->properties, true);
-                        $data['desa'] = $properties['WADMKD'];
-                        $data['kecamatan'] = $properties['WADMKC'];
-                        $data['kabupaten'] = $properties['WADMKK'];
+                        // $data['desa'] = $properties['WADMKD'];
+                        $data['kabupaten_id'] = $properties['KDWKB'];
+                        $data['kecamatan_id'] = $properties['KDWKC'];
                     }
+                    
                     foreach ($mapped as $field => $mappingOptions) {
                         $mappedKey = $mappingOptions[0] ?? null;
 
@@ -194,17 +201,20 @@ class LoadShpController extends Controller
                             'properties' => $feature['properties']
                         ]
                     ];
-
                     $signature = $this->saveGeoJsonFeatureToDatabase($featureToSave);
-                    $data['geo_feature_signature'] = $signature;
-
-                    \App\Models\PosPantau::create($data);
+                    if ($signature) {
+                        $data['geo_feature_signature'] = $signature;
+                        $datas[] = $data;
+                        Log::info(json_encode($data));
+                        \App\Models\PosPantau::create($data);
+                    }
                 }
             });
 
             return response()->json([
                 'success' => true,
-                'message' => count($features) . ' data berhasil disimpan.'
+                'message' => count($features) . ' data berhasil disimpan.',
+                'datas'    => $datas
             ]);
         } catch (\Exception $e) {
             return response()->json([

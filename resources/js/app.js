@@ -44,4 +44,7 @@ window.jQuery = $;
 
 window.Alpine = Alpine;
 window.DataTable = DataTable;
+window.chunkArray = chunkArray
 Alpine.start();
+
+import {chunkArray} from  './utiliti';

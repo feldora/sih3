@@ -109,6 +109,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         'update' => 'pos-pengamatan.update',
         'destroy' => 'pos-pengamatan.destroy',
     ]);
+    Route::get('import-excel', [PosPantauController::class, 'importExcel'])->name('pos-pengamatan.import-excel');
+    Route::post('import-excel', [PosPantauController::class, 'prcImport'])->name('pos-pengamatan.import-excel');
+    Route::get('import-excel/template', [PosPantauController::class, 'templateExcel'])->name('pos-pengamatan.import-excel.template');
+    
     Route::resource('sungai', SungaiController::class)->names([
         'index' => 'sungai.index',
         'create' => 'sungai.create',

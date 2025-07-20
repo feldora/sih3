@@ -5,9 +5,14 @@ namespace App\Services;
 use App\Models\GeoFeature;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use geoPHP;
+use Illuminate\Support\Facades\Cache;
 
 class GeoFeatureService
 {
+    protected array $pointCache = [];
+    
     /**
      * Ambil semua fitur sebagai GeoJSON FeatureCollection
      */
@@ -113,18 +118,97 @@ class GeoFeatureService
      */
     public function createFromGeoJson(array $geojson): GeoFeature
     {
-        $geometryJson = json_encode($geojson['geometry']);
-        $propertiesArray = $geojson['properties']['properties'] ?? [];
-
-        $signature = hash('sha256', $geometryJson . json_encode($propertiesArray, JSON_UNESCAPED_UNICODE));
+        $geometry = $geojson['geometry'];
+        $properties = $geojson['properties']['properties'] ?? $geojson['properties'];
+        $propertiesArray = $properties ?? [];
+        
+        $signature = $this->signature($geometry, $propertiesArray);
 
         return GeoFeature::create([
             'name' => $geojson['properties']['name'] ?? null,
             'tag' => $geojson['properties']['tag'] ?? null,
             'properties' => $propertiesArray,
             'signature' => $signature,
-            'geom' => DB::raw("ST_GeomFromGeoJSON(" . DB::getPdo()->quote($geometryJson) . ")"),
+            'geom' => DB::raw("ST_GeomFromGeoJSON(" . DB::getPdo()->quote(json_encode($geometry)) . ")"),
         ]);
+    }
+
+    /**
+     * 
+     */
+    public function bulkCreateFromGeoJson(array $features): void
+    {
+        $insertData = [];
+
+        foreach ($features as $feature) {
+            $geometry = $feature['geometry'];
+            $properties = $feature['properties']['properties'] ?? $feature['properties'];
+            $signature = $this->signature($geometry, $properties);
+
+            // $insertData[] = [
+            //     'name' => $feature['properties']['name'] ?? null,
+            //     'tag' => $feature['properties']['tag'] ?? null,
+            //     'properties' => $properties,
+            //     'signature' => $signature,
+            //     'geom' => DB::raw("ST_GeomFromGeoJSON(" . DB::getPdo()->quote(json_encode($geometry)) . ")"),
+            //     'created_at' => now(),
+            //     'updated_at' => now(),
+            // ];
+            $insertData[] = [
+                'name' => $feature['properties']['name'] ?? null,
+                'tag' => $feature['properties']['tag'] ?? null,
+                'properties' => json_encode($properties, JSON_UNESCAPED_UNICODE),
+                'signature' => $signature,
+                'geom' => DB::raw("ST_GeomFromGeoJSON(" . DB::getPdo()->quote(json_encode($geometry)) . ")"),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+        }
+
+        GeoFeature::insert($insertData);
+    }
+
+
+    /**
+     * Fungsi untuk mengubah data menjadi geojson
+     */
+    public function geoJsonFormat(array $data): array
+    {
+        if (isset($data['type'], $data['geometry'], $data['properties']) && $data['type'] === 'Feature') {
+            return $data;
+        }
+
+        $geometry = null;
+        if (isset($data['geom'])) {
+            $geometry = is_array($data['geom']) ? $data['geom'] : null;
+        } elseif (isset($data['latitude'], $data['longitude'])) {
+            $geometry = [
+                "type" => "Point",
+                "coordinates" => [(float)$data['longitude'], (float)$data['latitude']],
+            ];
+        }
+
+        $exclude = ['geom', 'geometry', 'latitude', 'longitude'];
+        $properties = array_diff_key($data, array_flip($exclude));
+
+        return [
+            "type" => "Feature",
+            "geometry" => $geometry ?? (object)[],
+            "properties" => $properties,
+        ];
+    }
+
+
+    public function signature($geometry, $properties): string
+    {
+        if (is_array($geometry)) {
+            $geometryJson = json_encode($geometry);
+        } else {
+            $geometryJson = $geometry;
+        }
+
+        return hash('sha256', $geometryJson . json_encode($properties, JSON_UNESCAPED_UNICODE));
     }
 
 
@@ -164,27 +248,100 @@ class GeoFeatureService
     /**
      * Temukan fitur berdasarkan titik (lon, lat)
      */
-    public function findFeatureContainingPoint(float $longitude, float $latitude)
+    public function findFeatureContainingPoint(float $longitude, float $latitude, $tag = 'kabupaten')
     {
         // $pointWKT = "POINT($longitude $latitude)";
         $pointWKT = "POINT($latitude $longitude)";
-        // return GeoFeature::whereRaw("ST_Contains(geom, ST_GeomFromText(?, 4326))", [$pointWKT])->where('tag', 'desa')->first();
-        return DB::table('geo_features')->whereRaw("ST_Contains(geom, ST_GeomFromText(?, 4326))", [$pointWKT])
-                ->where('tag', 'desa')
-                ->first();
 
+        return DB::table('geo_features')
+            ->whereRaw("ST_Intersects(geom, ST_GeomFromText(?, 4326))", [$pointWKT])
+            ->where('tag', $tag)
+            ->first();
+    }
+
+    public function PnP(float $longitude, float $latitude, $tag = 'kecamatan')
+    {
+        require_once base_path('vendor/phayes/geophp/geoPHP.inc');
+
+        // Ambil dari Redis
+        $cachedPolygons = Cache::get("polygons:$tag");
+
+        if (!$cachedPolygons) {
+            // Coba isi ulang dari database
+            $geoService = new \App\Services\GeoService();
+            $geoService->cachePolygons($tag); // isi ulang
+            $cachedPolygons = Cache::get("polygons:$tag");
+
+            if (!$cachedPolygons) {
+                Log::warning("Cache polygon untuk tag $tag masih kosong setelah fallback.");
+                return null;
+            }
+        }
+
+        // Buat titik point (lng lat — urutan benar)
+        $point = geoPHP::load("POINT($longitude $latitude)", 'wkt');
+
+        // Loop semua polygon dan cari yang mengandung titik
+        foreach ($cachedPolygons as $feature) {
+            if (empty($feature['wkt'])) continue;
+
+            $polygon = geoPHP::load($feature['wkt'], 'wkt');
+            if ($polygon && $polygon->contains($point)) {
+                // Ambil data asli dari DB berdasarkan id
+                return DB::table('geo_features')
+                    ->where('id', $feature['id'])
+                    ->first();
+            }
+        }
+
+        return null;
     }
 
 
-    public function exists(array $geojson): bool
+
+    public function findFeatureContainingPointCached(float $lon, float $lat, string $tag = 'kabupaten')
+    {
+        $key = "{$tag}:" . round($lon, 5) . "," . round($lat, 5);
+
+        if (isset($this->pointCache[$key])) {
+            return $this->pointCache[$key];
+        }
+
+        $result = $this->findFeatureContainingPoint($lon, $lat, $tag);
+        $this->pointCache[$key] = $result;
+
+        return $result;
+    }
+
+
+
+    public function exists(array $geojson)
     {
         $geometryJson = json_encode($geojson['geometry']);
-        $propertiesArray = $geojson['properties']['properties'] ?? [];
+        $prop = $geojson['properties']['properties'] ?? $geojson['properties'];
+        $propertiesArray = $prop ?? [];
+        
+        $signature = $this->signature($geometryJson , $propertiesArray);
+        // $signature = hash('sha256', $geometryJson . json_encode($propertiesArray, JSON_UNESCAPED_UNICODE));
 
-        $signature = hash('sha256', $geometryJson . json_encode($propertiesArray, JSON_UNESCAPED_UNICODE));
-
-        return GeoFeature::where('signature', $signature)->exists();
+        $feature = GeoFeature::where('signature', $signature);
+        if($feature->exists()) {
+            return $feature->first();
+        } else {
+            return false;
+        }
     }
+    /**
+     * 
+     */
+    public function existsBulk(array $signatures): array
+    {
+        return GeoFeature::whereIn('signature', $signatures)
+            ->pluck('signature')
+            ->flip()
+            ->toArray();
+    }
+
 
     /**
      * Cari fitur berdasarkan nama (dan bisa dikembangkan untuk full-text atau Elasticsearch)
@@ -296,31 +453,11 @@ class GeoFeatureService
         };
     }
 
-    /**
-     * Ambil data GeoFeature dalam potongan (chunks) untuk diproses.
-     *
-     * @param callable $callback
-     * @param int $chunkSize
-     * @return void
-     */
-    public function chunkGeoFeatures(int $chunkSize = 100, callable $callback)
+    public function cachePolygons($tag = 'kecamatan')
     {
-        GeoFeature::chunk($chunkSize, function ($geoFeatures) use ($callback) {
-            // Ambil setiap fitur dan konversi kolom geom menjadi GeoJSON
-            $geoFeaturesWithGeoJSON = $geoFeatures->map(function ($feature) {
-                // Mengonversi geom menjadi GeoJSON
-                $geometry = DB::selectOne("SELECT ST_AsGeoJSON(geom) AS geometry FROM geo_features WHERE id = ?", [$feature->id]);
-                $geometry = json_decode($geometry->geometry, true); // Mengonversi GeoJSON menjadi array
-                
-                // Menambahkan GeoJSON ke dalam fitur
-                $feature->geometry = $geometry; // Menambahkan 'geometry' sebagai GeoJSON
-                
-                return $feature;
-            });
-
-            // Panggil callback dengan fitur yang sudah dimodifikasi
-            $callback($geoFeaturesWithGeoJSON);
-        });
+        $geoService = new \App\Services\GeoService();
+        $geoService->cachePolygons($tag);
     }
+
 
 }
