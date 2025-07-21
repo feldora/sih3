@@ -32,13 +32,13 @@
             <tbody>
                 @foreach($posPantau as $pos)
                 <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $pos->nama_pos }}</td>
-                    <td>{{ $pos->jenis_pos }}</td>
-                    <td>{{ $pos->alamat }}</td>
-                    <td>{{ $pos->kabupaten->nama }}</td>
-                    <td>{{ $pos->kewenangan }}</td>
-                    <td>{{ $pos->status }}</td>
+                    <td>{{ $loop->iteration ?? '' }}</td>
+                    <td>{{ $pos->nama_pos ?? '' }}</td>
+                    <td>{{ $pos->jenis_pos ?? '' }}</td>
+                    <td>{{ $pos->alamat ?? '' }}</td>
+                    <td>{{ $pos->kabupaten->nama ?? '' }}</td>
+                    <td>{{ $pos->kewenangan ?? '' }}</td>
+                    <td>{{ $pos->status ?? '' }}</td>
                     <td>
                         <a href="{{ route('admin.pos-pengamatan.edit', $pos) }}" class="btn btn-sm btn-warning">Edit</a>
                         <form action="{{ route('admin.pos-pengamatan.destroy', $pos->id) }}" method="POST" class="inline">

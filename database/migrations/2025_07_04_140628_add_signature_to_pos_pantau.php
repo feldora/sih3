@@ -11,11 +11,10 @@ return new class extends Migration
         Schema::table('pos_pantau', function (Blueprint $table) {
             $table->string('geo_feature_signature', 64)->nullable();
 
-            // Foreign key ke geo_features(signature)
             $table->foreign('geo_feature_signature')
                   ->references('signature')
                   ->on('geo_features')
-                  ->onDelete('set null') // atau 'cascade' sesuai kebutuhan
+                  ->onDelete('set null')  // Sesuaikan dengan kebutuhan kamu
                   ->onUpdate('cascade');
         });
     }

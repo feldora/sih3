@@ -9,8 +9,9 @@ class CreateProvinsiTable extends Migration
     public function up()
     {
         Schema::create('provinsi', function (Blueprint $table) {
-            $table->string('id');
-            $table->string('nama')->nullable()->default('NULL');
+            $table->string('id')->primary();
+            $table->string('nama')->nullable();
+            // $table->timestamps(); // opsional, jika ingin simpan created_at dan updated_at
         });
     }
 

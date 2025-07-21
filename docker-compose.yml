@@ -1,0 +1,91 @@
+services:
+    sih3.app:
+        build:
+            context: 'docker/php/8.4'
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: 'fikridulumina/laravel-php:8.4'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-80}:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        volumes:
+            - '.:${PWD}'
+        networks:
+            - sail
+        depends_on:
+            - sih3.pgsql
+            - sih3.redis
+    sih3.pgsql:
+        # image: 'postgres:17'
+        build:
+            context: ./docker/pgsql/17.5-postgis
+            dockerfile: Dockerfile
+        image: 'fikridulumina/pgsql:17.5-postgis'
+        # ports:
+        #     - '${FORWARD_DB_PORT:-5432}:5432'
+        environment:
+            PGPASSWORD: '${DB_PASSWORD:-secret}'
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+        volumes:
+            - 'sail-pgsql:/var/lib/postgresql/data'
+            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - pg_isready
+                - '-q'
+                - '-d'
+                - '${DB_DATABASE}'
+                - '-U'
+                - '${DB_USERNAME}'
+            retries: 3
+            timeout: 5s
+    sih3.pgadmin:
+        image: dpage/pgadmin4
+        container_name: sih3_pgadmin
+        ports:
+            - "5672:80"  # Akses pgAdmin via http://localhost:8080
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@example.com  # Ganti sesuai kebutuhan
+            PGADMIN_DEFAULT_PASSWORD: admin           # Ganti untuk keamanan
+        depends_on:
+            - sih3.pgsql
+        networks:
+            - sail
+
+    sih3.redis:
+        image: redis:alpine
+        volumes:
+        - 'sail-redis:/data'
+        # - './docker/redis/redis.conf:/usr/local/etc/redis/redis.conf'
+        # command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+        # ports:
+        # - '${FORWARD_REDIS_PORT:-6379}:6379'
+        networks:
+        - sail
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            retries: 3
+            timeout: 5s
+
+networks:
+    sail:
+        driver: bridge
+volumes:
+    sail-pgsql:
+        driver: local
+    sail-redis:
+        driver: local

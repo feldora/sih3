@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
             KabupatenSeeder::class,
             KecamatanSeeder::class,
             DesaSeeder::class,
-            ImportGeoFeaturesSqlSeeder::class,
+            // ImportGeoFeaturesSqlSeeder::class,
         ]);
     }
 }

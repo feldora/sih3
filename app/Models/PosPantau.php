@@ -36,6 +36,11 @@ class PosPantau extends Model
         return $this->belongsTo(GeoFeature::class, 'geo_feature_signature', 'signature');
     }
 
+    public function kecamatan()
+    {
+        return $this->hasOne(Kecamatan::class, 'id', 'kecamatan_id');
+    }
+
     public function kabupaten()
     {
         return $this->hasOne(Kabupaten::class, 'id', 'kabupaten_id');

@@ -9,9 +9,10 @@ class CreateDesaTable extends Migration
     public function up()
     {
         Schema::create('desa', function (Blueprint $table) {
-            $table->string('id');
-            $table->string('nama')->nullable()->default('NULL');
-            $table->string('kecamatan_id')->nullable()->default('NULL');
+            $table->string('id')->primary();
+            $table->string('nama')->nullable();
+            $table->string('kecamatan_id')->nullable();
+            // $table->timestamps(); // opsional, jika mau simpan created_at dan updated_at
         });
     }
 

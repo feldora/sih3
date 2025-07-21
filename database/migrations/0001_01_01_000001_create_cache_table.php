@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('cache', function (Blueprint $table) {
             $table->string('key')->primary();
-            $table->mediumText('value');
+            $table->text('value'); // PostgreSQL tidak punya 'mediumText', gunakan 'text'
             $table->integer('expiration');
         });
 
@@ -29,7 +29,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cache');
         Schema::dropIfExists('cache_locks');
+        Schema::dropIfExists('cache');
     }
 };

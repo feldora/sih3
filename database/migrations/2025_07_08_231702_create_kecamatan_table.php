@@ -9,9 +9,10 @@ class CreateKecamatanTable extends Migration
     public function up()
     {
         Schema::create('kecamatan', function (Blueprint $table) {
-            $table->string('id');
-            $table->string('nama')->nullable()->default('NULL');
-            $table->string('kabupaten_id')->nullable()->default('NULL');
+            $table->string('id')->primary();
+            $table->string('nama')->nullable();
+            $table->string('kabupaten_id')->nullable();
+            // $table->timestamps(); // opsional jika ingin simpan waktu
         });
     }
 

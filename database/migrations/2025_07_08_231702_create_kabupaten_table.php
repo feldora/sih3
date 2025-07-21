@@ -9,9 +9,10 @@ class CreateKabupatenTable extends Migration
     public function up()
     {
         Schema::create('kabupaten', function (Blueprint $table) {
-            $table->string('id');
-            $table->string('nama')->nullable()->default('NULL');
-            $table->string('provinsi_id')->nullable()->default('NULL');
+            $table->string('id')->primary();
+            $table->string('nama')->nullable();
+            $table->string('provinsi_id')->nullable();
+            // $table->timestamps(); // opsional, kalau mau simpan created_at dan updated_at
         });
     }
 

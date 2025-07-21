@@ -23,9 +23,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('geo_features', function (Blueprint $table) {
-            $table->dropUnique(['signature']); // Hapus unique constraint
-            $table->dropIndex(['signature']);  // Hapus index
-            $table->dropColumn('signature');   // Hapus kolom
+            $table->dropUnique(['signature']); // Hapus unique index
+            // Tidak perlu dropIndex karena unique sudah termasuk index
+            $table->dropColumn('signature');  // Hapus kolom
         });
     }
+
 };
