@@ -101,9 +101,17 @@ class LoadShpController extends Controller
 
             while ($rec = $reader->fetchRecord()) {
                 if ($rec->isDeleted()) continue;
+
+                $geometry = json_decode($rec->getGeoJSON(), true);
+
+                // Deteksi dan konversi jika koordinat dalam EPSG:3857
+                if ($this->isLikelyMercator($geometry)) {
+                    $geometry['coordinates'] = $this->convertCoordinatesToWGS84($geometry['coordinates']);
+                }
+
                 $features[] = [
                     'type' => 'Feature',
-                    'geometry' => json_decode($rec->getGeoJSON()),
+                    'geometry' => $geometry,
                     'properties' => $rec->getDataArray(),
                 ];
             }
@@ -113,6 +121,7 @@ class LoadShpController extends Controller
             throw new \Exception('Error reading SHP: ' . $e->getMessage());
         }
     }
+
 
     public function saveGeo(Request $request)
     {
@@ -167,7 +176,7 @@ class LoadShpController extends Controller
                     $data['latitude'] = $coordinates[1];
                     $data['jenis_pos'] = $request->input('jenis_pos');
                     $data['kewenangan'] = $request->input('kewenangan');
-                    $tag = 'kabupaten';
+                    $tag = 'kecamatan';
                     $kabupaten= $this->geoFeatureService->findFeatureContainingPoint( $coordinates[0], $coordinates[1], $tag);
                     if(!empty($kabupaten)){
                         $properties = json_decode($kabupaten->properties, true);
@@ -223,4 +232,38 @@ class LoadShpController extends Controller
             ], 500);
         }
     }
+
+    private function isLikelyMercator(array $geometry): bool
+    {
+        $coords = $this->extractFirstCoordinate($geometry['coordinates'] ?? []);
+        return isset($coords[0], $coords[1]) && (abs($coords[0]) > 180 || abs($coords[1]) > 90);
+    }
+
+    private function extractFirstCoordinate($coords)
+    {
+        while (is_array($coords) && isset($coords[0]) && is_array($coords[0])) {
+            $coords = $coords[0];
+        }
+        return $coords;
+    }
+
+    private function convertCoordinatesToWGS84($coords)
+    {
+        if (!is_array($coords[0])) {
+            return $this->mercatorToLatLng($coords[0], $coords[1]);
+        }
+
+        return array_map(function ($c) {
+            return $this->convertCoordinatesToWGS84($c);
+        }, $coords);
+    }
+
+    private function mercatorToLatLng($x, $y): array
+    {
+        $R = 6378137.0;
+        $lng = ($x / $R) * (180 / pi());
+        $lat = rad2deg(atan(sinh($y / $R)));
+        return [$lng, $lat];
+    }
+
 }

@@ -28,7 +28,9 @@ class PosPantauController extends Controller
      */
     public function index()
     {
-        $posPantau = $this->posPantauRepository->all();
+        
+        $posPantau = $this->posPantauRepository->paginate(10);
+
         // $posPantau = new PosPantau();
         // $pos = $posPantau->with('kabupaten')->get();
         // dd($pos);
@@ -177,6 +179,7 @@ class PosPantauController extends Controller
                     $lat = $dataInsert['latitude'];
 
                     // Cari fitur kabupaten berdasarkan koordinat
+                    // $kecamatan = $GeoFeatureService->findFeatureContainingPoint($lat, $lon, 'kecamatan');
                     $kecamatan = $GeoFeatureService->findFeatureContainingPoint($lon, $lat, 'kecamatan');
                     // $kecamatan = $GeoFeatureService->findContainingPointInPolygon('-0.856096', '123.041325',  'kecamatan');
                     

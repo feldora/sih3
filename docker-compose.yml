@@ -63,6 +63,10 @@ services:
             PGADMIN_DEFAULT_PASSWORD: admin           # Ganti untuk keamanan
         depends_on:
             - sih3.pgsql
+        # volumes:
+        #     - ./docker/pgadmin:/var/lib/pgadmin
+        #     - 'sail-pgsql:/var/lib/pgadmin'
+        #     - './docker/pgsql/pgadmin/config:/var/lib/pgadmin'
         networks:
             - sail
 

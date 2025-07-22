@@ -363,7 +363,7 @@
 
                 document.getElementById('loadingText').textContent = `Mengimpor batch ${i + 1} dari ${chunks.length}...`;
 
-                const response = await fetch('{{ route("admin.pos-pengamatan.import-excel") }}', {
+                const response = await fetch('{{ route("admin.pos-pengamatan.import-excel.process") }}', {
                     method: 'POST',
                     body: formData,
                     headers: {

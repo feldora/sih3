@@ -13,6 +13,7 @@ use App\Repositories\Contracts\SungaiRepositoryInterface;
 use App\Repositories\SungaiRepository;
 use Illuminate\Support\Facades\URL;
 use App\Services\ElasticsearchService;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,5 +41,6 @@ class AppServiceProvider extends ServiceProvider
         if (env('APP_SCHEME') === 'https') {
             URL::forceScheme('https');
         }
+        Paginator::useTailwind();
     }
 }

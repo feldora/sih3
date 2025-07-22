@@ -185,5 +185,6 @@ class KecamatanSeeder extends Seeder
                 ['id' => '72.71.07', 'nama' => 'Tawaeli', 'kabupaten_id' => '72.71'],
                 ['id' => '72.71.08', 'nama' => 'Mantikulore', 'kabupaten_id' => '72.71'],
         ]);
+        
     }
 }

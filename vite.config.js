@@ -1,19 +1,22 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
-const host = process.env.VITE_HOST || 'localhost';
-const port = process.env.VITE_PORT || 5173;
+const serverHost = '0.0.0.0';                   // bind di semua interface supaya bisa diakses dari luar container
+const hmrHost = process.env.VITE_HOST || 'localhost'; // hostname websocket yang diakses browser
+const port = Number(process.env.VITE_PORT) || 5173;
 
 export default defineConfig({
     server: {
-        host: host,
+        host: serverHost,
         port: port,
         strictPort: true,
         hmr: {
-            host: host,
-    }
+            host: hmrHost,
+            protocol: 'ws',
+        },
     },
     plugins: [
         laravel({
@@ -28,18 +31,18 @@ export default defineConfig({
         }),
     ],
     build: {
-        chunkSizeWarningLimit: 1600, // Menyesuaikan ukuran chunk warning
+        chunkSizeWarningLimit: 1600,
         rollupOptions: {
             output: {
                 manualChunks(id) {
                     if (id.includes('node_modules/tinymce')) {
-                        return 'tinymce'; // Pisahkan TinyMCE menjadi chunk terpisah
+                        return 'tinymce';
                     }
                     if (id.includes('node_modules/daisyui')) {
-                        return 'daisyui'; // Pisahkan daisyUI menjadi chunk terpisah
+                        return 'daisyui';
                     }
-                }
-            }
-        }
+                },
+            },
+        },
     },
 });
