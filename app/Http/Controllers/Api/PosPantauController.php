@@ -17,12 +17,34 @@ class PosPantauController extends Controller
     }
 
     // GET /api/pos-pantau
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->ajax()) {
+            $query = $request->get('q');
+            $jenis_pos = $request->get('jenis_pos');
+            
+            $queryBuilder = PosPantau::where('nama_pos', 'like', "%$query%");
+            
+            if ($jenis_pos) {
+                $queryBuilder->where('jenis_pos', $jenis_pos);
+            }
+            
+            $data = $queryBuilder->limit(10)
+                ->get()
+                ->map(fn($user) => [
+                    'value' => $user->id,
+                    'label' => $user->nama_pos,
+                ]);
+
+            return response()->json($data);
+        }
+
+        // Ambil semua data untuk non-AJAX request
         $data = $this->posPantauRepository->all();
-        // $data = PosPantau::limit(10)->get();
+
         return response()->json($data);
     }
+
 
     // GET /api/pos-pantau/{id}
     public function show($id)
@@ -33,4 +55,18 @@ class PosPantauController extends Controller
         }
         return response()->json($data);
     }
+
+    public function search(Request $request)
+    {
+        $query = $request->get('q');
+        
+        return PosPantau::where('nama_pos', 'like', "%$query%")
+            ->limit(10)
+            ->get()
+            ->map(fn($user) => [
+                'value' => $user->id,
+                'label' => $user->name,
+            ]);
+    }
+
 }

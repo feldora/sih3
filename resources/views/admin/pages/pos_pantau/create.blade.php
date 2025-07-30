@@ -19,7 +19,6 @@
                     <option value="Pos Curah Hujan"></option>
                     <option value="Pos Duga Air"></option>
                     <option value="Pos Klimatologi"></option>
-                    <option value="pos hujan"></option>
                 </datalist>
             </div>
             <div>

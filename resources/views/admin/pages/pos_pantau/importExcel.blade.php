@@ -10,7 +10,7 @@
                     <i class="fas fa-file-import text-primary mr-2"></i>
                     Import Pos
                 </h1>
-                
+
                 <!-- Form Import -->
                 <form id="importForm" enctype="multipart/form-data">
                     @csrf
@@ -25,14 +25,8 @@
                                     </span>
                                 </label>
                                 <div class="relative">
-                                    <input 
-                                        type="file" 
-                                        id="excelFile" 
-                                        name="excel_file"
-                                        accept=".xlsx,.xls,.csv"
-                                        class="file-input file-input-bordered file-input-primary w-full"
-                                        required
-                                    />
+                                    <input type="file" id="excelFile" name="excel_file" accept=".xlsx,.xls,.csv"
+                                        class="file-input file-input-bordered file-input-primary w-full" required />
                                 </div>
                                 <label class="label">
                                     <span class="label-text-alt text-base-content/70">
@@ -54,21 +48,11 @@
 
                             <!-- Action Buttons -->
                             <div class="flex flex-col sm:flex-row gap-3">
-                                <button 
-                                    type="button" 
-                                    id="viewBtn" 
-                                    class="btn btn-secondary btn-md"
-                                    disabled
-                                >
+                                <button type="button" id="viewBtn" class="btn btn-secondary btn-md" disabled>
                                     <i class="fas fa-eye mr-2"></i>
                                     View Data
                                 </button>
-                                <button 
-                                    type="button" 
-                                    id="importBtn" 
-                                    class="btn btn-primary btn-md"
-                                    disabled
-                                >
+                                <button type="button" id="importBtn" class="btn btn-primary btn-md" disabled>
                                     <i class="fas fa-upload mr-2"></i>
                                     Import Data
                                 </button>
@@ -114,7 +98,8 @@
                                     <p class="text-sm text-base-content/80 mb-3">
                                         Download template untuk memastikan format data yang benar
                                     </p>
-                                    <a href="{{ route('admin.pos-pengamatan.import-excel.template') }}" class="btn btn-primary btn-sm">
+                                    <a href="{{ route('admin.pos-pengamatan.import-excel.template') }}"
+                                        class="btn btn-primary btn-sm">
                                         <i class="fas fa-download mr-2"></i>
                                         Download Template
                                     </a>
@@ -129,7 +114,7 @@
                     <div class="divider">
                         <span class="text-base-content font-semibold">Preview Data</span>
                     </div>
-                    
+
                     <div class="space-y-4">
                         <!-- Preview Stats -->
                         <div class="stats stats-vertical lg:stats-horizontal shadow w-full">
@@ -149,7 +134,7 @@
                                 <div class="stat-desc">Ukuran file</div>
                             </div>
                         </div>
-                        
+
                         <!-- Data Table -->
                         <div class="card bg-base-100 shadow-sm">
                             <div class="card-body">
@@ -162,7 +147,7 @@
                                         Menampilkan maksimal 100 baris pertama
                                     </div>
                                 </div>
-                                
+
                                 <div class="overflow-x-auto">
                                     <table class="table table-zebra table-sm">
                                         <thead id="tableHeader"></thead>
@@ -184,7 +169,8 @@
                 <span class="loading loading-spinner loading-lg text-primary"></span>
                 <h3 class="font-bold text-lg">Processing...</h3>
                 <p id="loadingText">Sedang memproses file...</p>
-                <progress id="importProgress" class="progress progress-primary w-full my-4 hidden" value="0" max="100"></progress>
+                <progress id="importProgress" class="progress progress-primary w-full my-4 hidden" value="0"
+                    max="100"></progress>
             </div>
         </div>
     </div>
@@ -219,239 +205,263 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-    let excelData = null;
-    let currentFile = null;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let excelData = null;
+        let currentFile = null;
 
-    // File input change handler
-    document.getElementById('excelFile').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            currentFile = file;
-            showFileInfo(file);
-            document.getElementById('viewBtn').disabled = false;
-            document.getElementById('importBtn').disabled = true;
-            document.getElementById('dataPreview').classList.add('hidden');
+        // Show file info
+        function showFileInfo(file) {
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').classList.remove('hidden');
         }
-    });
 
-    // View button handler
-    document.getElementById('viewBtn').addEventListener('click', function() {
-        if (currentFile) {
-            processExcelFile(currentFile);
-        }
-    });
+        // Process Excel file
+        function processExcelFile(file) {
+            showModal('loadingModal');
+            document.getElementById('loadingText').textContent = 'Membaca file Excel...';
 
-    // Import button handler
-    document.getElementById('importBtn').addEventListener('click', function() {
-        if (excelData) {
-            importData();
-        }
-    });
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {
+                        type: 'array'
+                    });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+                        header: 1
+                    });
+                    if (jsonData.length > 0) {
+                        const startRowIndex = 1;
+                        const dataOnly = jsonData.slice(startRowIndex);
+                        excelData = dataOnly;
+                        displayPreview(jsonData);
+                        document.getElementById('importBtn').disabled = false;
+                        closeModal('loadingModal');
 
-    // Show file info
-    function showFileInfo(file) {
-        document.getElementById('fileName').textContent = file.name;
-        document.getElementById('fileSize').textContent = formatFileSize(file.size);
-        document.getElementById('fileInfo').classList.remove('hidden');
-    }
-
-    // Process Excel file
-    function processExcelFile(file) {
-        showModal('loadingModal');
-        document.getElementById('loadingText').textContent = 'Membaca file Excel...';
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                if (jsonData.length > 0) {
-                    const startRowIndex = 1;
-                    const dataOnly = jsonData.slice(startRowIndex);
-                    excelData = dataOnly;
-                    displayPreview(jsonData);
-                    document.getElementById('importBtn').disabled = false;
+                        // Show success toast
+                        showToast('File berhasil dibaca!', 'success');
+                    } else {
+                        throw new Error('File Excel kosong atau tidak valid');
+                    }
+                } catch (error) {
                     closeModal('loadingModal');
-                    
-                    // Show success toast
-                    showToast('File berhasil dibaca!', 'success');
-                } else {
-                    throw new Error('File Excel kosong atau tidak valid');
+                    showErrorModal('Error membaca file: ' + error.message);
                 }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Display data preview
+        function displayPreview(data) {
+            const preview = document.getElementById('dataPreview');
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+
+            // Clear previous data
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) return;
+
+            // Update stats
+            document.getElementById('totalRows').textContent = data.length - 1; // -1 for header
+            document.getElementById('totalColumns').textContent = data[0].length;
+            document.getElementById('previewFileSize').textContent = formatFileSize(currentFile.size);
+
+            // Create header
+            const headerRow = document.createElement('tr');
+            data[0].forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header || 'Column';
+                th.className = 'text-center';
+                headerRow.appendChild(th);
+            });
+            tableHeader.appendChild(headerRow);
+
+            // Create body (limit to 100 rows)
+            const maxRows = Math.min(data.length, 101); // 100 + 1 for header
+            for (let i = 1; i < maxRows; i++) {
+                const row = document.createElement('tr');
+                data[i].forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell || '';
+                    td.className = 'text-center';
+                    row.appendChild(td);
+                });
+                tableBody.appendChild(row);
+            }
+
+            preview.classList.remove('hidden');
+        }
+
+        // Import data to backend
+        async function importData() {
+            if (!excelData || !currentFile) return;
+
+            showModal('loadingModal');
+            document.getElementById('loadingText').textContent = 'Mengimport data...';
+
+            try {
+                const batchSize = 100; // atau 100
+                const mappedData = excelData.slice(1).map(row => ({
+                    jenis_pos: row[7],
+                    nama_pos: row[0],
+                    latitude: row[3],
+                    longitude: row[4],
+                    tahun_pembangunan: row[5],
+                    kewenangan: row[2],
+                    status: row[6],
+                    wilayah_sungai: row[1]
+                }));
+
+                const chunks = chunkArray(mappedData, batchSize);
+                let total = mappedData.length;
+                let successCount = 0;
+                document.getElementById('importProgress').classList.remove('hidden');
+                for (let i = 0; i < chunks.length; i++) {
+                    const formData = new FormData();
+                    formData.append('data', JSON.stringify(chunks[i]));
+
+                    document.getElementById('loadingText').textContent =
+                        `Mengimpor batch ${i + 1} dari ${chunks.length}...`;
+
+                    const response = await fetch('{{ route('admin.pos-pengamatan.import-excel.process') }}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                'content')
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok || result.success === false) {
+                        throw new Error(result.message || `Batch ke-${i + 1} gagal`);
+                    }
+                    document.getElementById('importProgress').value = Math.round(((i + 1) / chunks.length) * 100);
+                    successCount += chunks[i].length;
+                }
+
+                closeModal('loadingModal');
+                document.getElementById('successText').textContent =
+                    `Berhasil mengimport ${successCount} dari ${total} data.`;
+                showModal('successModal');
+
+                setTimeout(() => {
+                    resetForm();
+                }, 2000);
             } catch (error) {
                 closeModal('loadingModal');
-                showErrorModal('Error membaca file: ' + error.message);
+                showErrorModal(error.message);
             }
-        };
-        reader.readAsArrayBuffer(file);
-    }
-
-    // Display data preview
-    function displayPreview(data) {
-        const preview = document.getElementById('dataPreview');
-        const tableHeader = document.getElementById('tableHeader');
-        const tableBody = document.getElementById('tableBody');
-        
-        // Clear previous data
-        tableHeader.innerHTML = '';
-        tableBody.innerHTML = '';
-        
-        if (data.length === 0) return;
-        
-        // Update stats
-        document.getElementById('totalRows').textContent = data.length - 1; // -1 for header
-        document.getElementById('totalColumns').textContent = data[0].length;
-        document.getElementById('previewFileSize').textContent = formatFileSize(currentFile.size);
-        
-        // Create header
-        const headerRow = document.createElement('tr');
-        data[0].forEach(header => {
-            const th = document.createElement('th');
-            th.textContent = header || 'Column';
-            th.className = 'text-center';
-            headerRow.appendChild(th);
-        });
-        tableHeader.appendChild(headerRow);
-        
-        // Create body (limit to 100 rows)
-        const maxRows = Math.min(data.length, 101); // 100 + 1 for header
-        for (let i = 1; i < maxRows; i++) {
-            const row = document.createElement('tr');
-            data[i].forEach(cell => {
-                const td = document.createElement('td');
-                td.textContent = cell || '';
-                td.className = 'text-center';
-                row.appendChild(td);
-            });
-            tableBody.appendChild(row);
         }
-        
-        preview.classList.remove('hidden');
-    }
 
-    // Import data to backend
-    async function importData() {
-        if (!excelData || !currentFile) return;
 
-        showModal('loadingModal');
-        document.getElementById('loadingText').textContent = 'Mengimport data...';
-        
-        try {
-            const batchSize = 100; // atau 100
-            const mappedData = excelData.slice(1).map(row => ({
-                jenis_pos: row[7],
-                nama_pos: row[0],
-                latitude: row[3],
-                longitude: row[4],
-                tahun_pembangunan: row[5],
-                kewenangan: row[2],
-                status: row[6],
-                wilayah_sungai: row[1]
-            }));
+        // Reset form
+        function resetForm() {
+            document.getElementById('excelFile').value = '';
+            document.getElementById('fileInfo').classList.add('hidden');
+            document.getElementById('dataPreview').classList.add('hidden');
+            document.getElementById('viewBtn').disabled = true;
+            document.getElementById('importBtn').disabled = true;
+            excelData = null;
+            currentFile = null;
+        }
 
-            const chunks = chunkArray(mappedData, batchSize);
-            let total = mappedData.length;
-            let successCount = 0;
-            document.getElementById('importProgress').classList.remove('hidden');
-            for (let i = 0; i < chunks.length; i++) {
-                const formData = new FormData();
-                formData.append('data', JSON.stringify(chunks[i]));
+        // Utility functions
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
 
-                document.getElementById('loadingText').textContent = `Mengimpor batch ${i + 1} dari ${chunks.length}...`;
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('modal-open');
+        }
 
-                const response = await fetch('{{ route("admin.pos-pengamatan.import-excel.process") }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('modal-open');
+        }
 
-                const result = await response.json();
+        function showErrorModal(message) {
+            document.getElementById('errorText').textContent = message;
+            showModal('errorModal');
+        }
 
-                if (!response.ok || result.success === false) {
-                    throw new Error(result.message || `Batch ke-${i + 1} gagal`);
-                }
-                document.getElementById('importProgress').value = Math.round(((i + 1) / chunks.length) * 100);
-                successCount += chunks[i].length;
-            }
-
-            closeModal('loadingModal');
-            document.getElementById('successText').textContent = 
-                `Berhasil mengimport ${successCount} dari ${total} data.`;
-            showModal('successModal');
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-top toast-end`;
+            toast.innerHTML = `
+                <div class="alert alert-${type}">
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(toast);
 
             setTimeout(() => {
-                resetForm();
-            }, 2000);
-        } catch (error) {
-            closeModal('loadingModal');
-            showErrorModal(error.message);
+                toast.remove();
+            }, 3000);
         }
-    }
 
+        window.addEventListener('load', function() {
+            if (typeof $ === 'undefined') {
+                console.error('jQuery is not loaded yet.');
+                return;
+            }
 
-    // Reset form
-    function resetForm() {
-        document.getElementById('excelFile').value = '';
-        document.getElementById('fileInfo').classList.add('hidden');
-        document.getElementById('dataPreview').classList.add('hidden');
-        document.getElementById('viewBtn').disabled = true;
-        document.getElementById('importBtn').disabled = true;
-        excelData = null;
-        currentFile = null;
-    }
+            // File input change handler
+            document.getElementById('excelFile').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    currentFile = file;
+                    showFileInfo(file);
+                    document.getElementById('viewBtn').disabled = false;
+                    document.getElementById('importBtn').disabled = true;
+                    document.getElementById('dataPreview').classList.add('hidden');
+                }
+            });
 
-    // Utility functions
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
+            // View button handler
+            document.getElementById('viewBtn').addEventListener('click', function() {
+                if (currentFile) {
+                    processExcelFile(currentFile);
+                }
+            });
 
-    function showModal(modalId) {
-        document.getElementById(modalId).classList.add('modal-open');
-    }
+            // Import button handler
+            document.getElementById('importBtn').addEventListener('click', function() {
+                if (excelData) {
+                    importData();
+                }
+            });
 
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.remove('modal-open');
-    }
+            // Close modals when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    e.target.classList.remove('modal-open');
+                }
+            });
 
-    function showErrorModal(message) {
-        document.getElementById('errorText').textContent = message;
-        showModal('errorModal');
-    }
+            @if (session('error'))
+                showToast("{{ session('error') }}", "error");
+            @endif
 
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast toast-top toast-end`;
-        toast.innerHTML = `
-            <div class="alert alert-${type}">
-                <span>${message}</span>
-            </div>
-        `;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    }
+            @if (session('success'))
+                showToast("{{ session('success') }}", "success");
+            @endif
 
-    // Close modals when clicking outside
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('modal')) {
-            e.target.classList.remove('modal-open');
-        }
-    });
-
-    function map_data(){
-
-    }
-</script>
-@endpush
+        // File input change handler
+        document.getElementById('excelFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+    
+            @if (session('warning'))
+                showToast("{{ session('warning') }}", "warning");
+            @endif
+        });
+    </script>

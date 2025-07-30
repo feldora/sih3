@@ -29,6 +29,7 @@
         "jquery": "^3.7.1",
         "leaflet": "^1.9.4",
         "leaflet.awesome-markers": "^2.0.5",
-        "tinymce": "^7.9.1"
+        "tinymce": "^7.9.1",
+        "tom-select": "^2.4.3"
     }
 }

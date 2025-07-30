@@ -15,3 +15,5 @@ Route::get('/geo-features/desa', [App\Http\Controllers\Api\GeoFeatureController:
 Route::get('/geo-features/filter', [App\Http\Controllers\Api\GeoFeatureController::class, 'filter']);
 Route::apiResource('geo-features', App\Http\Controllers\Api\GeoFeatureController::class)->only(['index','show']);
 Route::get('/geospasial/search', [App\Http\Controllers\Api\GeoFeatureController::class, 'search']);
+
+Route::get('/pos-pantau/search', [App\Http\Controllers\Api\PosPantauController::class, 'search'])->name('pos-pantau.search');

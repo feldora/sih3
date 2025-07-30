@@ -15,6 +15,8 @@ use App\Http\Controllers\Web\PosPantauController;
 use App\Http\Controllers\Web\SungaiController;
 use App\Http\Controllers\Web\LoadShpController;
 use App\Http\Controllers\Web\FormFieldsController;
+use App\Http\Controllers\Web\DataHujanController;
+use App\Http\Controllers\Web\DataTinggiMukaAirController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -131,6 +133,86 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::get('/blank', function () {
         return view('admin.blank');
     })->name('blank');
+
+    // Data Meteorologi Routes
+    Route::prefix('meteorologi')->name('meteorologi.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.blank');
+        })->name('index');
+
+        Route::get('curah-hujan/import-excel', [DataHujanController::class, 'importExcel'])->name('curah-hujan.import-excel.form');
+        Route::post('curah-hujan/import-excel', [DataHujanController::class, 'prcImport'])->name('curah-hujan.import-excel.process');
+        Route::get('curah-hujan/import-excel/template', [DataHujanController::class, 'templateExcel'])->name('curah-hujan.import-excel.template');
+
+        Route::resource('curah-hujan', DataHujanController::class)->names([
+            'index' => 'curah-hujan.index',
+            'create' => 'curah-hujan.create',
+            'store' => 'curah-hujan.store',
+            'show' => 'curah-hujan.show',
+            'edit' => 'curah-hujan.edit',
+            'update' => 'curah-hujan.update',
+            'destroy' => 'curah-hujan.destroy',
+        ]);
+    });
+
+    // Data Hidrologi Routes
+    Route::prefix('hidrologi')->name('hidrologi.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.blank');
+        })->name('index');
+        
+        Route::get('/debit', function () {
+            return view('admin.blank');
+        })->name('debit');
+        
+        Route::get('/sedimen', function () {
+            return view('admin.blank');
+        })->name('sedimen');
+
+        Route::get('tinggi-muka-air/import-excel', [DataTinggiMukaAirController::class, 'importExcel'])->name('tma.import-excel.form');
+        Route::post('tinggi-muka-air/import-excel', [DataTinggiMukaAirController::class, 'prcImport'])->name('tma.import-excel.process');
+        Route::get('tinggi-muka-air/import-excel/template', [DataTinggiMukaAirController::class, 'templateExcel'])->name('tma.import-excel.template');
+
+        Route::resource('tinggi-muka-air', DataTinggiMukaAirController::class)
+        ->parameters(['tinggi-muka-air' => 'dataTinggiMukaAir'])
+        ->names([
+            'index' => 'tma.index',
+            'create' => 'tma.create',
+            'store' => 'tma.store',
+            'show' => 'tma.show',
+            'edit' => 'tma.edit',
+            'update' => 'tma.update',
+            'destroy' => 'tma.destroy',
+        ]);
+    });
+
+    // Data Geologi Routes
+    Route::prefix('geologi')->name('geologi.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.blank');
+        })->name('index');
+        
+        Route::get('/muka-air-tanah', function () {
+            return view('admin.blank');
+        })->name('muka-air-tanah');
+        
+        Route::get('/minatan-hidrogeologi', function () {
+            return view('admin.blank');
+        })->name('minatan-hidrogeologi');
+        
+        Route::get('/kualitas-air-tanah', function () {
+            return view('admin.blank');
+        })->name('kualitas-air-tanah');
+        
+        Route::get('/cekungan-air-tanah', function () {
+            return view('admin.blank');
+        })->name('cekungan-air-tanah');
+        
+        Route::get('/hidrogeologi', function () {
+            return view('admin.blank');
+        })->name('hidrogeologi');
+    });
+
 });
 
 // Route::prefix('api')->name('public-api.')->group(function () {

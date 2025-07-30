@@ -35,6 +35,18 @@ class PermissionRoleMenuSeeder extends Seeder
         Permission::create(['name' => 'wilayah_sungai']);
         Permission::create(['name' => 'titik_pantau']);
         Permission::create(['name' => 'sungai']);
+        Permission::create(['name' => 'hidrologi']);
+        Permission::create(['name' => 'tinggi_muka_air']);
+        Permission::create(['name' => 'debit']);
+        Permission::create(['name' => 'sedimen']);
+        Permission::create(['name' => 'meteorologi']);
+        Permission::create(['name' => 'curah_hujan']);
+        Permission::create(['name' => 'geologi']);
+        Permission::create(['name' => 'muka_air_tanah']);
+        Permission::create(['name' => 'minatan_hidrogeologi']);
+        Permission::create(['name' => 'kualitas_air_tanah']);
+        Permission::create(['name' => 'cekungan_air_tanah']);
+        Permission::create(['name' => 'hidrogeologi']);
 
         // Buat role admin dan assign semua permission
         $admin = Role::create(['name' => 'admin']);
@@ -49,6 +61,18 @@ class PermissionRoleMenuSeeder extends Seeder
             'titik_pantau',
             'sungai',
             'pos_pengamatan',
+            'hidrologi',
+            'tinggi_muka_air',
+            'debit',
+            'sedimen',
+            'meteorologi',
+            'curah_hujan',
+            'geologi',
+            'muka_air_tanah',
+            'minatan_hidrogeologi',
+            'kualitas_air_tanah',
+            'cekungan_air_tanah',
+            'hidrogeologi',
         ]);
 
         // Buat role lain dan assign sebagian permission

@@ -105,6 +105,9 @@ class UniversalMapManager {
 
     // ==================== INITIALIZATION ====================
     async init() {
+        if (!document.getElementById('map')){
+            return;
+        }
         try {
             // Check if map element exists before proceeding
             const mapElement = document.getElementById(this.config.mapId);
