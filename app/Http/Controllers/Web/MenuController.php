@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MenuController extends Controller
 {
@@ -45,7 +46,12 @@ class MenuController extends Controller
         ]);
 
         Menu::create($validated);
-
+        $permission = new \Spatie\Permission\Models\Permission();
+        $permission->where('name', $request->permission_name)->firstOrCreate([
+            'name' => $request->permission_name,
+            'guard_name' => 'web',
+        ]);
+        
         return redirect()->route('admin.menus.index')->with('success', 'Menu berhasil dibuat!');
     }
 

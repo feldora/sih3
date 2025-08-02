@@ -14,6 +14,7 @@ use App\Repositories\SungaiRepository;
 use Illuminate\Support\Facades\URL;
 use App\Services\ElasticsearchService;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Blade;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -42,5 +43,6 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
         Paginator::useTailwind();
+        Blade::component('media-display', \App\View\Components\MediaDisplay::class);
     }
 }

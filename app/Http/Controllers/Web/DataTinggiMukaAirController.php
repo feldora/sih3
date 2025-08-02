@@ -29,7 +29,7 @@ class DataTinggiMukaAirController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('pos_pantau_nama', function($row) {
-                    return $row->posPantau ? $row->posPantau->nama : '-';
+                    return $row->posPantau ? $row->posPantau->nama_pos : '-';
                 })
                 ->addColumn('tanggal_formatted', function($row) {
                     return $row->tanggal ? $row->tanggal->format('d/m/Y') : '-';
@@ -105,7 +105,7 @@ class DataTinggiMukaAirController extends Controller
         if (request()->ajax()) {
             return response()->json([
                 'data' => $dataTinggiMukaAir,
-                'pos_pantau_nama' => $dataTinggiMukaAir->posPantau ? $dataTinggiMukaAir->posPantau->nama : '-',
+                'pos_pantau_nama' => $dataTinggiMukaAir->posPantau ? $dataTinggiMukaAir->posPantau->nama_pos : '-',
                 'tanggal_formatted' => $dataTinggiMukaAir->tanggal ? $dataTinggiMukaAir->tanggal->format('d/m/Y') : '-',
                 'jam_formatted' => $dataTinggiMukaAir->jam ? $dataTinggiMukaAir->jam->format('H:i') : '-',
             ]);

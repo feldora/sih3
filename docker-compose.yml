@@ -19,6 +19,7 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:${PWD}'
+            - '.:/mnt/data/laragon/www/sih3-sulteng'
         networks:
             - sail
         depends_on:

@@ -20,7 +20,7 @@ class PostAsideComposer
         // ]);
 
         $view->with([
-            'categories' => \App\Models\Category::all(),
+            'categories' => \App\Models\Category::where('type', 'post')->get(),
             'popularPosts' => Post::where('status', 'published')
                 ->with('user', 'category')
                 ->orderBy('views', 'desc')

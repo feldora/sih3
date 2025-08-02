@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Tinggi Muka Air - Snow Clone')
+@section('title', 'Data Tinggi Muka Air')
 
 @section('content')
     <div class="container mx-auto px-4">
@@ -102,7 +102,7 @@
                     },
                     {
                         data: 'pos_pantau_nama',
-                        name: 'posPantau.nama'
+                        name: 'posPantau.nama_pos'
                     },
                     {
                         data: 'tanggal_formatted',

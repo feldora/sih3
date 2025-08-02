@@ -66,53 +66,94 @@
                     <!-- Main Content Area -->
                     <div class="lg:col-span-3">
                         <div class="mb-12">
-                            <div class="relative overflow-hidden rounded-2xl shadow-xl bg-white">
-                                <div class="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0">
-                                </div>
+                            <article class="relative overflow-hidden rounded-2xl shadow-xl bg-white">
                                 <div class="p-8">
-                                    <img src="https://picsum.photos/800/300?random={{ $post->id }}" alt="Artikel Image"
-                                        class="rounded w-full h-64 object-cover mb-6">
-                                    <p class="text-gray-600 leading-relaxed mb-6 text-lg">
-                                        {!! $post->content !!}
-                                    </p>
-                                    <hr class="my-6">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-3">
+
+                                    <!-- Article Header -->
+                                    <Header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                                        <!-- Author Info -->
+                                        <div class="flex items-center space-x-4">
+                                            <div>
+                                                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                                                    {{ $post->title }}
+                                                </h1>
+                                                <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                                    <span>{{ $post->created_at->format('H:i') }}</span>
+                                                    <span>•</span>
+                                                    <span>{{ $post->views }} Views</span>
+                                                    @if ($post->category)
+                                                        <span>•</span>
+                                                        <span
+                                                            class="text-blue-600 font-medium">{{ $post->category->name }}</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Back Button -->
+                                        <div class="flex-shrink-0">
+
+                                        </div>
+                                    </Header>
+
+                                    <!-- Media Display Component -->
+                                    <x-media-display :media="$post->media->first()" />
+
+                                    <!-- Article Content -->
+                                    <div class="prose prose-lg max-w-none mb-8">
+                                        <div class="text-gray-700 leading-relaxed text-lg">
+                                            {!! $post->content !!}
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-8 border-gray-200">
+
+                                    <!-- Article Footer -->
+                                    <footer class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                        <!-- Author Info -->
+                                        <div class="flex items-center space-x-4">
                                             <div
-                                                class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                                class="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-lg">
                                                 {{ substr($post->user->name ?? 'U', 0, 1) }}
                                             </div>
                                             <div>
-                                                <p class="font-semibold text-gray-800">
-                                                    {{ $post->user->name ?? 'Unknown' }}</p>
-                                                <p class="text-gray-500 text-sm">
-                                                    {{ $post->created_at->format('H:i') }}</p>
+                                                <h3 class="font-semibold text-gray-900 text-lg">
+                                                    {{ $post->user->name ?? 'Unknown' }}
+                                                </h3>
                                             </div>
                                         </div>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-gray-400 text-sm">•</span>
-                                            <span class="text-gray-500 text-sm">
-                                                {{ $post->views }} Views
-                                            </span>
+
+                                        <!-- Back Button -->
+                                        <div class="flex-shrink-0">
+                                            <a href="{{ route('artikel.publicIndex') }}"
+                                                class="inline-flex items-center
+                                                px-3 py-1.5
+                                                bg-gradient-to-r from-blue-500 to-purple-600
+                                                text-white text-sm font-medium
+                                                rounded-full
+                                                hover:from-blue-600 hover:to-purple-700
+                                                transition-colors duration-200
+                                                shadow-sm
+                                                focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50
+                                                group">
+                                                <svg class="w-3 h-3 mr-1 inline-block" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+                                                </svg>
+                                                Kembali ke Artikel
+                                            </a>
                                         </div>
-                                        <a href="{{ route('artikel.publicIndex') }}"
-                                            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-full hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
-                                            <svg class="w-4 h-4 ml-2 group-hover:-translate-x-1 transition-transform duration-300"
-                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
-                                            </svg>
-                                            Kembali
-                                        </a>
-                                    </div>
+
+                                    </footer>
                                 </div>
-                            </div>
+                            </article>
                         </div>
                     </div>
 
                     <!-- Sidebar -->
                     <div class="lg:col-span-1">
-                        <div class="sticky top-8">
+                        <div class="sticky top-8 space-y-6">
                             @include('partials.post-asside')
                         </div>
                     </div>
@@ -133,6 +174,11 @@
                         <p class="text-gray-600 mb-6">Belum ada artikel yang dipublikasikan. Silakan cek kembali nanti.</p>
                         <a href="{{ route('/') }}"
                             class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-full hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                                </path>
+                            </svg>
                             Kembali ke Beranda
                         </a>
                     </div>
@@ -141,95 +187,246 @@
         </div>
     </div>
 
-    @push('styles')
+    @push('_styles')
         <style>
-            .line-clamp-2 {
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
+            /* Prose styling for article content */
+            .prose {
+                max-width: none;
             }
 
-            .line-clamp-3 {
-                display: -webkit-box;
-                -webkit-line-clamp: 3;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
+            .prose h1,
+            .prose h2,
+            .prose h3,
+            .prose h4,
+            .prose h5,
+            .prose h6 {
+                color: #1f2937;
+                font-weight: 600;
+                margin-top: 2rem;
+                margin-bottom: 1rem;
             }
 
-            /* Custom scrollbar untuk sidebar */
-            .sticky::-webkit-scrollbar {
+            .prose p {
+                margin-bottom: 1.5rem;
+                line-height: 1.75;
+            }
+
+            .prose ul,
+            .prose ol {
+                margin: 1.5rem 0;
+                padding-left: 2rem;
+            }
+
+            .prose li {
+                margin-bottom: 0.5rem;
+            }
+
+            .prose blockquote {
+                border-left: 4px solid #3b82f6;
+                padding-left: 1.5rem;
+                margin: 2rem 0;
+                font-style: italic;
+                color: #4b5563;
+                background-color: #f8fafc;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+            }
+
+            .prose code {
+                background-color: #f1f5f9;
+                color: #dc2626;
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                font-size: 0.875em;
+            }
+
+            .prose pre {
+                background-color: #1e293b;
+                color: #e2e8f0;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                overflow-x: auto;
+                margin: 1.5rem 0;
+            }
+
+            .prose img {
+                border-radius: 0.5rem;
+                margin: 2rem auto;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+
+            .prose a {
+                color: #3b82f6;
+                text-decoration: none;
+                font-weight: 500;
+                border-bottom: 1px solid transparent;
+                transition: border-color 0.2s ease;
+            }
+
+            .prose a:hover {
+                border-bottom-color: #3b82f6;
+            }
+
+            /* Meta badges styling */
+            .meta-badge {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.5rem 1rem;
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 9999px;
+                font-weight: 500;
+                color: #374151;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .category-badge {
+                background: rgba(59, 130, 246, 0.1);
+                color: #2563eb;
+                border-color: rgba(59, 130, 246, 0.2);
+            }
+
+            /* Floating particles animation */
+            .floating-particles {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                pointer-events: none;
+            }
+
+            .particle {
+                position: absolute;
                 width: 4px;
+                height: 4px;
+                background: rgba(59, 130, 246, 0.3);
+                border-radius: 50%;
+                animation: float 6s ease-in-out infinite;
             }
 
-            .sticky::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 10px;
+            .particle:nth-child(1) {
+                left: 20%;
+                animation-delay: 0s;
             }
 
-            .sticky::-webkit-scrollbar-thumb {
-                background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
-                border-radius: 10px;
+            .particle:nth-child(2) {
+                left: 40%;
+                animation-delay: 2s;
             }
 
-            /* Hover animations */
-            @keyframes fadeInUp {
-                from {
+            .particle:nth-child(3) {
+                left: 60%;
+                animation-delay: 4s;
+            }
+
+            .particle:nth-child(4) {
+                left: 80%;
+                animation-delay: 6s;
+            }
+
+            @keyframes float {
+                0%, 100% {
+                    transform: translateY(0px) rotate(0deg);
                     opacity: 0;
-                    transform: translateY(30px);
                 }
+                10%, 90% {
+                    opacity: 1;
+                }
+                50% {
+                    transform: translateY(-20px) rotate(180deg);
+                }
+            }
 
+            /* Stagger animation for meta badges */
+            .stagger-animation {
+                animation: slideInUp 0.6s ease-out forwards;
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            .stagger-animation:nth-child(1) {
+                animation-delay: 0.1s;
+            }
+
+            .stagger-animation:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .stagger-animation:nth-child(3) {
+                animation-delay: 0.3s;
+            }
+
+            @keyframes slideInUp {
                 to {
                     opacity: 1;
                     transform: translateY(0);
                 }
             }
 
-            .group:hover .group-hover\:animate-fadeInUp {
-                animation: fadeInUp 0.3s ease-out;
+            /* Fade in animation */
+            .fade-in {
+                animation: fadeIn 1s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
         </style>
     @endpush
 
-    @push('scripts')
+    @push('_scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Animate articles on scroll
-                const articles = document.querySelectorAll('article');
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.style.opacity = '1';
-                            entry.target.style.transform = 'translateY(0)';
-                        }
+                // Image zoom functionality for prose images
+                document.querySelectorAll('.prose img').forEach(img => {
+                    img.style.cursor = 'zoom-in';
+                    img.addEventListener('click', function() {
+                        const modal = document.createElement('div');
+                        modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+                        modal.innerHTML = `
+                            <div class="relative max-w-4xl max-h-full">
+                                <img src="${this.src}" alt="${this.alt}" class="max-w-full max-h-full object-contain rounded-lg">
+                                <button class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+
+                        document.body.appendChild(modal);
+                        document.body.style.overflow = 'hidden';
+
+                        // Close modal
+                        modal.addEventListener('click', function(e) {
+                            if (e.target === modal || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                                document.body.removeChild(modal);
+                                document.body.style.overflow = 'auto';
+                            }
+                        });
+
+                        // Close with ESC key
+                        const escHandler = function(e) {
+                            if (e.key === 'Escape') {
+                                if (document.body.contains(modal)) {
+                                    document.body.removeChild(modal);
+                                    document.body.style.overflow = 'auto';
+                                }
+                                document.removeEventListener('keydown', escHandler);
+                            }
+                        };
+                        document.addEventListener('keydown', escHandler);
                     });
-                }, {
-                    threshold: 0.1,
-                    rootMargin: '0px 0px -50px 0px'
-                });
-
-                articles.forEach(article => {
-                    article.style.opacity = '0';
-                    article.style.transform = 'translateY(20px)';
-                    article.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-                    observer.observe(article);
-                });
-
-                // Add reading time estimation
-                document.querySelectorAll('article').forEach(article => {
-                    const content = article.querySelector('p').textContent;
-                    const wordCount = content.split(' ').length;
-                    const readingTime = Math.ceil(wordCount / 200); // 200 words per minute
-
-                    const timeElement = document.createElement('span');
-                    timeElement.className = 'text-gray-400 text-sm';
-                    timeElement.textContent = `${readingTime} min read`;
-
-                    const timeContainer = article.querySelector('.flex.items-center.space-x-2');
-                    if (timeContainer) {
-                        timeContainer.appendChild(document.createTextNode(' • '));
-                        timeContainer.appendChild(timeElement);
-                    }
                 });
             });
         </script>

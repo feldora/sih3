@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Detail Data Tinggi Muka Air - Snow Clone')
+@section('title', 'Detail Data Tinggi Muka Air')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard - Snow Clone')
+@section('title', 'Dashboard')
 
 @section('content')
   @include('components.admin.stats')

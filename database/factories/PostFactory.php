@@ -14,7 +14,7 @@ class PostFactory extends Factory
     public function definition(): array
     {
         $user = \App\Models\User::inRandomOrder()->first();
-        $category = \App\Models\Category::inRandomOrder()->first();
+        $category = \App\Models\Category::inRandomOrder()->where('type', 'post')->first();
         // $tags = \App\Models\Tag::inRandomOrder()->take(rand(1, 3))->pluck('id')->toArray();
 
         return [

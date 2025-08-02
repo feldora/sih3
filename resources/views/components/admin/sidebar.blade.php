@@ -1,4 +1,5 @@
-<aside id="sidebar" class="hidden md:flex flex-col w-64 shadow-lg transition duration-300 ease-in-out bg-white z-50 h-full">
+{{-- <aside id="sidebar" class="hidden md:flex flex-col w-64 shadow-lg transition duration-300 ease-in-out bg-white z-50 h-full"> --}}
+<aside id="sidebar" class="hidden md:flex flex-col w-64 shadow-lg transition duration-300 ease-in-out bg-white z-50 h-full overflow-y-auto">
     <div class="p-4 text-xl font-bold border-b ">
         SIH3 <br>
         <span class="text-sm text-gray-700 dark:text-gray-300 hidden md:inline">Prov. Sulawesi Tengah</span>

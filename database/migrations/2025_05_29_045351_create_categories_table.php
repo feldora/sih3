@@ -9,10 +9,11 @@ return new class extends Migration
     public function up()
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->id(); // Akan menjadi BIGSERIAL di PostgreSQL
+            $table->id();
             $table->string('name');
             $table->string('slug')->unique();
-            $table->timestampsTz(); // Gunakan timestamps with timezone (lebih umum untuk PostgreSQL)
+            $table->string('type')->default('post');
+            $table->timestampsTz();
         });
     }
 

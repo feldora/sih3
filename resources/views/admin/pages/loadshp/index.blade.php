@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Load Shapefile - Snow Clone')
+@section('title', 'Load Shapefile')
 
 @section('content')
     <div class="container mx-auto p-4">

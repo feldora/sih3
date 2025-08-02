@@ -1,5 +1,7 @@
 <?php
 namespace App\Services;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +22,8 @@ class MediaService
         if ($clearOld) {
             $model->clearMediaCollection($collection);
         }
+        \Log::info("Saving media to disk [$disk] in collection [$collection]");
+        \Log::info("Disk media path: " . Storage::disk('media')->path(''));
         $model->addMedia($mediaFile)->toMediaCollection($collection, $disk);
     }
 

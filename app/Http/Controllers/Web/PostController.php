@@ -20,15 +20,16 @@ class PostController extends Controller
             'sort' => $request->input('sort', 'created_at'),
             'direction' => $request->input('direction', 'desc'),
             'per_page' => $request->input('per_page', 10),
+            'selected_categories_type' => 'post',
         ]);
-        $categories = Category::all();
+        $categories = Category::where('type', 'post')->get();
         return view('admin.posts.index', compact('posts', 'categories'));
     }
 
     // Menampilkan form untuk membuat post baru
     public function create()
     {
-        $categories = Category::all();
+        $categories = Category::where('type', 'post')->get();
         $tags = Tag::all();
         return view('admin.posts.create', compact('categories', 'tags'));
     }
@@ -46,7 +47,14 @@ class PostController extends Controller
             // 'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Maksimal 2MB
         ]);
 
-        $service->store($request->all());
+        $data = $request->only([
+            'title', 'content', 'status', 'role', 'views', 'tags', 'category_id'
+        ]);
+
+        $data['featured_image'] = $request->file('featured_image');
+        $data['fileUploads'] = $request->file('fileUploads'); // bisa array
+
+        $service->store($data);
 
         return redirect()->route('admin.posts.index')->with('success', 'Post created successfully.');
     }
@@ -54,7 +62,7 @@ class PostController extends Controller
     // Menampilkan form untuk mengedit post
     public function edit(\App\Models\Post $post)
     {
-        $categories = Category::all();
+        $categories = Category::where('type', 'post')->get();
         $tags = Tag::all();
         return view('admin.posts.edit', compact('post', 'categories', 'tags'));
     }

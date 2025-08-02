@@ -22,7 +22,7 @@ class PostSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 0; $i < 15; $i++) {
+        for ($i = 0; $i < 50; $i++) {
             // Ambil data dari factory
             $data = \Database\Factories\PostFactory::new()->definition();
 

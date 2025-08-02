@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use App\Services\MediaService;
+use Illuminate\Http\UploadedFile;
 
 class PostService
 {
@@ -23,13 +24,13 @@ class PostService
         $user = Auth::user();
 
         if ($user && in_array('admin', $user->getRoleNames()->toArray())) {
-            $query = Post::with(['user', 'category', 'tags']);
+            $query = Post::with(['user', 'category', 'tags', 'media']);
         } else if ($user) {
-            $query = Post::with(['user', 'category', 'tags'])
+            $query = Post::with(['user', 'category', 'tags', 'media'])
                 ->whereIn('role', $user->getRoleNames()->toArray())
                 ->orWhere('role', null);
         } else {
-            $query = Post::with(['user', 'category', 'tags']);
+            $query = Post::with(['user', 'category', 'tags', 'media']);
         }
 
         // Apply filters
@@ -41,6 +42,11 @@ class PostService
         }
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
+        }
+        if (!empty($filters['selected_categories_type'])) {
+            $query->whereHas('category', function ($q) use ($filters) {
+                $q->where('type', ($filters['selected_categories_type'] ?? 'post'));
+            });
         }
 
         // Sorting
@@ -77,12 +83,28 @@ class PostService
                 $post->tags()->sync($tags);
             }
 
-            if (!empty($data['featured_image'])) {
+            if (!empty($data['featured_image']) && $data['featured_image'] instanceof UploadedFile) {
                 $this->mediaService->attachMedia(
                     $post, 
                     $data['featured_image'], 
                     'featured_image', 
-                    'media');
+                    'media'
+                );
+            }
+
+            if (!empty($data['fileUploads'])) {
+                $files = is_array($data['fileUploads']) ? $data['fileUploads'] : [$data['fileUploads']];
+
+                foreach ($files as $file) {
+                    if ($file instanceof UploadedFile) {
+                        $this->mediaService->attachMedia(
+                            $post, 
+                            $file, 
+                            'fileUploads', 
+                            'media'
+                        );
+                    }
+                }
             }
 
             DB::commit();

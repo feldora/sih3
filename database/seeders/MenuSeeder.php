@@ -296,6 +296,17 @@ class MenuSeeder extends Seeder
             'menu_type' => 'child',
         ]);
 
+        Menu::create([
+            'title' => 'Data Klimatologi',
+            'url' => '/admin/hidrologi/data-klimatologi',
+            'icon' => 'fas fa-wind',
+            'parent_id' => $dataHidrologi->id,
+            'order' => 4,
+            'permission_name' => 'klimatologi',
+            'zona' => 'admin',
+            'menu_type' => 'child',
+        ]);
+
         // Add Data Meteorologi menu and child
         $dataMeteo = Menu::create([
             'title' => 'Data Meteorologi',
