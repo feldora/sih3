@@ -117,6 +117,13 @@ class PostService
 
     public function update(Post $post, array $data)
     {
+        // \Log::info('CHECK MODEL INSTANCE', [
+        //     'id' => $post->id,
+        //     'exists' => $post->exists,
+        //     'class' => get_class($post),
+        //     'attributes' => $post->getAttributes(),
+        // ]);
+
         DB::beginTransaction();
         try {
             $category = Category::where('name', $data['category_id'])->firstOrFail();
@@ -128,8 +135,15 @@ class PostService
                 'category_id' => $category->id,
                 'status' => $data['status'],
             ];
+            // \Log::info("message", ['postData' => $postData]);
+            // $post->update($postData);
+            $post->fill($postData);
 
-            $post->update($postData);
+            if ($post->isDirty()) {
+                $post->save();
+            } else {
+                throw new \Exception('Data tidak berubah. Mungkin isinya sama seperti sebelumnya.');
+            }
 
             if (!empty($data['tags'])) {
                 $tags = collect($data['tags'])->flatten()->filter()->all();

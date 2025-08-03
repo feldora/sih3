@@ -48,17 +48,19 @@
                             :multiple="true"
                             :value="old('fileUploads', $post->media->map(fn($m) => $m->original_url)->toArray())"
                         />
-
+                        
                         <!-- Content Field -->
                         <x-text-editor
                             name="content"
                             label="Deskripsi"
+                            value="{!! old('content', $post->content) !!}"
                             placeholder="Write your content here...">{{
                                 old('content', $post->content)
-                            }}</x-text-editor>
+                            }}
+                        </x-text-editor>
 
                         <!-- Hidden Fields -->
-                        <input type="hidden" name="category_id" value="{{ old('category_id', $post->category_id) }}">
+                        <input type="hidden" name="category_id" value="{{ old('category_id', $post->category->name) }}">
                         <input type="hidden" name="status" value="{{ old('status', $post->status ?? 'published') }}">
                         {{-- Jika tags array kosong, bisa sesuaikan --}}
                         <input type="hidden" name="tags[]" value="">
@@ -77,9 +79,39 @@
 @endsection
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Jika perlu, inisialisasi atau custom script
-});
-</script>
+  <script>
+    window.addEventListener('load', function() {
+      if (typeof $ === 'undefined') {
+        console.error('jQuery is not loaded yet.');
+        return;
+      }
+
+      function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-top toast-end`;
+        toast.innerHTML = `
+          <div class="alert alert-${type}">
+            <span>${message}</span>
+          </div>
+        `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+      }
+
+      @if (session('error'))
+        showToast("{{ session('error') }}", "error");
+      @endif
+
+      @if (session('success'))
+        showToast("{{ session('success') }}", "success");
+      @endif
+
+      @if (session('warning'))
+        showToast("{{ session('warning') }}", "warning");
+      @endif
+    });
+  </script>
 @endpush

@@ -15,6 +15,7 @@ class DataMukaAirTanahController extends Controller
     private $actionUrls = [];
     private $viewPath = 'admin.pages.dt_general.';
     private $generalTitle = 'Data Muka Air Tanah';
+    private $filterCategories = 'data muka air tanah';
 
     public function __construct()
     {
@@ -42,7 +43,7 @@ class DataMukaAirTanahController extends Controller
             'per_page' => $request->input('per_page', 10),
         ]);
 
-        $categories = Category::where('type', 'data')->where('name','data muka air tanah')->first();
+        $categories = Category::where('type', 'data')->where('name', $this->filterCategories )->first();
         $actionUrls = $this->actionUrls;
         $title = $this->generalTitle;
         return view($this->viewPath.'index', compact('title', 'posts', 'categories', 'actionUrls'));
@@ -53,7 +54,7 @@ class DataMukaAirTanahController extends Controller
      */
     public function create()
     {
-        $categories = Category::where('type', 'data')->where('name','data muka air tanah')->first();
+        $categories = Category::where('type', 'data')->where('name', $this->filterCategories )->first();
         $tags = [];
         $actionPost = route($this->baseLabelUrl.'.store');
         
@@ -95,16 +96,32 @@ class DataMukaAirTanahController extends Controller
         
         $actionPost = route($this->baseLabelUrl.'.update', $dataMukaAirTanah->id);
         
-        $title = $this->generalTitle . ' - Edit ' . $dataMukaAirTanah->title;
-        return view($this->viewPath.'edit', compact('title', 'dataMukaAirTanah', 'actionPost'));
+        $title = $this->generalTitle;
+        $post = $dataMukaAirTanah->load(['category', 'tags', 'user', 'media']);
+        
+        return view($this->viewPath.'edit', compact('title', 'post', 'actionPost'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(dataMukaAirTanah $dataMukaAirTanah, Request $request, PostService $service)
     {
-        
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+        ]);
+        $post = $dataMukaAirTanah->load(['category', 'tags', 'user', 'media']);
+
+        try {
+            $service->update($post, $request->all());
+            return redirect()->route($this->baseLabelUrl.'.index')->with('success', 'Data updated successfully.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+
     }
 
     /**

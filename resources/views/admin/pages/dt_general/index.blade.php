@@ -62,9 +62,7 @@
 @push('scripts')
 <script>
 
-    const actionUrls = JSON.parse('{!! json_encode($actionUrls) !!}');
-    console.log(actionUrls);
-    
+const actionUrls = JSON.parse('{!! json_encode($actionUrls) !!}');
     
 window.addEventListener('load', function() {
   if (typeof $ === 'undefined') {
@@ -302,7 +300,7 @@ function renderPosts(posts) {
   };
 
   window.editPost = function(slug) {
-    window.location.href = `/admin/posts/${slug}/edit`; // Sesuaikan dengan route edit-mu
+    window.location.href =  actionUrls.edit.replace(':slug', slug) //`/admin/posts/${slug}/edit`; // Sesuaikan dengan route edit-mu
   };
 
   window.deletePost = function(id) {

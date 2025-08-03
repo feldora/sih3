@@ -46,7 +46,7 @@
 
                             <!-- content Field -->
                             <x-text-editor name="content" label="Deskripsi" placeholder="Write your content here..."/>
-                            <input type="text" name="category_id" value="data muka air tanah" hidden>
+                            <input type="text" name="category_id" value="{{ $categories->name }}" hidden>
                             <input type="text" name="tags[]" value="" hidden>
                             <input type="text" name="status" value="published" hidden>
                             <!-- Submit Button -->

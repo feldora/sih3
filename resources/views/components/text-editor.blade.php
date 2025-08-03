@@ -12,7 +12,7 @@
 
     <!-- Textarea untuk TinyMCE Editor -->
     <textarea name="{{ $name }}" id="{{ $name }}" placeholder="{{ $placeholder }}"
-        {{ $attributes->merge(['class' => 'w-full h-60 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500']) }}>{!! old($name, $value) !!}</textarea>
+        {{ $attributes->merge(['class' => 'w-full h-60 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500']) }}>{{ $value }}</textarea>
 
     <!-- Script untuk TinyMCE Editor -->
     {{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script> --}}
