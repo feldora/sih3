@@ -35,17 +35,17 @@ return [
                 'filterCategories'  => 'Data hidrologi',
               ],
         ],
-        'klimatologi' => [
-            'prefix' => 'data-klimatologi',
-            'name' => 'klimatologi.',
-            'config' => [
-                'baseLabelUrl' => 'admin.hidrologi.klimatologi',
-                'viewPath' => 'admin.pages.dt_general.',
-                'generalTitle' => 'Data Klimatologi',
-                'filterTag' => 'data klimatologi',
-                'filterCategories'  => 'Data hidrologi',
-              ],
-        ],
+        // 'klimatologi' => [
+        //     'prefix' => 'data-klimatologi',
+        //     'name' => 'klimatologi.',
+        //     'config' => [
+        //         'baseLabelUrl' => 'admin.hidrologi.klimatologi',
+        //         'viewPath' => 'admin.pages.dt_general.',
+        //         'generalTitle' => 'Data Klimatologi',
+        //         'filterTag' => 'data klimatologi',
+        //         'filterCategories'  => 'Data hidrologi',
+        //       ],
+        // ],
     ],
 
     'meteorologi' => [
