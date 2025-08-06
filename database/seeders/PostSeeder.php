@@ -25,7 +25,7 @@ class PostSeeder extends Seeder
         for ($i = 0; $i < 50; $i++) {
             // Ambil data dari factory
             $data = \Database\Factories\PostFactory::new()->definition();
-
+            $data['title'] = ($i+1) .'. '. $data['title'];
             // Tambahkan tags random
             $data['tags'] = Tag::inRandomOrder()->take(rand(1, 3))->pluck('id')->toArray();
 

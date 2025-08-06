@@ -104,7 +104,7 @@ window.addEventListener('load', function() {
   }
 
   // Load posts from API
-  function loadPosts(extraParams = { 'per_page' : 9, 'category': "{{ $categories->id ?? '' }}" })  {
+  function loadPosts(extraParams = { 'per_page' : 9, 'category': "{{ $categories->id ?? '' }}", 'tags': "{{ $tag->name }}" })  {
     const loading = document.getElementById('loading');
     const container = document.getElementById('posts-container');
     const noData = document.getElementById('no-data');

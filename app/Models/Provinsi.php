@@ -11,6 +11,11 @@ class Provinsi extends Model
 
     protected $table = 'provinsi';
 
+    protected $casts = [
+        'id' => 'string',
+        'nama'  => 'string'
+    ];
+    
     public function kabupaten()
     {
         return $this->hasMany(Kabupaten::class);

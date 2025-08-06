@@ -46,4 +46,19 @@ class PosPantau extends Model
         return $this->hasOne(Kabupaten::class, 'id', 'kabupaten_id');
     }
 
+    public function dataCurahHujan()
+    {
+        return $this->hasMany(DataCurahHujan::class, 'pos_pantau_id');
+    }
+
+    public function dataKlimatologi()
+    {
+        return $this->hasMany(DataKlimatologi::class, 'pos_pantau_id');
+    }
+
+    public function dataTinggiMukaAir()
+    {
+        return $this->hasMany(DataTinggiMukaAir::class, 'pos_pantau_id');
+    }
+
 }

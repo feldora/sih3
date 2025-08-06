@@ -14,6 +14,7 @@ class PostController extends Controller
         $posts = $service->getPosts([
             'search' => $request->input('search'),
             'category' => $request->input('category'),
+            'tags'     => $request->input('tags'),
             'status' => $request->input('status'),
             'sort' => $request->input('sort', 'created_at'),
             'direction' => $request->input('direction', 'desc'),

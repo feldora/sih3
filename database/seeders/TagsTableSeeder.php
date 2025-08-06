@@ -13,55 +13,17 @@ class TagsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('tags')->insert([
-            // Hidrologi
-            [
-                'name' => 'sungai',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'danau',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'waduk',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // Hidrometeorologi
-            [
-                'name' => 'curah hujan',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'banjir',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'kekeringan',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // Hidrogeologi
-            [
-                'name' => 'air tanah',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'akuifer',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'sumur',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        $tags_hidrologi = ['sungai','curah hujan','banjir','pengelolaan sumber daya air','daerah aliran sungai','sistem hidrologi','evaporasi','infiltrasi','limbah cair','irigasi'];
+        $tags_hidrometeorologi = ['perubahan iklim','cuaca ekstrem','meteorologi','analisis hujan','ramalan cuaca','model hidrometeorologi','radar cuaca','angin','temperatur','tinggi muka air'];
+        $tags_hidrogeologi = ['air tanah','sumber daya air bawah tanah','geohidrologi','akuifer','permeabilitas tanah','penurunan muka air tanah','kualitas air tanah','kontaminasi air tanah','pencemaran air bawah tanah','pengelolaan air tanah'];
+        $data_h3 = ['data tinggi muka air', 'data debit', 'data sedimen', 'data klimatologi', 'data curah hujan', 'data muka air tanah', 'data minatan hidrogeologi', 'data kualitas air tanah', 'cekungan air tanah', 'data hidrogeologi'];
+        $all_tags = array_merge($tags_hidrologi, $tags_hidrometeorologi, $tags_hidrogeologi, $data_h3);
+
+        $tags_to_insert = array_map(function ($tag) {
+            return ['name' => $tag, 'created_at' => now(), 'updated_at' => now()];
+        }, $all_tags);
+
+        DB::table('tags')->insert($tags_to_insert);
+
     }
 }

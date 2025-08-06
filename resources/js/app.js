@@ -25,8 +25,8 @@ import 'tinymce/skins/ui/oxide/skin.min.css';
 import 'tinymce/skins/ui/oxide/content.css';
 import 'tinymce/skins/ui/oxide/content.min.css';
 
-import '../css/pages/geospasial-map.css';
-import './pages/geospasial-map.js';
+// import '../css/pages/geospasial-map.css';
+// import './pages/geospasial-map.js';
 
 import DataTable from 'datatables.net-dt';
 import 'datatables.net-dt/css/dataTables.dataTables.css';

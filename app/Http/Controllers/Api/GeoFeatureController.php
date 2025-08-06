@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\GeoFeatureService;
+use App\Models\Kabupaten;
+use App\Models\GeoFeature;
+use App\Models\PosPantau;
 
 class GeoFeatureController extends Controller
 {
@@ -30,7 +33,6 @@ class GeoFeatureController extends Controller
             'features' => $features,
         ]);
     }
-
 
     // GET /api/geo-features/{id}
     public function show($id)
@@ -189,12 +191,54 @@ class GeoFeatureController extends Controller
     public function getKabupaten(Request $request)
     {
         $provinsi_id = $request->query('provinsi_id');
-        $query = \App\Models\Kabupaten::query();
-        if ($provinsi_id) {
-            $query->where('provinsi_id', $provinsi_id);
-        }
-        return response()->json($query->orderBy('nama')->get());
+
+        $kabupaten = \App\Models\Kabupaten::when($provinsi_id, function ($query, $provinsi_id) {
+            return $query->where('provinsi_id', $provinsi_id);
+        })->orderBy('nama')->get();
+
+        return response()->json($kabupaten);
     }
+
+    public function getMapKabupaten() {
+        $filters = [
+            'tag' => 'kabupaten',
+            'properties->KDWPR' => '72',
+        ];
+        $features = $this->geoFeatureService->getAllAsGeoJson($filters);
+        $headers = [] ;
+        return response()->json($features, 200, $headers);
+    }
+
+    public function getMapKabupatenInfo(Request $request){
+        $kab_id = $request->query('KDWKB');
+        $data['kab_id'] = $kab_id;
+
+        // Mendapatkan tanggal satu bulan terakhir
+        $oneMonthAgo = now()->subMonth(); // `now()` adalah fungsi helper Laravel untuk tanggal saat ini
+
+        // Ambil data titik_pantau berdasarkan kabupaten_id
+        $titik_pantau = PosPantau::where('kabupaten_id', $kab_id)->where('status', 'Aktif')
+                                ->with([
+                                    'dataCurahHujan' => function($query) use ($oneMonthAgo) {
+                                        $query->where('tanggal', '>=', $oneMonthAgo);
+                                    },
+                                    'dataKlimatologi' => function($query) use ($oneMonthAgo) {
+                                        $query->where('tanggal', '>=', $oneMonthAgo);
+                                    },
+                                    'dataTinggiMukaAir' => function($query) use ($oneMonthAgo) {
+                                        $query->where('tanggal', '>=', $oneMonthAgo);
+                                    }
+                                ])
+                                ->limit(10)
+                                ->get();
+
+        // Menyusun data yang akan dikembalikan ke response
+        $data['titik_pantau'] = $titik_pantau;
+        
+        $headers = [];
+        return response()->json($data, 200, $headers);
+    }
+
 
     public function getKecamatan(Request $request)
     {
@@ -221,4 +265,5 @@ class GeoFeatureController extends Controller
 
         return response()->json($data);
     }
+
 }

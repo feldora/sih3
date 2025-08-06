@@ -11,6 +11,12 @@ class Kecamatan extends Model
 
     protected $table = 'kecamatan';
 
+    protected $casts = [
+        'id' => 'string',
+        'nama'  => 'string',
+        'kabupaten_id'  => 'string'
+    ];
+    
     public function kabupaten()
     {
         return $this->belongsTo(Kabupaten::class);

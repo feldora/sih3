@@ -11,6 +11,12 @@ class Desa extends Model
 
     protected $table = 'desa';
 
+    protected $casts = [
+        'id' => 'string',
+        'nama'  => 'string',
+        'kecamatan_id'  => 'string'
+    ];
+    
     public function kecamatan()
     {
         return $this->belongsTo(Kecamatan::class);

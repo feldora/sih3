@@ -9,7 +9,11 @@ Route::apiResource('sungai', App\Http\Controllers\Api\SungaiController::class)->
 Route::apiResource('posts', App\Http\Controllers\Api\PostController::class)->only(['index', 'show']);
 
 Route::get('/geo-features/provinsi', [App\Http\Controllers\Api\GeoFeatureController::class, 'getProvinsi']);
+
 Route::get('/geo-features/kabupaten', [App\Http\Controllers\Api\GeoFeatureController::class, 'getKabupaten']);
+Route::get('/geo-features/map-kabupaten', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapKabupaten']);
+Route::get('/geo-features/map-kabupaten/info', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapKabupatenInfo']);
+
 Route::get('/geo-features/kecamatan', [App\Http\Controllers\Api\GeoFeatureController::class, 'getKecamatan']);
 Route::get('/geo-features/desa', [App\Http\Controllers\Api\GeoFeatureController::class, 'getDesa']);
 Route::get('/geo-features/filter', [App\Http\Controllers\Api\GeoFeatureController::class, 'filter']);

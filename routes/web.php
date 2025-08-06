@@ -21,6 +21,9 @@ use App\Http\Controllers\Web\DataTinggiMukaAirController;
 use App\Http\Controllers\Web\DataKlimatologiController;
 use App\Http\Controllers\Web\DataMukaAirTanahController;
 
+// $routeData = config('resources');
+
+// \Log::info("data config", $routeData);
 // Route::get('/', function () {
 //     return view('welcome');
 // });
@@ -37,7 +40,8 @@ Route::get('/media/{path}', function ($path) {
 
 // public route
 Route::view('/informasi-h3', 'pages.blank_page');
-Route::view('/informasi-h3/info', 'pages.blank_page');
+Route::get('/informasi-h3/info', [ App\Http\Controllers\Web\InfoH3Controller::class, 'index' ] );
+
 Route::view('/informasi-h3/data', 'pages.blank_page');
 Route::view('/informasi-h3/neraca-air', 'pages.blank_page');
 Route::view('/produk-hukum', 'pages.blank_page');
@@ -167,6 +171,51 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
             ]);
         });
 
+        $routeConfig = config('resources.meteorologi');
+        if(!empty($routeConfig)){
+            foreach ($routeConfig as $key => $resource) {
+                Route::prefix($resource['prefix'])
+                    ->name($resource['name'])
+                    ->group(function () use ($resource) {
+                        $config = $resource['config'];
+                        
+                        // INDEX
+                        Route::get('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->index($request, $service);
+                        })->name('index');
+    
+                        // CREATE
+                        Route::get('/create', function () use ($config) {
+                            return (new DataMukaAirTanahController($config))->create();
+                        })->name('create');
+    
+                        // STORE
+                        Route::post('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->store($request, $service);
+                        })->name('store');
+    
+                        // SHOW
+                        Route::get('/{slug}', function ($slug, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->show($slug, $service);
+                        })->name('show');
+    
+                        // EDIT
+                        Route::get('/{post}/edit', function (App\Models\Post $post) use ($config) {
+                            return (new DataMukaAirTanahController($config))->edit($post);
+                        })->name('edit');
+    
+                        // UPDATE
+                        Route::put('/{post}', function (App\Models\Post $post, Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->update($post, $request, $service);
+                        })->name('update');
+    
+                        // DESTROY
+                        Route::delete('/{post}', function (App\Models\Post $post, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->destroy($post, $service);
+                        })->name('destroy');
+                    });
+            }
+        }
     });
 
     // Data Hidrologi Routes
@@ -174,15 +223,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('/', function () {
             return view('admin.blank');
         })->name('index');
-        
-        Route::get('/debit', function () {
-            return view('admin.blank');
-        })->name('debit');
-        
-        Route::get('/sedimen', function () {
-            return view('admin.blank');
-        })->name('sedimen');
-
 
         // tinggi-muka-air
         Route::prefix('tinggi-muka-air')->name('tma.')->group(function () {
@@ -222,6 +262,53 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
             ]);
         });
 
+
+        $routeConfig = config('resources.hidrologi');
+        if(!empty($routeConfig)){
+            foreach ($routeConfig as $key => $resource) {
+                Route::prefix($resource['prefix'])
+                    ->name($resource['name'])
+                    ->group(function () use ($resource) {
+                        $config = $resource['config'];
+                        
+                        // INDEX
+                        Route::get('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->index($request, $service);
+                        })->name('index');
+
+                        // CREATE
+                        Route::get('/create', function () use ($config) {
+                            return (new DataMukaAirTanahController($config))->create();
+                        })->name('create');
+
+                        // STORE
+                        Route::post('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->store($request, $service);
+                        })->name('store');
+
+                        // SHOW
+                        Route::get('/{slug}', function ($slug, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->show($slug, $service);
+                        })->name('show');
+
+                        // EDIT
+                        Route::get('/{post}/edit', function (App\Models\Post $post) use ($config) {
+                            return (new DataMukaAirTanahController($config))->edit($post);
+                        })->name('edit');
+
+                        // UPDATE
+                        Route::put('/{post}', function (App\Models\Post $post, Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->update($post, $request, $service);
+                        })->name('update');
+
+                        // DESTROY
+                        Route::delete('/{post}', function (App\Models\Post $post, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->destroy($post, $service);
+                        })->name('destroy');
+                    });
+            }
+        }
+
     });
 
     // Data Geologi Routes
@@ -230,39 +317,38 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
             return view('admin.blank');
         })->name('index');
         
-        // Route::get('/muka-air-tanah', function () {
-        //     return view('admin.blank');
-        // })->name('muka-air-tanah');
-        
-        Route::prefix('muka-air-tanah')->name('dmat.')->group(function () {
-            Route::resource('/', DataMukaAirTanahController::class)
-            ->parameters(['' => 'dataMukaAirTanah'])
-            ->names([
-                'index' => 'index',
-                'create' => 'create',
-                'store' => 'store',
-                'show' => 'show',
-                'edit' => 'edit',
-                'update' => 'update',
-                'destroy' => 'destroy',
-            ]);
-        });
+        $routeConfig = config('resources.geologi');
+        if(!empty($routeConfig)){
+            foreach ($routeConfig as $key => $resource) {
+                Route::prefix($resource['prefix'])
+                    ->name($resource['name'])
+                    ->group(function () use ($resource) {
+                        $config = $resource['config'];                        
+                        Route::get('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->index($request, $service);
+                        })->name('index');
+                        Route::get('/create', function () use ($config) {
+                            return (new DataMukaAirTanahController($config))->create();
+                        })->name('create');
+                        Route::post('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->store($request, $service);
+                        })->name('store');
+                        Route::get('/{slug}', function ($slug, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->show($slug, $service);
+                        })->name('show');
+                        Route::get('/{post}/edit', function (App\Models\Post $post) use ($config) {
+                            return (new DataMukaAirTanahController($config))->edit($post);
+                        })->name('edit');
+                        Route::put('/{post}', function (App\Models\Post $post, Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->update($post, $request, $service);
+                        })->name('update');
+                        Route::delete('/{post}', function (App\Models\Post $post, App\Services\PostService $service) use ($config) {
+                            return (new DataMukaAirTanahController($config))->destroy($post, $service);
+                        })->name('destroy');
+                    });
+            }
+        }
 
-        Route::get('/minatan-hidrogeologi', function () {
-            return view('admin.blank');
-        })->name('minatan-hidrogeologi');
-        
-        Route::get('/kualitas-air-tanah', function () {
-            return view('admin.blank');
-        })->name('kualitas-air-tanah');
-        
-        Route::get('/cekungan-air-tanah', function () {
-            return view('admin.blank');
-        })->name('cekungan-air-tanah');
-        
-        Route::get('/hidrogeologi', function () {
-            return view('admin.blank');
-        })->name('hidrogeologi');
     });
 
 });

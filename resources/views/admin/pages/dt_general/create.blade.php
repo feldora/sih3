@@ -47,8 +47,11 @@
                             <!-- content Field -->
                             <x-text-editor name="content" label="Deskripsi" placeholder="Write your content here..."/>
                             <input type="text" name="category_id" value="{{ $categories->name }}" hidden>
-                            <input type="text" name="tags[]" value="" hidden>
+                            @foreach ($tags as $tag )                                
+                                <input type="text" name="tags[]" value="{{ $tag->id }}" hidden>
+                            @endforeach
                             <input type="text" name="status" value="published" hidden>
+                            <input type="text" name="type" value="data" hidden>
                             <!-- Submit Button -->
                             <div class="flex justify-end">
                                 <button id="simpan" type="submit" class="btn btn-primary">Simpan</button>

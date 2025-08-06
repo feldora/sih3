@@ -33,9 +33,9 @@ async function initializeMap() {
                 center: [-0.8917, 119.8707],
                 zoom: 8,
                 endpoints: {
-                    wilayahsungai: '/api/geospasial/wilayah-sungai',
-                    pospantau: '/api/geospasial/pos-pantau',
-                    titikpantau: '/api/geospasial/titik-pantau'
+                    wilayahsungai: '/api/wilayah-sungai',
+                    pospantau: '/api/pos-pantau',
+                    titikpantau: '/api/titik-pantau'
                 },
                 icons: {
                     pospantau: {
@@ -70,19 +70,19 @@ async function initializeMap() {
             await window.currentMapManager
                 .registerLayer('wilayahsungai', {
                     type: 'geojson',
-                    endpoint: '/api/geospasial/wilayah-sungai',
+                    endpoint: '/api/wilayah-sungai',
                     style: { color: '#3388ff', weight: 2, fillOpacity: 0.1 },
                     popup: (feature) => `<b>${feature.properties.nama}</b><br>Wilayah: ${feature.properties.wilayah}`
                 })
                 .registerLayer('pospantau', {
                     type: 'marker',
-                    endpoint: '/api/geospasial/pos-pantau',
+                    endpoint: '/api/pos-pantau',
                     icon: 'pospantau',
                     popup: (data) => `<b>${data.nama}</b><br>Status: ${data.status}`
                 })
                 .registerLayer('titikpantau', {
                     type: 'marker', 
-                    endpoint: '/api/geospasial/titik-pantau',
+                    endpoint: '/api/titik-pantau',
                     icon: 'titikpantau',
                     popup: (data) => `<b>${data.nama}</b>`
                 });

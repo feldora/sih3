@@ -15,7 +15,7 @@ class CategorySeeder extends Seeder
     {
         DB::table('categories')->insert([
             [
-                'id' => 1,
+                // 'id' => 1,
                 'name' => 'hidrologi',
                 'slug' => 'hidrologi',
                 'type' => 'post',
@@ -23,7 +23,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 2,
+                // 'id' => 2,
                 'name' => 'hidrometeorologi',
                 'slug' => 'hidrometeorologi',
                 'type' => 'post',
@@ -31,18 +31,44 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 3,
+                // 'id' => 3,
                 'name' => 'hidrogeologi',
                 'slug' => 'hidrogeologi',
                 'type' => 'post',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            // ==================================
+            [
+                // 'id' => 1,
+                'name' => 'Data hidrologi',
+                'slug' => 'data-hidrologi',
+                'type' => 'data',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                // 'id' => 2,
+                'name' => 'Data hidrometeorologi',
+                'slug' => 'data-hidrometeorologi',
+                'type' => 'data',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                // 'id' => 3,
+                'name' => 'Data hidrogeologi',
+                'slug' => 'data-hidrogeologi',
+                'type' => 'data',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+            // ===============================
             /**
              * ====================================
-             */
+             
             [
-                'id' => 4,
+                // 'id' => 4,
                 'name' => 'data muka air tanah',
                 'slug' => 'data-muka-air-tanah',
                 'type' => 'data',
@@ -50,7 +76,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 5,
+                // 'id' => 5,
                 'name' => 'data minatan hidrogeologi',
                 'slug' => 'data-minatan-hidrogeologi',
                 'type' => 'data',
@@ -58,7 +84,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 6,
+                // 'id' => 6,
                 'name' => 'data kualitas air tanah',
                 'slug' => 'data-kualitas-air-tanah',
                 'type' => 'data',
@@ -66,7 +92,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 7,
+                // 'id' => 7,
                 'name' => 'data curah hujan',
                 'slug' => 'data-curah-hujan',
                 'type' => 'data',
@@ -74,7 +100,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 8,
+                // 'id' => 8,
                 'name' => 'data tinggi muka air',
                 'slug' => 'data-tinggi-muka-air',
                 'type' => 'data',
@@ -82,7 +108,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 9,
+                // 'id' => 9,
                 'name' => 'data debit',
                 'slug' => 'data-debit',
                 'type' => 'data',
@@ -90,7 +116,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 10,
+                // 'id' => 10,
                 'name' => 'data sedimen',
                 'slug' => 'data-sedimen',
                 'type' => 'data',
@@ -98,7 +124,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 11,
+                // 'id' => 11,
                 'name' => 'analisis dan prakiraan iklim dasarian',
                 'slug' => 'analisis-prakiraan-iklim-dasarian',
                 'type' => 'data',
@@ -106,7 +132,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 12,
+                // 'id' => 12,
                 'name' => 'peringatan dini cuaca dan iklim (pdci) dasarian',
                 'slug' => 'peringatan-dini-cuaca-iklim-dasarian',
                 'type' => 'data',
@@ -114,7 +140,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 13,
+                // 'id' => 13,
                 'name' => 'buletin bulanan iklim prov. sulteng',
                 'slug' => 'buletin-bulanan-iklim-sulteng',
                 'type' => 'data',
@@ -122,7 +148,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 14,
+                // 'id' => 14,
                 'name' => 'buletin musim prov. sulteng',
                 'slug' => 'buletin-musim-sulteng',
                 'type' => 'data',
@@ -130,14 +156,17 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 15,
+                // 'id' => 15,
                 'name' => 'buletin tahunan prov. sulteng',
                 'slug' => 'buletin-tahunan-sulteng',
                 'type' => 'data',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+             **/
 
         ]);
+        // DB::statement("SELECT setval(pg_get_serial_sequence('categories', 'id'), (SELECT MAX(id) FROM categories))");
+
     }
 }

@@ -464,4 +464,5 @@
                 showToast("{{ session('warning') }}", "warning");
             @endif
         });
+    });
     </script>

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
@@ -7,18 +6,26 @@ use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use App\Services\PostService;
-use App\Models\Post as dataMukaAirTanah;
+use App\Models\Post;  // Gunakan model Post, bukan dataMukaAirTanah
 
 class DataMukaAirTanahController extends Controller
 {
-    private $baseLabelUrl = 'admin.geologi.dmat';
+    private $baseLabelUrl;
     private $actionUrls = [];
-    private $viewPath = 'admin.pages.dt_general.';
-    private $generalTitle = 'Data Muka Air Tanah';
-    private $filterCategories = 'data muka air tanah';
+    private $viewPath;
+    private $generalTitle;
+    private $filterCategories;
+    private $filterTag;
 
-    public function __construct()
+    public function __construct(array $config = [])
     {
+
+        $this->baseLabelUrl = $config['baseLabelUrl'] ?? 'default';
+        $this->viewPath = $config['viewPath'] ?? '';
+        $this->generalTitle = $config['generalTitle'] ?? '';
+        $this->filterCategories = $config['filterCategories'] ?? '';
+        $this->filterTag = $config['filterTag'] ?? '';
+        
         $this->actionUrls = [
             'index' => route($this->baseLabelUrl.'.index'),
             'create' => route($this->baseLabelUrl.'.create'),
@@ -29,24 +36,40 @@ class DataMukaAirTanahController extends Controller
             'destroy' => route($this->baseLabelUrl.'.destroy', ':id'),
         ];
     }
+    
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request, PostService $service)
     {
-        $posts = $service->getPosts([
-            'search' => $request->input('search'),
-            'category' => $request->input('category'),
-            'status' => $request->input('status'),
-            'sort' => $request->input('sort', 'created_at'),
-            'direction' => $request->input('direction', 'desc'),
-            'per_page' => $request->input('per_page', 10),
-        ]);
+        
+        $existingCategory = Category::where('type', 'data')
+            ->where('name', $this->filterCategories)
+            ->first();
+        if ($existingCategory) {
+            $category = $existingCategory;
+        } else {
+            $category = new Category();
+            $category->type = 'data';
+            $category->name = $this->filterCategories;
+            $category->slug = str_replace(' ', '-', $this->filterCategories);
+            $category->save();
+        }
 
-        $categories = Category::where('type', 'data')->where('name', $this->filterCategories )->first();
+        $existingTag = Tag::where('name', $this->filterTag)->first();
+        if($existingTag) {
+           $tag = $existingTag; 
+        } else {
+            $tag = new Tag();
+            $tag->name = $this->filterTag;
+            $tag->save();
+        }
+
         $actionUrls = $this->actionUrls;
         $title = $this->generalTitle;
-        return view($this->viewPath.'index', compact('title', 'posts', 'categories', 'actionUrls'));
+        $categories = $category;
+
+        return view($this->viewPath.'index', compact('title', 'categories', 'tag', 'actionUrls'));
     }
 
     /**
@@ -55,7 +78,8 @@ class DataMukaAirTanahController extends Controller
     public function create()
     {
         $categories = Category::where('type', 'data')->where('name', $this->filterCategories )->first();
-        $tags = [];
+        $tag = Tag::where('name', $this->filterTag)->first();
+        $tags = [$tag ];
         $actionPost = route($this->baseLabelUrl.'.store');
         
         $title = $this->generalTitle;
@@ -67,7 +91,6 @@ class DataMukaAirTanahController extends Controller
      */
     public function store(Request $request, PostService $service)
     {
-        // echo "Data muka air tanah berhasil disimpan.";
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -80,10 +103,10 @@ class DataMukaAirTanahController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $slug, PostService $service)
+    public function show($slug, PostService $service)  // Menggunakan Post sebagai parameter
     {
-        [$post] = $service->getPublicPostDetail($slug);
-        
+        $post = $service->getPostBySlug($slug); 
+        $post->load(['category', 'tags', 'user', 'media']); 
         $title = $this->generalTitle . ' - ' . $post->title;
         return view($this->viewPath.'show', compact('title', 'post'));
     }
@@ -91,13 +114,12 @@ class DataMukaAirTanahController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(dataMukaAirTanah $dataMukaAirTanah)
+    public function edit(Post $post)
     {
-        
-        $actionPost = route($this->baseLabelUrl.'.update', $dataMukaAirTanah->id);
+        $actionPost = route($this->baseLabelUrl.'.update', $post->id);
         
         $title = $this->generalTitle;
-        $post = $dataMukaAirTanah->load(['category', 'tags', 'user', 'media']);
+        $post = $post->load(['category', 'tags', 'user', 'media']);
         
         return view($this->viewPath.'edit', compact('title', 'post', 'actionPost'));
     }
@@ -105,13 +127,14 @@ class DataMukaAirTanahController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(dataMukaAirTanah $dataMukaAirTanah, Request $request, PostService $service)
+    public function update(Post $post, Request $request, PostService $service)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
-        $post = $dataMukaAirTanah->load(['category', 'tags', 'user', 'media']);
+
+        $post = $post->load(['category', 'tags', 'user', 'media']);
 
         try {
             $service->update($post, $request->all());
@@ -121,15 +144,14 @@ class DataMukaAirTanahController extends Controller
                 ->withInput()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(dataMukaAirTanah $dataMukaAirTanah, PostService $service)
+    public function destroy(Post $post, PostService $service)
     {
-        $service->delete($dataMukaAirTanah);
-        // return redirect()->route($this->baseLabelUrl.'.index')->with('success', 'Post deleted successfully.');
+        $service->delete($post);
+        return redirect()->route($this->baseLabelUrl.'.index')->with('success', 'Post deleted successfully.');
     }
 }

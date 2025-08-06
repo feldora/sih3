@@ -18,6 +18,7 @@ class PostFactory extends Factory
         // $tags = \App\Models\Tag::inRandomOrder()->take(rand(1, 3))->pluck('id')->toArray();
 
         return [
+            'type'  => (($category->type == 'post') ? 'article' : $category->type),
             'title' => $this->faker->sentence,
             'slug' => Str::slug($this->faker->sentence),
             'content' => $this->faker->paragraph,

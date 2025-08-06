@@ -17,6 +17,7 @@ class PostController extends Controller
             'search' => $request->input('search'),
             'category' => $request->input('category'),
             'status' => $request->input('status'),
+            'tags'     => $request->input('tags'),
             'sort' => $request->input('sort', 'created_at'),
             'direction' => $request->input('direction', 'desc'),
             'per_page' => $request->input('per_page', 10),

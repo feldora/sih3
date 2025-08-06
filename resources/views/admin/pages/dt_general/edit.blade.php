@@ -62,6 +62,7 @@
                         <!-- Hidden Fields -->
                         <input type="hidden" name="category_id" value="{{ old('category_id', $post->category->name) }}">
                         <input type="hidden" name="status" value="{{ old('status', $post->status ?? 'published') }}">
+                        <input type="text" name="type" value="data" hidden>
                         {{-- Jika tags array kosong, bisa sesuaikan --}}
                         <input type="hidden" name="tags[]" value="">
 

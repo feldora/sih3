@@ -13,18 +13,34 @@ class GeoFeatureService
 {
     protected array $pointCache = [];
 
-    public function getAllAsGeoJson(): array
+    public function getAllAsGeoJson($filters = []): array
     {
-        $features = DB::table('geo_features')
-            ->select('id', 'name', 'tag', 'properties', DB::raw('ST_AsGeoJSON(geom) as geometry'))
-            ->get()
-            ->map($this->geoJsonMap());
+        $query = DB::table('geo_features')
+            ->select('id', 'name', 'tag', 'properties', DB::raw('ST_AsGeoJSON(geom) as geometry'));
+
+        // Terapkan filter jika ada
+        if (!empty($filters)) {
+            foreach ($filters as $key => $value) {
+                // Jika key mengandung 'properties->', anggap sebagai filter JSON
+                if (str_starts_with($key, 'properties->')) {
+                    $jsonKey = explode('->', $key)[1];
+                    $query->whereRaw("properties->>'$jsonKey' = ?", [$value]);
+                } else {
+                    $query->where($key, $value);
+                }
+            }
+        }
+
+
+        // Eksekusi query dan mapping ke format GeoJSON
+        $features = $query->get()->map($this->geoJsonMap())->all();
 
         return [
             'type' => 'FeatureCollection',
             'features' => $features,
         ];
     }
+
 
     public function paginate(array $params = []): array
     {
