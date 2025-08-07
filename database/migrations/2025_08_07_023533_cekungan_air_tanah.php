@@ -21,7 +21,7 @@ return new class extends Migration
             $table->float('kedalaman_akuifer')->nullable()->comment('Kedalaman rata-rata akuifer dalam meter');
             $table->double('kapasitas_air_tanah')->nullable()->comment('Estimasi kapasitas atau potensi air tanah (L/detik atau m³/tahun)');
             $table->date('tanggal_pembaruan')->nullable()->comment('Tanggal terakhir data diperbarui');
-            $table->timestamps()->comment('Kolom created_at dan updated_at');
+            $table->timestamps();
         });
     }
 
