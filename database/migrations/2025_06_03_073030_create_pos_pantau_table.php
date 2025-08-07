@@ -23,7 +23,7 @@ class CreatePosPantauTable extends Migration
             $table->string('desa_id')->nullable();
             $table->string('nama_pengamat')->nullable();
             $table->year('tahun_pembangunan')->nullable();
-            $table->string('kewenangan')->nullable();
+            $table->string('instansi_id')->nullable();
             $table->string('status')->default('aktif');
             $table->timestamps();
         });

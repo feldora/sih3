@@ -14,29 +14,14 @@
             </div>
             <div>
                 <label class="label">Jenis Pos</label>
-                <input list="jenis_pos_list" type="text" name="jenis_pos" class="input input-bordered w-full" value="{{ old('jenis_pos') }}" required>
-                <datalist id="jenis_pos_list">
-                    <option value="Pos Curah Hujan"></option>
-                    <option value="Pos Duga Air"></option>
-                    <option value="Pos Klimatologi"></option>
-                </datalist>
+                <x-select-jenis-pos name="jenis_pos"
+                    :selected="old('jenis_pos', $item->jenis_pos ?? '')"
+                    class="w-full" />
             </div>
-            <div>
-                <label class="label">Alamat</label>
-                <input type="text" name="alamat" class="input input-bordered w-full" value="{{ old('alamat') }}">
-            </div>
-            <div>
-                <label class="label">Kabupaten</label>
-                <input type="text" name="kabupaten" class="input input-bordered w-full" value="{{ old('kabupaten') }}">
-            </div>
-            <div>
-                <label class="label">Kecamatan</label>
-                <input type="text" name="kecamatan" class="input input-bordered w-full" value="{{ old('kecamatan') }}">
-            </div>
-            <div>
-                <label class="label">Desa</label>
-                <input value="{{ old('desa') }}" type="text" name="desa" class="input input-bordered w-full">
-            </div>
+            <x-select-wilayah :kabupatenId="old('kabupaten_id',$item->kabupaten_id ?? null)"
+                      :kecamatanId="old('kecamatan_id',$item->kecamatan_id ?? null)"
+                      :desaId="old('desa_id',$item->desa_id ?? null)" />
+                      
             <div>
                 <label class="label">Nama Pengamat</label>
                 <input value="{{ old('nama_pengamat') }}" type="text" name="nama_pengamat" class="input input-bordered w-full">
@@ -47,7 +32,7 @@
             </div>
             <div>
                 <label class="label">Kewenangan</label>
-                <input value="{{ old('kewenangan') }}" type="text" name="kewenangan" class="input input-bordered w-full">
+                <x-instansi-select name="instansi_id" :selected="old('instansi_id', $data->instansi_id ?? null)" class="w-full" />
             </div>
             <div>
                 <label class="label">Status</label>

@@ -230,16 +230,16 @@ class MenuSeeder extends Seeder
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);
-        Menu::create([
-            'title' => 'Titik Pantau',
-            'url' => '/admin/titik-pantau',
-            'icon' => 'fas fa-map-marker-alt',
-            'parent_id' => null,
-            'order' => $adminMenuOrder++,
-            'permission_name' => 'titik_pantau',
-            'zona' => 'admin',
-            'menu_type' => 'link',
-        ]);
+        // Menu::create([
+        //     'title' => 'Titik Pantau',
+        //     'url' => '/admin/titik-pantau',
+        //     'icon' => 'fas fa-map-marker-alt',
+        //     'parent_id' => null,
+        //     'order' => $adminMenuOrder++,
+        //     'permission_name' => 'titik_pantau',
+        //     'zona' => 'admin',
+        //     'menu_type' => 'link',
+        // ]);
         Menu::create([
             'title' => 'Sungai',
             'url' => '/admin/sungai',

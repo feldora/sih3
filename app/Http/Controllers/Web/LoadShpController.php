@@ -175,6 +175,7 @@ class LoadShpController extends Controller
                     $data['longitude'] = $coordinates[0];
                     $data['latitude'] = $coordinates[1];
                     $data['jenis_pos'] = $request->input('jenis_pos');
+                    $data['instansi_id'] = $request->input('instansi_id');
                     $data['kewenangan'] = $request->input('kewenangan');
                     $tag = 'kecamatan';
                     $kabupaten= $this->geoFeatureService->findFeatureContainingPoint( $coordinates[0], $coordinates[1], $tag);

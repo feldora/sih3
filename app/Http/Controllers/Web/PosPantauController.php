@@ -29,11 +29,8 @@ class PosPantauController extends Controller
     public function index()
     {
         
-        $posPantau = $this->posPantauRepository->paginate(10);
+        $posPantau = PosPantau::with(['kewenangan', 'kabupaten', 'kecamatan', 'desa'])->paginate(10);
 
-        // $posPantau = new PosPantau();
-        // $pos = $posPantau->with('kabupaten')->get();
-        // dd($pos);
         return view('admin.pages.pos_pantau.index', compact('posPantau'));
     }
 
@@ -61,7 +58,7 @@ class PosPantauController extends Controller
             'desa' => 'nullable|string|max:255',
             'nama_pengamat' => 'nullable|string|max:255',
             'tahun_pembangunan' => 'nullable|digits:4',
-            'kewenangan' => 'nullable|string|max:255',
+            'instansi_id' => 'nullable|numeric',
         ]);
 
         $this->posPantauRepository->create($request->all());
@@ -75,6 +72,7 @@ class PosPantauController extends Controller
     public function edit(string $id)
     {
         $posPantau = $this->posPantauRepository->find($id);
+        // pd($posPantau->toArray());
         return view('admin.pages.pos_pantau.edit', compact('posPantau'));
     }
     

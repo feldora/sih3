@@ -15,16 +15,19 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/pages/geospasial-map.css'])
     <style>
-        #listLayer {
-            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        #listLayerCAT,
+        #listLayerWS,
+        #listLayerKAB {
             max-height: 0;
             opacity: 0;
             overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
         }
 
-        #listLayer.open {
+        #listLayerCAT.open,
+        #listLayerWS.open,
+        #listLayerKAB.open {
             max-height: 1000px;
-            /* Atur sesuai kebutuhan konten */
             opacity: 1;
         }
     </style>
@@ -53,30 +56,33 @@
                 <div class="sidebar-item flex items-center py-1" id="homeButton">
                     <span class="mr-2">🏠</span> SIH3 SULTENG
                 </div>
-                <!-- Search Section -->
-                {{-- <div class="sidebar-section">
-                    <h3>Cari</h3>
-                    <input type="text" class="search-input px-2 py-1 text-xs rounded w-32"
-                        placeholder="Cari tempat..." id="searchInput">
 
-                    <div class="sidebar-section hidden" id="searchResultsSection">
-                        <small>Hasil pencarian</small>
-                        <div class="bg-white bg-opacity-10 p-2 rounded-lg">
-                            <ul id="searchResults" class="list-none p-0 m-0">
-                            </ul>
-                        </div>
+                <div class="sidebar-section pb-3">
+                    <div id="toggleCAT" class="flex items-center justify-start cursor-pointer hover:text-primary hover:bg-primary-content bg-white bg-opacity-10 p-2 rounded-lg open flex-1 gap-2 p-2">
+                        <input type="checkbox" id="checkAllCAT" class="toggle-all-checkbox">
+                        <h3 class="text-xs hover:text-primary ">Daftar CAT</h3>
                     </div>
-                </div> --}}
-
-                <div class="sidebar-section">
-                    <h3 class="text-sm cursor-pointer hover:bg-primary-content hover:text-primary p-2 bg-white bg-opacity-10 p-2 rounded-lg open"
-                        id="toggleButton">Daftar Kabupaten/Kota</h3>
-                    <div id="listLayer">
-
-                    </div>
+                    <div id="listLayerCAT"></div>
                 </div>
+
+                <div class="sidebar-section pb-3">
+                    <div id="toggleWS" class="flex items-center justify-start cursor-pointer hover:text-primary hover:bg-primary-content bg-white bg-opacity-10 p-2 rounded-lg open flex-1 gap-2 p-2">
+                        <input type="checkbox" id="checkAllWS" class="toggle-all-checkbox">
+                        <h3 class="text-xs hover:text-primary ">Daftar WS</h3>
+                    </div>
+                    <div id="listLayerWS"></div>
+                </div>
+
+                <div class="sidebar-section pb-3">
+                    <div id="toggleKAB" class="flex items-center justify-start cursor-pointer hover:text-primary hover:bg-primary-content bg-white bg-opacity-10 p-2 rounded-lg open flex-1 gap-2 p-2">
+                        <input type="checkbox" id="checkAllKAB" class="toggle-all-checkbox">
+                        <h3 class="text-xs hover:text-primary ">Daftar Kabupaten/Kota</h3>
+                    </div>
+                    <div id="listLayerKAB"></div>
+                </div>
+
                 <!-- Info Section -->
-                <div class="sidebar-section">
+                <div class="sidebar-section pt-3">
                     <h3 class="text-xs">Map Information</h3>
                     <div class="bg-white bg-opacity-10 p-2 rounded-lg text-xs">
                         <div class="mb-1">
@@ -133,11 +139,9 @@
         <div id="footerMarkInfo"></div>
         SIH3 SULTENG &copy; 2025
     </footer>
-    <!-- Di bagian head atau sebelum penutup </body> -->
-    <script src="https://cdn.jsdelivr.net/npm/terraformer@1.0.8/terraformer.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/terraformer-wkt-parser@1.2.1/terraformer-wkt-parser.min.js"></script>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const sidebar = document.getElementById('sidebar');
             const sidebarToggle = document.getElementById('sidebarToggle');
 
@@ -153,169 +157,167 @@
                 attributes: true,
                 attributeFilter: ['class']
             });
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Inisialisasi peta Leaflet
+            
             const centerOfMaps = [-1.2842, 121.8274];
             const map = L.map('map').setView(centerOfMaps, 8);
+            const esriSatLayer = L.tileLayer(
+                'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye',
+                    maxZoom: 19
+                }).addTo(map);
 
-            // Tile layer (pakai OpenStreetMap)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+            const addedMarkers = new Set();
 
-            const listLayerContainer = document.getElementById('listLayer');
+            const layerGroups = {
+                KAB: L.layerGroup().addTo(map),
+                WS: L.layerGroup().addTo(map),
+                CAT: L.layerGroup().addTo(map),
+                // jika tambah baru tambahkan disini 1 : NEW: L.layerGroup().addTo(map),
+            };
 
-            let addedMarkers = new Set(); // Untuk menyimpan koordinat marker yang sudah ditambahkan
+            async function loadGeoLayer({
+                url,
+                containerId,
+                layerGroup,
+                defaultShow = false,
+                colorList = [],
+                customStyle = null,
+                clickCallback = null
+            }) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
 
-            try {
-                const response = await fetch('/api/geo-features/map-kabupaten');
-                if (!response.ok) throw new Error('Network response was not ok');
-                const geoJsonData = await response.json();
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Gagal fetch ' + url);
 
-                // Validasi format GeoJSON
-                if (!geoJsonData.type || geoJsonData.type !== 'FeatureCollection' || !Array.isArray(geoJsonData
-                        .features)) {
-                    throw new Error('Invalid GeoJSON format');
-                }
+                    const geoJsonData = await response.json();
+                    if (geoJsonData.type !== 'FeatureCollection' || !Array.isArray(geoJsonData.features)) {
+                        throw new Error('Format GeoJSON tidak valid');
+                    }
 
-                // Simpan referensi layer untuk toggle visibility
-                const areaLayers = {};
+                    geoJsonData.features.forEach((feature, index) => {
+                        const color = colorList[index % colorList.length] || '#007bff';
 
-                // Warna berbeda untuk setiap kabupaten
-                const colors = [
-                    '#FF5733', '#581845', '#3357FF', '#F333FF', '#FF33A8',
-                    '#33FFF5', '#FF8C33', '#8C33FF', '#33FF8C', '#FF338C',
-                    '#FFC300', '#900C3F', '#33FF57'
-                ];
-
-                geoJsonData.features.forEach((feature, index) => {
-                    try {
-                        // Buat layer GeoJSON di Leaflet
                         const layer = L.geoJSON(feature, {
-                            style: {
-                                color: colors[index % colors.length],
-                                weight: 0.5,
-                                opacity: 0.9,
-                                fillOpacity: 0.3,
-                                fillColor: colors[index % colors.length]
-                            },
+                            style: typeof customStyle === 'function'
+                                ? customStyle(color)
+                                : {
+                                    color: color,
+                                    weight: 0.5,
+                                    opacity: 0.9,
+                                    fillOpacity: 0.3,
+                                    fillColor: color
+                                },
                             onEachFeature: (geoJsonFeature, leafletLayer) => {
-                                leafletLayer.bindPopup(`
-                            <b>${feature.properties.name}</b><br>
-                            <small>Kabupaten: ${feature.properties.properties.WADMKK}</small>
-                        `);
+                                leafletLayer.bindPopup(
+                                    `<b>${feature.properties.name}</b>`);
 
-                                // Menambahkan event klik
-                                leafletLayer.on('click', (e) => {
-                                    console.log(
-                                        `Area ${feature.properties.name} diklik!`
-                                    );
-                                    console.log(
-                                        `Koordinat: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`
-                                    );
-                                    getKabInfo(feature.properties.properties.KDWKB);
-                                });
+                                if (typeof clickCallback === 'function') {
+                                    leafletLayer.on('click', e => clickCallback(feature,
+                                        e));
+                                }
                             }
                         });
 
-                        // Tambah ke peta
-                        layer.addTo(map);
-                        areaLayers[feature.properties.id] = layer;
+                        // Tambahkan ke peta hanya jika defaultShow true
+                        if (defaultShow) {
+                            layerGroup.addLayer(layer);
+                        }
 
-                        // Buat elemen toggle di sidebar
-                        const toggleContainer = document.createElement('div');
-                        toggleContainer.classList.add('layer-toggle', 'flex', 'items-center', 'py-1',
-                            'cursor-pointer', 'hover:bg-blue-50', 'px-2', 'rounded',
-                            'hover:text-primary');
-
-                        // Checkbox untuk toggle
+                        // Checkbox untuk layer ini
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
-                        checkbox.checked = true;
-                        checkbox.classList.add('mr-2', 'layer-checkbox');
-                        checkbox.id = `layer-${feature.properties.id}`;
+                        checkbox.checked = defaultShow;
+                        checkbox.className = 'mr-2';
 
-                        // Label nama layer
+                        // Label
                         const label = document.createElement('label');
-                        label.htmlFor = `layer-${feature.properties.id}`;
-                        label.classList.add('cursor-pointer', 'flex', 'items-center', 'w-full');
+                        label.className = 'cursor-pointer flex items-center w-full';
+                        label.textContent = feature.properties.name;
 
-                        // Icon mata
-                        const eyeIcon = document.createElement('span');
-                        eyeIcon.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>`;
+                        const colorDot = document.createElement('span');
+                        colorDot.className = 'w-3 h-3 rounded-full ml-2';
+                        colorDot.style.backgroundColor = color;
+                        label.appendChild(colorDot);
 
-                        // Nama kabupaten
-                        const nameSpan = document.createElement('span');
-                        nameSpan.textContent = feature.properties.name;
-                        nameSpan.classList.add('text-sm');
-
-                        // Warna identifikasi
-                        const colorIndicator = document.createElement('span');
-                        colorIndicator.classList.add('w-3', 'h-3', 'rounded-full', 'ml-2');
-                        colorIndicator.style.backgroundColor = colors[index % colors.length];
-
-                        label.appendChild(nameSpan);
-                        label.appendChild(colorIndicator);
-
+                        const toggleContainer = document.createElement('div');
+                        toggleContainer.className =
+                            'flex items-center py-1 px-2 cursor-pointer hover:bg-blue-50 hover:text-primary';
                         toggleContainer.appendChild(checkbox);
                         toggleContainer.appendChild(label);
 
-                        // Event toggle visibility
-                        checkbox.addEventListener('change', (e) => {
+                        checkbox.addEventListener('change', e => {
                             if (e.target.checked) {
-                                map.addLayer(layer);
+                                layerGroup.addLayer(layer);
                             } else {
-                                map.removeLayer(layer);
+                                layerGroup.removeLayer(layer);
                             }
                         });
 
-                        listLayerContainer.appendChild(toggleContainer);
-
-                    } catch (error) {
-                        console.error(
-                            `Error processing feature ${feature.properties?.name || 'unknown'}:`,
-                            error);
-                    }
-                });
-
-                // Update koordinat saat mouse move di peta
-                map.on('mousemove', (e) => {
-                    document.getElementById('currentCoords').textContent =
-                        `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
-                });
-
-                // Update zoom level
-                map.on('zoomend', () => {
-                    document.getElementById('currentZoom').textContent = map.getZoom();
-                });
-
-                // Sembunyikan loader setelah peta siap
-                document.getElementById('loader').style.display = 'none';
-
-            } catch (error) {
-                console.error('Error loading GeoJSON data:', error);
-                document.getElementById('loader').style.display = 'none';
-                alert('Gagal memuat data peta. Silakan coba lagi.');
+                        container.appendChild(toggleContainer);
+                    });
+                } catch (error) {
+                    console.error(`Error loading ${containerId}:`, error);
+                }
             }
 
-            // Fungsi untuk mengambil data titik pantau berdasarkan kabupaten
-            async function getKabInfo(kab_id) {
-                console.log(kab_id);
-                try {
-                    const dataFetch = await fetch(`/api/geo-features/map-kabupaten/info?KDWKB=${kab_id}`);
-                    const data = await dataFetch.json();
-                    console.log(data);
+            await loadGeoLayer({
+                url: '/api/geo-features/map-kabupaten',
+                containerId: 'listLayerKAB',
+                layerGroup: layerGroups.KAB,
+                defaultShow: false,
+                colorList: [
+                    '#FF5733', '#C70039', '#900C3F', '#581845', '#FF8C00', '#FF4500',
+                    '#FF1493', '#FF69B4', '#FF6347', '#FFB6C1', '#FFD700', '#FFA500',
+                    '#FFDAB9', '#FFDEAD', '#FFFACD', '#EEE8AA', '#F0E68C', '#BDB76B',
+                    '#DAA520', '#B8860B', '#CD853F', '#D2691E', '#A0522D', '#8B4513'
+                ],
+                clickCallback: (feature, e) => getKabInfo(feature.properties.properties.KDWKB),
+                customStyle: (color) => ({
+                    color: color,
+                    weight: 1.5,
+                    opacity: 1,
+                    dashArray: '5, 5',
+                    fill: false
+                })
+            });
+            setupToggleAll('listLayerCAT', 'checkAllCAT', layerGroups.CAT);
 
-                    // Loop untuk menambahkan marker berdasarkan titik pantau
-                    data.titik_pantau.forEach((item) => {
+            await loadGeoLayer({
+                url: '/api/geo-features/map-ws',
+                containerId: 'listLayerWS',
+                layerGroup: layerGroups.WS,
+                defaultShow: false,
+                colorList: [
+                    '#1E90FF', '#00BFFF', '#87CEFA', '#4682B4', '#5F9EA0', '#6495ED',
+                    '#7B68EE', '#6A5ACD', '#483D8B', '#4169E1', '#0000CD', '#00008B',
+                    '#8A2BE2', '#9370DB', '#BA55D3', '#9400D3', '#9932CC', '#8B008B',
+                    '#6B8E23', '#3CB371', '#2E8B57', '#228B22', '#008000', '#006400'
+                ]
+            });
+            setupToggleAll('listLayerWS', 'checkAllWS', layerGroups.WS);
+
+            await loadGeoLayer({
+                url: '/api/geo-features/map-cat',
+                containerId: 'listLayerCAT',
+                layerGroup: layerGroups.CAT,
+                defaultShow: false,
+                colorList: [
+                    '#00CED1', '#20B2AA', '#40E0D0', '#48D1CC', '#00FA9A', '#7FFFD4',
+                    '#7FFF00', '#ADFF2F', '#32CD32', '#90EE90', '#98FB98', '#00FF7F',
+                    '#DC143C', '#E9967A', '#FA8072', '#F08080', '#CD5C5C', '#8B0000',
+                    '#F4A460', '#DEB887', '#D2B48C', '#BC8F8F', '#FFE4B5', '#FFDAB9'
+                ]
+            });
+            setupToggleAll('listLayerKAB', 'checkAllKAB', layerGroups.KAB);
+            // jika tambah baru tambahkan disini 2 (dari await sampai setupToggleAll)
+
+            async function getKabInfo(kab_id) {
+                try {
+                    const res = await fetch(`/api/geo-features/map-kabupaten/info?KDWKB=${kab_id}`);
+                    const data = await res.json();
+                    data.titik_pantau.forEach(item => {
                         const {
                             latitude,
                             longitude,
@@ -323,58 +325,82 @@
                             jenis_pos
                         } = item;
                         const latLng = `${latitude},${longitude}`;
-
-                        // Pastikan marker belum ada di koordinat yang sama
                         if (!addedMarkers.has(latLng)) {
-                            // const marker = L.marker([parseFloat(latitude), parseFloat(longitude)]).addTo(map);
                             const icon = getIconForJenisPos(jenis_pos);
-                            const marker = L.marker([parseFloat(latitude), parseFloat(longitude)], {
+                            L.marker([parseFloat(latitude), parseFloat(longitude)], {
                                     icon
-                                })
-                                .addTo(map);
-                            marker.bindPopup(`
-                                <b>${nama_pos}</b><br>
-                                <small>Jenis Pos: ${jenis_pos}</small><br>
-                                <small>Latitude: ${latitude}</small><br>
-                                <small>Longitude: ${longitude}</small>
-                            `);
-                            addedMarkers.add(
-                                latLng); // Menyimpan koordinat marker yang sudah ditambahkan
+                                }).addTo(map)
+                                .bindPopup(
+                                    `<b>${nama_pos}</b><br>Jenis Pos: ${jenis_pos}<br>Lat: ${latitude}<br>Lng: ${longitude}`
+                                    );
+                            addedMarkers.add(latLng);
                         }
                     });
-                } catch (error) {
-                    console.error(`Error fetching kabupaten info: ${error}`);
+                } catch (e) {
+                    console.error('Error fetch kab info:', e);
                 }
             }
 
             function getIconForJenisPos(jenis_pos) {
-                let iconUrl = '/images/pin/kuning.svg'; // default
-                if (jenis_pos === "Pos Curah Hujan") {
-                    iconUrl = '/images/pin/merah.svg';
-                } else if (jenis_pos === "Pos Duga Air") {
-                    iconUrl = '/images/pin/biru.svg';
-                } else if (jenis_pos === "Pos Klimatologi") {
-                    iconUrl = '/images/pin/hijau.svg';
-                }
+                let iconUrl = '/images/pin/kuning.svg';
+                if (jenis_pos === "Pos Curah Hujan") iconUrl = '/images/pin/merah.svg';
+                if (jenis_pos === "Pos Duga Air") iconUrl = '/images/pin/biru.svg';
+                if (jenis_pos === "Pos Klimatologi") iconUrl = '/images/pin/hijau.svg';
 
                 return L.icon({
-                    iconUrl: iconUrl,
-                    iconSize: [32, 32], // sesuaikan ukuran jika perlu
-                    iconAnchor: [16, 32], // titik bawah ikon
-                    popupAnchor: [0, -32] // posisi popup terhadap ikon
+                    iconUrl,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    popupAnchor: [0, -32]
                 });
             }
 
-            const toggleButton = document.getElementById('toggleButton');
-            const listLayer = document.getElementById('listLayer');
-
-            toggleButton.addEventListener('click', () => {
-                // Toggle kelas 'open' untuk membuka/tutup
-                listLayer.classList.toggle('open');
+            document.getElementById('homeButton').addEventListener('click', () => {
+                window.location.href = '/';
             });
+
+            // Toggle sidebar sections
+            document.getElementById('toggleCAT').addEventListener('click', () => {
+                document.getElementById('listLayerCAT').classList.toggle('open');
+            });
+
+            document.getElementById('toggleWS').addEventListener('click', () => {
+                document.getElementById('listLayerWS').classList.toggle('open');
+            });
+
+            document.getElementById('toggleKAB').addEventListener('click', () => {
+                document.getElementById('listLayerKAB').classList.toggle('open');
+            });
+
+            // Display koordinat dan zoom
+            map.on('mousemove', e => {
+                document.getElementById('currentCoords').textContent =
+                    `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+            });
+
+            map.on('zoomend', () => {
+                document.getElementById('currentZoom').textContent = map.getZoom();
+            });
+
+            document.getElementById('loader').style.display = 'none';
+
+            function setupToggleAll(containerId, checkboxId, layerGroup) {
+                const masterCheckbox = document.getElementById(checkboxId);
+                const container = document.getElementById(containerId);
+
+                masterCheckbox.addEventListener('change', () => {
+                    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(cb => {
+                        cb.checked = masterCheckbox.checked;
+                        const event = new Event('change');
+                        cb.dispatchEvent(event);
+                    });
+                });
+            }
 
         });
     </script>
+
 </body>
 
 </html>

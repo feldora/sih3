@@ -167,9 +167,7 @@
                                 Provinsi Sulawesi Tengah.</p>
                             <p class="mb-5">Keseluruhan informasi terkait sumber daya air akan dipublikasikan di portal
                                 ini, sebagai transparansi data dan berita di Provinsi Sulawesi Tengah.</p>
-                            <a href="#"
-                                class="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Kontak
-                                Kami</a>
+                            <a href="/tentang" class="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Kenal Lebih dekat</a>
                         </div>
                     </div>
                 </div>

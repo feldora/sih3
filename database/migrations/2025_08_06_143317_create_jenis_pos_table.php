@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wilayah_sungai', function (Blueprint $table) {
+        Schema::create('jenis_pos', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->decimal('luas')->null();
-            $table->string('kewenangan')->nullable();
-            $table->text('description')->nullable();
-            $table->string('status')->default('active');
             $table->timestamps();
         });
     }
@@ -27,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wilayah_sungai');
+        Schema::dropIfExists('jenis_pos');
     }
 };

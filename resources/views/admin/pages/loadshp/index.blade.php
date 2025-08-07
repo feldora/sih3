@@ -11,7 +11,7 @@
                 @if (!empty($data['form_type']))
                     <h2 class="card-title text-2xl mb-4">{{ $data['form_type'] }}</h2>
                 @else
-                    <h2 class="card-title text-2xl mb-4">Load Shapefile </h2>
+                    <h2 class="card-title text-2xl mb-4">Load Shapefile - {{ $data['type'] }} </h2>
                 @endif
 
 
@@ -297,13 +297,26 @@
                 Object.keys(props).forEach(key => headers.add(key));
             });
 
-            const finalHeaders = [...headers, 'type', 'action'];
-
+            const finalHeaders = [...headers, 'type'];
             finalHeaders.forEach(key => {
                 const th = document.createElement('th');
                 th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
                 thead.appendChild(th);
             });
+
+            const thBtn = document.createElement('th');
+            thBtn.innerHTML = `
+                <button type="button" class="btn btn-outline btn-sm" id="toggleAllFeatures" title="Tampilkan Semua Fitur">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </button>
+            `;
+            thead.appendChild(thBtn);
 
             geoJsonData.features.forEach((feature, index) => {
                 const tr = document.createElement('tr');
@@ -336,7 +349,14 @@
             });
 
             dataTableInstance = new DataTable('#FeatureCollection', {
-                scrollX: true
+                scrollX: true,
+                columnDefs: [
+                    {
+                        targets: -1,        // Kolom terakhir (tombol)
+                        orderable: false    // Nonaktifkan sorting
+                    }
+                ]
+
             });
             dataTableInstance.columns().every(function(index) {
                 // Abaikan kolom terakhir (misalnya kolom "action")
@@ -357,6 +377,52 @@
                     select.append('<option value="' + d + '">' + d + '</option>');
                 });
             });
+
+
+            let allVisible = false;
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('#toggleAllFeatures')) {
+                    toggleSemuaFitur(); // Fungsi buatanmu sendiri
+                }
+            });
+            function toggleSemuaFitur() {
+                const semuaTertampil = visibleFeatures.every(v => v === true);
+                const toggleBtn = document.getElementById('toggleAllFeatures');
+
+                const visibleRowIndexes = dataTableInstance.rows({ filter: 'applied' }).indexes().toArray();
+
+                visibleRowIndexes.forEach(index => {
+                    const layer = featureLayers[index];
+
+                    if (!layer) return;
+
+                    if (semuaTertampil) {
+                        map.removeLayer(layer);
+                        visibleFeatures[index] = false;
+                        newFeatures = [];
+                    } else {
+                        layer.addTo(map);
+                        visibleFeatures[index] = true;
+                        if (!newFeatures.includes(index)) {
+                            newFeatures.push(index);
+                        }
+                    }
+
+                    toggleEyeIcon(index, visibleFeatures[index]);
+                });
+
+
+                // Feedback tombol
+                if (toggleBtn) {
+                    if (semuaTertampil) {
+                        toggleBtn.classList.remove('text-blue-500');
+                        toggleBtn.classList.add('text-gray-400');
+                    } else {
+                        toggleBtn.classList.remove('text-gray-400');
+                        toggleBtn.classList.add('text-blue-500');
+                    }
+                }
+            }
 
         }
 
@@ -499,18 +565,26 @@
                                 <label class="label">${field}</label>
                                 <input type="text" name="${field}" class="input input-bordered w-full" />
                             `;
-                        } else {
+                        } else if(mode === 'mapping') {
                             // Select multiple (mapping)
                             const selectId = `select-${field}`;
                             wrapper.innerHTML = `
                                 <label class="label">${field}</label>
                                 <select id="${selectId}" name="mapped[${field}][]" class="w-full" multiple></select>
                             `;
+                        } else if (mode === 'instansi') {
+                            
+                            const selectId = `select-${field}`;
+                            wrapper.innerHTML = `
+                                <label class="label">${field}</label>
+                                <x-instansi-select name="instansi_id" :selected="old('instansi_id', $data->instansi_id ?? null)" class="w-full" />
+                            `;
                         }
+
 
                         mappingContainer.appendChild(wrapper);
 
-                        if (mode !== 'input') {
+                        if (mode === 'mapping') {
                             const selectEl = wrapper.querySelector('select');
                             Object.keys(geoProps).forEach(prop => {
                                 const option = document.createElement('option');

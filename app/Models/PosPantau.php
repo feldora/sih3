@@ -19,16 +19,22 @@ class PosPantau extends Model
         'desa_id',
         'nama_pengamat',
         'tahun_pembangunan',
-        'kewenangan',
+        // 'kewenangan',
+        'instansi_id',
         'status',
         'geo_feature_signature'
     ];
 
     public $timestamps = true;
 
-    public function titikPantau()
+    // public function titikPantau()
+    // {
+    //     return $this->hasMany(TitikPantau::class, 'pos_pantau_id');
+    // }
+
+    public function kewenangan()
     {
-        return $this->hasMany(TitikPantau::class, 'pos_pantau_id');
+        return $this->hasOne(Instansi::class, 'id', 'instansi_id');
     }
     
     public function geoFeature()
@@ -44,6 +50,11 @@ class PosPantau extends Model
     public function kabupaten()
     {
         return $this->hasOne(Kabupaten::class, 'id', 'kabupaten_id');
+    }
+
+    public function desa()
+    {
+        return $this->hasOne(Desa::class, 'id', 'desa_id');
     }
 
     public function dataCurahHujan()

@@ -20,18 +20,21 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+#homeButton {
+    margin-bottom: 30px;
+}
 .sidebar-content {
     padding: 20px;
 }
 
 .sidebar-section {
-    margin-bottom: 30px;
+    margin-bottom: 5px;
 }
 
 .sidebar-section h3 {
     font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     color: rgba(255, 255, 255, 0.9);
 }
 

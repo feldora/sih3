@@ -29,10 +29,10 @@ class FormFieldsController extends Controller
     public $form = [
         'Pos Pantau' => [
             "jenis_pos" => "input",
-            "kewenangan"    => "input",
-            "tahun_pembangunan" => "input",
+            "kewenangan"    => "instansi",
+            "tahun_pembangunan" => "mapping",
             'nama_pos'  => "mapping",
-            'alamat'    => "mapping",
+            // 'alamat'    => "mapping",
             'kabupaten' => "mapping",
             'kecamatan' => "mapping",
             'desa'      => "mapping",
@@ -40,5 +40,6 @@ class FormFieldsController extends Controller
             'status'    => "mapping",],
         'wilayah Sungai'    => [],
         'Sungai'    => [],
+        'Cekungan Air Tanah' => [],
     ];
 }

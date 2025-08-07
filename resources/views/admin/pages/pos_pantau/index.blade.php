@@ -22,7 +22,6 @@
                     <th>#</th>
                     <th>Nama Pos</th>
                     <th>Jenis Pos</th>
-                    <th>Alamat</th>
                     <th>Kabupaten</th>
                     <th>Kewenangan</th>
                     <th>Status</th>
@@ -36,9 +35,8 @@
                     <td>{{ $posPantau->firstItem() + $index }}</td>
                     <td>{{ $pos->nama_pos ?? '' }}</td>
                     <td>{{ $pos->jenis_pos ?? '' }}</td>
-                    <td>{{ $pos->alamat ?? '' }}</td>
                     <td>{{ $pos->kabupaten->nama ?? '' }}</td>
-                    <td>{{ $pos->kewenangan ?? '' }}</td>
+                    <td>{{ $pos->kewenangan->nama ?? '' }}</td>
                     <td>{{ $pos->status ?? '' }}</td>
                     <td>
                         <a href="{{ route('admin.pos-pengamatan.edit', $pos) }}" class="btn btn-sm btn-warning">Edit</a>

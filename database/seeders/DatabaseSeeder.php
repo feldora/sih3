@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             TagsTableSeeder::class,
             PostSeeder::class,
-            WilayahSungaiSeeder::class,
+            // WilayahSungaiSeeder::class,
             assignRoleToUser::class,
             ProvinsiSeeder::class,
             KabupatenSeeder::class,
@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
             DesaSeeder::class,
             // ImportGeoFeaturesSqlSeeder::class,
             ShapefileImportSeeder::class,
+            InstansiSeeder::class,
         ]);
     }
 }

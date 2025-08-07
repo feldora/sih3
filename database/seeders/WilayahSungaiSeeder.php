@@ -15,24 +15,12 @@ class WilayahSungaiSeeder extends Seeder
     {
         \DB::table('wilayah_sungai')->insert([
             [
-                'name' => 'Sungai Bongka',
-                'description' => 'DAS Bongka',
+                'name' => 'Palu - Lariang',
+                'description' => '',
             ],
             [
-                'name' => 'Sungai Laa',
-                'description' => 'DAS Laa',
-            ],
-            [
-                'name' => 'Sungai Lariang',
-                'description' => 'DAS Lariang',
-            ],
-            [
-                'name' => 'Sungai Palu',
-                'description' => 'DAS Palu',
-            ],
-            [
-                'name' => 'Sungai Poso',
-                'description' => 'DAS Poso',
+                'name' => 'Parigi - Poso',
+                'description' => '',
             ],
         ]);
     }

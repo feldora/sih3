@@ -217,7 +217,7 @@ class GeoFeatureController extends Controller
         $oneMonthAgo = now()->subMonth(); // `now()` adalah fungsi helper Laravel untuk tanggal saat ini
 
         // Ambil data titik_pantau berdasarkan kabupaten_id
-        $titik_pantau = PosPantau::where('kabupaten_id', $kab_id)->where('status', 'Aktif')
+        $titik_pantau = PosPantau::where('kabupaten_id', $kab_id)->where('status', 'aktif')
                                 ->with([
                                     'dataCurahHujan' => function($query) use ($oneMonthAgo) {
                                         $query->where('tanggal', '>=', $oneMonthAgo);
@@ -229,7 +229,7 @@ class GeoFeatureController extends Controller
                                         $query->where('tanggal', '>=', $oneMonthAgo);
                                     }
                                 ])
-                                ->limit(10)
+                                // ->limit(10)
                                 ->get();
 
         // Menyusun data yang akan dikembalikan ke response
