@@ -11,7 +11,7 @@ class WilayahSungai extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['id', 'name', 'description', 'status', 'geojson'];
+    protected $fillable = ['id', 'name', 'description', 'instansi_id', 'luas', 'status', 'signature'];
     public $timestamps = true;
     protected $table = 'wilayah_sungai';
     protected $primaryKey = 'id';
@@ -20,4 +20,13 @@ class WilayahSungai extends Model
     // {
     //     return $this->hasMany(TitikPantau::class, 'wilayah_sungai_id', 'id');
     // }
+
+    public function kewenangan()
+    {
+        return $this->hasOne(Instansi::class, 'id', 'instansi_id');
+    }
+    
+    public function feature(){
+        return $this->hasOne(GeoFeature::class, 'signature', 'signature');
+    }
 }

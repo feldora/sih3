@@ -17,14 +17,15 @@ Route::get('/geo-features/kabupaten', [App\Http\Controllers\Api\GeoFeatureContro
 Route::get('/geo-features/map-kabupaten', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapKabupaten']);
 Route::get('/geo-features/map-kabupaten/info', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapKabupatenInfo']);
 
-Route::get('/geo-features/map-ws', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapKabupaten']);
+Route::get('/geo-features/map-ws', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapWilayahSungai']);
 Route::get('/geo-features/map-cat', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapKabupaten']);
 
+Route::post('/geo-features/loadshp', [App\Http\Controllers\Api\GeoFeatureController::class, 'loadshp']);
 
 Route::get('/geo-features/kecamatan', [App\Http\Controllers\Api\GeoFeatureController::class, 'getKecamatan']);
 Route::get('/geo-features/desa', [App\Http\Controllers\Api\GeoFeatureController::class, 'getDesa']);
 Route::get('/geo-features/filter', [App\Http\Controllers\Api\GeoFeatureController::class, 'filter']);
-Route::apiResource('geo-features', App\Http\Controllers\Api\GeoFeatureController::class)->only(['index','show']);
+Route::apiResource('geo-features', App\Http\Controllers\Api\GeoFeatureController::class)->only(['index','show','post']);
 Route::get('/geospasial/search', [App\Http\Controllers\Api\GeoFeatureController::class, 'search']);
 
 Route::get('/pos-pantau/search', [App\Http\Controllers\Api\PosPantauController::class, 'search'])->name('pos-pantau.search');

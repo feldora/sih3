@@ -8,6 +8,13 @@ use App\Services\GeoFeatureService;
 use App\Models\Kabupaten;
 use App\Models\GeoFeature;
 use App\Models\PosPantau;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Shapefile\ShapefileReader;
+use Shapefile\ShapefileException;
+use ZipArchive;
+use Illuminate\Support\Facades\DB;
+use App\Models\WilayahSungai;
 
 class GeoFeatureController extends Controller
 {
@@ -47,76 +54,76 @@ class GeoFeatureController extends Controller
     }
 
     // POST /api/geo-features
-    public function store(Request $request)
-    {
-        $request->validate([
-            'properties' => 'required|array',
-            'geometry' => 'required|array',
-        ]);
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'properties' => 'required|array',
+    //         'geometry' => 'required|array',
+    //     ]);
 
-        $geometryJson = json_encode($request->geometry, JSON_UNESCAPED_UNICODE);
-        $propertiesJson = json_encode($request->properties, JSON_UNESCAPED_UNICODE);
+    //     $geometryJson = json_encode($request->geometry, JSON_UNESCAPED_UNICODE);
+    //     $propertiesJson = json_encode($request->properties, JSON_UNESCAPED_UNICODE);
 
-        $signature = hash('sha256', $geometryJson . $propertiesJson);
+    //     $signature = hash('sha256', $geometryJson . $propertiesJson);
 
-        $exists = \App\Models\GeoFeature::where('signature', $signature)->exists();
-        if ($exists) {
-            return response()->json(['message' => 'Fitur sudah ada'], 409);
-        }
+    //     $exists = \App\Models\GeoFeature::where('signature', $signature)->exists();
+    //     if ($exists) {
+    //         return response()->json(['message' => 'Fitur sudah ada'], 409);
+    //     }
 
-        $geojson = [
-            'type' => 'Feature',
-            'properties' => [
-                'name' => $request->input('name'),
-                'tag' => $request->input('tag'),
-                'properties' => $request->properties,
-            ],
-            'geometry' => $request->geometry,
-        ];
+    //     $geojson = [
+    //         'type' => 'Feature',
+    //         'properties' => [
+    //             'name' => $request->input('name'),
+    //             'tag' => $request->input('tag'),
+    //             'properties' => $request->properties,
+    //         ],
+    //         'geometry' => $request->geometry,
+    //     ];
 
-        $feature = $this->geoFeatureService->createFromGeoJson($geojson);
+    //     $feature = $this->geoFeatureService->createFromGeoJson($geojson);
 
-        return response()->json(['message' => 'Berhasil disimpan', 'data' => $feature], 201);
-    }
+    //     return response()->json(['message' => 'Berhasil disimpan', 'data' => $feature], 201);
+    // }
 
     // PUT /api/geo-features/{id}
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'properties' => 'required|array',
-            'geometry' => 'required|array',
-        ]);
+    // public function update(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'properties' => 'required|array',
+    //         'geometry' => 'required|array',
+    //     ]);
 
-        $geojson = [
-            'type' => 'Feature',
-            'properties' => [
-                'name' => $request->input('name'),
-                'tag' => $request->input('tag'),
-                'properties' => $request->properties,
-            ],
-            'geometry' => $request->geometry,
-        ];
+    //     $geojson = [
+    //         'type' => 'Feature',
+    //         'properties' => [
+    //             'name' => $request->input('name'),
+    //             'tag' => $request->input('tag'),
+    //             'properties' => $request->properties,
+    //         ],
+    //         'geometry' => $request->geometry,
+    //     ];
 
-        $feature = $this->geoFeatureService->updateFromGeoJson((int) $id, $geojson);
+    //     $feature = $this->geoFeatureService->updateFromGeoJson((int) $id, $geojson);
 
-        if (!$feature) {
-            return response()->json(['message' => 'Data tidak ditemukan'], 404);
-        }
+    //     if (!$feature) {
+    //         return response()->json(['message' => 'Data tidak ditemukan'], 404);
+    //     }
 
-        return response()->json(['message' => 'Berhasil diperbarui']);
-    }
+    //     return response()->json(['message' => 'Berhasil diperbarui']);
+    // }
 
     // DELETE /api/geo-features/{id}
-    public function destroy($id)
-    {
-        $deleted = $this->geoFeatureService->delete((int) $id);
+    // public function destroy($id)
+    // {
+    //     $deleted = $this->geoFeatureService->delete((int) $id);
 
-        if (!$deleted) {
-            return response()->json(['message' => 'Data tidak ditemukan'], 404);
-        }
+    //     if (!$deleted) {
+    //         return response()->json(['message' => 'Data tidak ditemukan'], 404);
+    //     }
 
-        return response()->json(['message' => 'Berhasil dihapus']);
-    }
+    //     return response()->json(['message' => 'Berhasil dihapus']);
+    // }
 
     public function search(Request $request)
     {
@@ -239,7 +246,6 @@ class GeoFeatureController extends Controller
         return response()->json($data, 200, $headers);
     }
 
-
     public function getKecamatan(Request $request)
     {
         $kabupaten_id = $request->query('kabupaten_id');
@@ -264,6 +270,26 @@ class GeoFeatureController extends Controller
         $data = $this->geoFeatureService->getFilteredAsGeoJson($filters);
 
         return response()->json($data);
+    }
+
+    public function getMapWilayahSungai(Request $request) {
+        $filters = [
+            'tag' => 'Wilayah Sungai',
+            // 'properties->KDWPR' => '72',
+        ];
+        $features = $this->geoFeatureService->getAllAsGeoJson($filters);
+        $ws = new WilayahSungai();
+        
+        if (count($features) >= 1) {
+            foreach ($features['features'] as $key => $value ) {
+                foreach ($value as $k => $v) {
+                    $features['features'][$key]['ws'] = $ws->where('signature', $value['signature'])->with('kewenangan')->first();
+                }
+            }
+        }
+
+        $headers = [] ;
+        return response()->json($features, 200, $headers);
     }
 
 }

@@ -14,6 +14,7 @@ class PosPantau extends Model
         'latitude',
         'longitude',
         'alamat',
+        'ws_id',
         'kabupaten_id',
         'kecamatan_id',
         'desa_id',
@@ -35,6 +36,11 @@ class PosPantau extends Model
     public function kewenangan()
     {
         return $this->hasOne(Instansi::class, 'id', 'instansi_id');
+    }
+    
+    public function ws()
+    {
+        return $this->hasOne(WilayahSungai::class, 'id', 'ws_id');
     }
     
     public function geoFeature()

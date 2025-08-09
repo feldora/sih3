@@ -11,6 +11,7 @@ use Shapefile\ShapefileReader;
 use Shapefile\ShapefileException;
 use ZipArchive;
 use Illuminate\Support\Facades\DB;
+use App\Models\WilayahSungai;
 
 class LoadShpController extends Controller
 {
@@ -130,6 +131,8 @@ class LoadShpController extends Controller
         switch ($tabel) {
             case 'Pos Pantau':
                 return $this->savePosPantau($request);
+            case 'Wilayah Sungai' :
+                return $this->saveWilayahSungai($request);
             default:
                 return response()->json([
                     'success' => false,
@@ -177,18 +180,22 @@ class LoadShpController extends Controller
                     $data['jenis_pos'] = $request->input('jenis_pos');
                     $data['instansi_id'] = $request->input('instansi_id');
                     $data['kewenangan'] = $request->input('kewenangan');
-                    $tag = 'kecamatan';
-                    $kabupaten= $this->geoFeatureService->findFeatureContainingPoint( $coordinates[0], $coordinates[1], $tag);
+                    
+                    $kabupaten= $this->geoFeatureService->findFeatureContainingPoint( $coordinates[0], $coordinates[1], 'kecamatan');
                     if(!empty($kabupaten)){
                         $properties = json_decode($kabupaten->properties, true);
-                        Log::info("KDWKB " . $properties['KDWKB']);
-                        Log::info("KDWKC " . $properties['KDWKC']);
-
                         // $data['desa'] = $properties['WADMKD'];
                         $data['kabupaten_id'] = $properties['KDWKB'];
                         $data['kecamatan_id'] = $properties['KDWKC'];
                     }
-                    
+                    $ws= $this->geoFeatureService->findFeatureContainingPoint( $coordinates[0], $coordinates[1], 'Wilayah Sungai');
+                    if (!empty($ws)) {
+
+                        $ws_data = WilayahSungai::where('signature', $ws->signature)->first();
+
+                        $data['ws_id'] = $ws_data->id;
+                    }
+
                     foreach ($mapped as $field => $mappingOptions) {
                         $mappedKey = $mappingOptions[0] ?? null;
 
@@ -217,6 +224,70 @@ class LoadShpController extends Controller
                         $datas[] = $data;
                         Log::info(json_encode($data));
                         \App\Models\PosPantau::create($data);
+                    }
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => count($features) . ' data berhasil disimpan.',
+                'datas'    => $datas
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan data: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function saveWilayahSungai(Request $request) {
+        
+        $features = json_decode($request->input('visibleFeatures'), true);
+        $mapped = $request->input('mapped', []);
+
+        if (!$features || !is_array($features)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data fitur tidak valid.'
+            ], 400);
+        }
+        $datas=[];
+        try {
+            DB::transaction(function () use ($features, $mapped, $request) {
+                foreach ($features as $feature) {
+                    $data = [];
+
+                    $coordinates = $feature['geometry']['coordinates'] ?? [null, null];
+
+                    foreach ($mapped as $field => $mappingOptions) {
+                        $mappedKey = $mappingOptions[0] ?? null;
+
+                        if ($mappedKey && str_starts_with($mappedKey, 'properties.') && isset($feature['properties'])) {
+                            $propName = str_replace('properties.', '', $mappedKey);
+                            $data[$field] = $feature['properties'][$propName] ?? null;
+                        }
+                    }
+
+                    // Mempersiapkan data untuk disimpan sebagai GeoFeature
+                    // Strukturnya harus cocok dengan yang diharapkan oleh GeoFeatureService
+                    $featureToSave = [
+                        'type' => 'Feature',
+                        'geometry' => $feature['geometry'],
+                        'properties' => [
+                            // 'name' dan 'tag' berada di level atas 'properties'
+                            'name' => $data['name'] ?? null,
+                            'tag' => 'Wilayah Sungai',
+                            // 'properties' asli dari shapefile di-nest di dalam 'properties'
+                            'properties' => $feature['properties']
+                        ]
+                    ];
+                    $signature = $this->saveGeoJsonFeatureToDatabase($featureToSave);
+                    if ($signature) {
+                        $data['signature'] = $signature;
+                        $data['instansi_id'] = $request->input('kewenangan');
+                        Log::info(json_encode($data));
+                        \App\Models\WilayahSungai::create($data);
                     }
                 }
             });

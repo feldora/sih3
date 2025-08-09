@@ -14,6 +14,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Carbon\Carbon;
 
 class DataKlimatologiController extends Controller
 {
@@ -165,6 +166,60 @@ class DataKlimatologiController extends Controller
 
             $posMap = PosPantau::pluck('id', 'nama_pos')->toArray();
 
+            // helper kecil
+            $toIntOrNull = function ($v) {
+                if ($v === null || $v === '' ) return null;
+                // normalisasi koma desimal jika ada (meskipun untuk int seharusnya tidak diperlukan)
+                if (is_string($v)) $v = trim(str_replace(',', '.', $v));
+                return is_numeric($v) ? (int) $v : null;
+            };
+
+            $parseExcelDate = function ($v) {
+                if ($v === null || $v === '') return null;
+
+                // normalisasi string
+                $raw = is_string($v) ? trim(str_replace(',', '.', $v)) : $v;
+
+                // jika numeric -> anggap serial excel
+                if (is_numeric($raw)) {
+                    try {
+                        return ExcelDate::excelToDateTimeObject((float)$raw)->format('Y-m-d');
+                    } catch (\Throwable $e) {
+                        // fallback ke parse string
+                    }
+                }
+
+                // coba parse dengan Carbon
+                try {
+                    return Carbon::parse($v)->format('Y-m-d');
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            };
+
+            $parseExcelTime = function ($v) {
+                if ($v === null || $v === '') return null;
+
+                $raw = is_string($v) ? trim(str_replace(',', '.', $v)) : $v;
+
+                if (is_numeric($raw)) {
+                    try {
+                        // excel time biasanya pecahan hari, excel->DateTime akan bekerja
+                        return ExcelDate::excelToDateTimeObject((float)$raw)->format('H:i:s');
+                    } catch (\Throwable $e) {
+                        // fallback
+                    }
+                }
+
+                // coba parse string seperti "12:34", "12:34:56" atau "2024-05-10 12:34"
+                try {
+                    // Carbon dapat mem-parse "12:34" menjadi hari ini + waktu
+                    return Carbon::parse($v)->format('H:i:s');
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            };
+
             $inserted = [];
             foreach ($data as $index => $row) {
                 $validator = Validator::make($row, [
@@ -191,32 +246,43 @@ class DataKlimatologiController extends Controller
                         'message' => "Pos Pantau '{$namaPos}' tidak ditemukan (baris " . ($index + 2) . ")",
                     ], 422);
                 }
-                $tanggal = Date::excelToDateTimeObject($row['tanggal'] ?? now())->format('Y-m-d');
+
+                // tanggal aman (excel serial atau string)
+                $tanggal = $parseExcelDate($row['tanggal'] ?? null) ?? now()->format('Y-m-d');
+
+                // jam aman
+                $jam = $parseExcelTime($row['jam'] ?? null);
+
                 $inserted[] = [
                     'pos_pantau_id'    => $posMap[$namaPos],
-                    'kecepatan_angin'  => $row['kecepatan_angin'] ?? null,
-                    'arah_angin'       => $row['arah_angin'] ?? null,
-                    'kelembapan'       => $row['kelembapan'] ?? null,
-                    'suhu'             => $row['suhu'] ?? null,
-                    'curah_hujan'      => $row['curah_hujan'] ?? null,
+                    'kecepatan_angin'  => $toIntOrNull($row['kecepatan_angin'] ?? null),
+                    'arah_angin'       => $toIntOrNull($row['arah_angin'] ?? null),
+                    'kelembapan'       => $toIntOrNull($row['kelembapan'] ?? null),
+                    'suhu'             => $toIntOrNull($row['suhu'] ?? null),
+                    'curah_hujan'      => $toIntOrNull($row['curah_hujan'] ?? null),
                     'tanggal'          => $tanggal,
-                    'jam'              => isset($row['jam']) ? Date::excelToDateTimeObject($row['jam'])->format('H:i:s') : null,
+                    'jam'              => $jam,
                     'keterangan'       => $row['keterangan'] ?? null,
                     'created_at'       => now(),
                     'updated_at'       => now(),
                 ];
             }
 
+            // insert batch
             DB::table('data_klimatologi')->insert($inserted);
 
             return response()->json(['success' => true, 'message' => 'Data berhasil diimport.']);
         } catch (\Throwable $th) {
+            // untuk debugging, bisa juga log stack trace
+            \Log::error('Import error: '.$th->getMessage()."\n".$th->getTraceAsString());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan: ' . $th->getMessage(),
             ], 500);
         }
     }
+
 
     public function templateExcel()
     {

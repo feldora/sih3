@@ -16,7 +16,7 @@ class GeoFeatureService
     public function getAllAsGeoJson($filters = []): array
     {
         $query = DB::table('geo_features')
-            ->select('id', 'name', 'tag', 'properties', DB::raw('ST_AsGeoJSON(geom) as geometry'));
+            ->select('id', 'name', 'tag', 'properties', 'signature', DB::raw('ST_AsGeoJSON(geom) as geometry'));
 
         // Terapkan filter jika ada
         if (!empty($filters)) {
@@ -26,7 +26,11 @@ class GeoFeatureService
                     $jsonKey = explode('->', $key)[1];
                     $query->whereRaw("properties->>'$jsonKey' = ?", [$value]);
                 } else {
-                    $query->where($key, $value);
+                    if (is_array($value)) {
+                        $query->whereIn($key, $value);
+                    }else {
+                        $query->where($key, $value);
+                    }
                 }
             }
         }
@@ -40,7 +44,6 @@ class GeoFeatureService
             'features' => $features,
         ];
     }
-
 
     public function paginate(array $params = []): array
     {
@@ -99,6 +102,30 @@ class GeoFeatureService
             'signature' => $signature,
             'geom' => DB::raw("ST_SetSRID(ST_GeomFromGeoJSON(" . DB::getPdo()->quote(json_encode($geometry)) . "), 4326)"),
         ]);
+    }
+    
+    public function updateBySignature(array $geojson, string $existingSignature): GeoFeature
+    {
+        $geometry = $geojson['geometry'];
+        $properties = $geojson['properties']['properties'] ?? $geojson['properties'];
+
+        $geomRaw = DB::raw("ST_SetSRID(ST_GeomFromGeoJSON(" . DB::getPdo()->quote(json_encode($geometry)) . "), 4326)");
+
+        $feature = GeoFeature::where('signature', $existingSignature)->first();
+
+        if (!$feature) {
+            throw new \Exception("GeoFeature dengan signature $existingSignature tidak ditemukan.");
+        }
+
+        $feature->update([
+            'name' => $geojson['properties']['name'] ?? null,
+            'tag' => $geojson['properties']['tag'] ?? null,
+            'properties' => $properties,
+            'geom' => $geomRaw,
+            // Signature tetap tidak diubah
+        ]);
+
+        return $feature;
     }
 
     public function bulkCreateFromGeoJson(array $features): void
@@ -300,7 +327,7 @@ class GeoFeatureService
             'features' => $features,
         ];
     }
-
+    /**
     protected function geoJsonMap(): \Closure
     {
         return function ($f) {
@@ -319,6 +346,40 @@ class GeoFeatureService
                     'tag' => $f->tag,
                     'properties' => json_decode($f->properties ?? '{}', true),
                 ],
+                'geometry' => $geometry,
+            ];
+        };
+    }
+    **/
+    protected function geoJsonMap(): \Closure
+    {
+        return function ($f) {
+            // Decode geometry, fallback to empty array if gagal
+            $geometry = json_decode($f->geometry ?? '{}', true);
+            if (!is_array($geometry)) {
+                $geometry = []; // fallback jika decode gagal
+            }
+
+            // Cek dan konversi jika EPSG:3857
+            if (!empty($geometry) && $this->isMercator($geometry)) {
+                $geometry = $this->convertMercatorToWGS84($geometry);
+            }
+
+            // Decode properties dengan fallback
+            $properties = json_decode($f->properties ?? '{}', true);
+            if (!is_array($properties)) {
+                $properties = []; // fallback jika decode gagal
+            }
+
+            return [
+                'type' => 'Feature',
+                'properties' => [
+                    'id' => (int) $f->id,
+                    'name' => $f->name ?? '',
+                    'tag' => $f->tag ?? '',
+                    'properties' => $properties,
+                ],
+                'signature' => $f->signature,
                 'geometry' => $geometry,
             ];
         };

@@ -38,7 +38,11 @@ class FormFieldsController extends Controller
             'desa'      => "mapping",
             'nama_pengamat' => "mapping",
             'status'    => "mapping",],
-        'wilayah Sungai'    => [],
+        'Wilayah Sungai'    => [
+            "kewenangan"    => "instansi",
+            'name'          => 'mapping',
+            'luas'          => 'mapping',
+        ],
         'Sungai'    => [],
         'Cekungan Air Tanah' => [],
     ];

@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('wilayah_sungai', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->decimal('luas')->null();
-            $table->string('kewenangan')->nullable();
+            $table->decimal('luas', 15, 2)->nullable();
+            $table->string('instansi_id')->nullable();
             $table->text('description')->nullable();
             $table->string('status')->default('active');
+            $table->string('signature')->nullable();
+
             $table->timestamps();
         });
     }

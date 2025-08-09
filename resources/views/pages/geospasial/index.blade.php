@@ -17,6 +17,7 @@
     <style>
         #listLayerCAT,
         #listLayerWS,
+        #listLayerPP,
         #listLayerKAB {
             max-height: 0;
             opacity: 0;
@@ -26,9 +27,29 @@
 
         #listLayerCAT.open,
         #listLayerWS.open,
+        #listLayerPP.open,
         #listLayerKAB.open {
-            max-height: 1000px;
+            max-height: 150px;
             opacity: 1;
+            overflow-y: auto;
+        }
+
+        .custom-popup {
+            /* max-width: 500px !important; */
+            width: 500px !important;
+        }
+
+        .custom-popup .leaflet-popup-content-wrapper,
+        .custom-popup .leaflet-popup-content {
+            width: auto !important;
+            max-width: 100% !important;
+        }
+
+        .custom-popup .flex {
+            flex-wrap: wrap;
+            /* biar isi bisa turun ke baris berikutnya */
+            min-width: 0;
+            /* cegah item flex melebar */
         }
     </style>
 </head>
@@ -47,7 +68,10 @@
 
     <main class="main-container h-max-screen">
         <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
+        <div class="relative sidebar" id="sidebar">
+            <div class="absolute top-2 right-2">
+                <button class="btn btn-sm btn-circle btn-ghost sidebar-close">✕</button>
+            </div>
             <div class="sidebar-header">
                 <h2 class="text-xl font-bold">Map Controls</h2>
                 <p class="text-sm opacity-75 mt-2">Explore and navigate the map</p>
@@ -58,27 +82,47 @@
                 </div>
 
                 <div class="sidebar-section pb-3">
-                    <div id="toggleCAT" class="flex items-center justify-start cursor-pointer hover:text-primary hover:bg-primary-content bg-white bg-opacity-10 p-2 rounded-lg open flex-1 gap-2 p-2">
-                        <input type="checkbox" id="checkAllCAT" class="toggle-all-checkbox">
-                        <h3 class="text-xs hover:text-primary ">Daftar CAT</h3>
+                    <div id="toggleCAT"
+                        class="flex items-center justify-start cursor-pointer hover:text-primary hover:bg-primary-content bg-white bg-opacity-10 p-2 rounded-lg open flex-1 gap-2 p-2">
+                        <input type="checkbox" id="checkAllCAT" class="toggle-all-checkbox toggle toggle-xs">
+                        <span class="text-sm hover:text-primary ">Daftar CAT</span>
                     </div>
-                    <div id="listLayerCAT"></div>
+                    <div id="listLayerCAT" class="listLayer"></div>
                 </div>
 
                 <div class="sidebar-section pb-3">
-                    <div id="toggleWS" class="flex items-center justify-start cursor-pointer hover:text-primary hover:bg-primary-content bg-white bg-opacity-10 p-2 rounded-lg open flex-1 gap-2 p-2">
-                        <input type="checkbox" id="checkAllWS" class="toggle-all-checkbox">
-                        <h3 class="text-xs hover:text-primary ">Daftar WS</h3>
+                    <div id="toggleWS"
+                        class="flex items-center justify-start cursor-pointer hover:text-primary hover:bg-primary-content bg-white bg-opacity-10 p-2 rounded-lg open flex-1 gap-2 p-2">
+                        <input type="checkbox" id="checkAllWS" class="toggle-all-checkbox toggle toggle-xs">
+                        <span class="text-sm hover:text-primary ">Daftar WS</span>
                     </div>
-                    <div id="listLayerWS"></div>
+                    <div id="listLayerWS" class="listLayer"></div>
                 </div>
 
                 <div class="sidebar-section pb-3">
-                    <div id="toggleKAB" class="flex items-center justify-start cursor-pointer hover:text-primary hover:bg-primary-content bg-white bg-opacity-10 p-2 rounded-lg open flex-1 gap-2 p-2">
-                        <input type="checkbox" id="checkAllKAB" class="toggle-all-checkbox">
-                        <h3 class="text-xs hover:text-primary ">Daftar Kabupaten/Kota</h3>
+                    <div id="togglePP"
+                        class="flex items-center justify-start cursor-pointer hover:text-primary hover:bg-primary-content bg-white bg-opacity-10 p-2 rounded-lg open flex-1 gap-2 p-2">
+                        <input type="checkbox" id="checkAllPP" class="toggle-all-checkbox toggle toggle-xs">
+                        <span class="text-sm hover:text-primary ">Pos Pantau</span>
                     </div>
-                    <div id="listLayerKAB"></div>
+                    <div id="listLayerPP" class="listLayer"></div>
+                </div>
+
+
+                <div class="sidebar-section pb-3">
+                    <div id="toggleKAB"
+                        class="flex items-center justify-start cursor-pointer hover:text-primary hover:bg-primary-content bg-white bg-opacity-10 p-2 rounded-lg open flex-1 gap-2 p-2">
+                        <input type="checkbox" id="checkAllKAB" class="toggle-all-checkbox toggle toggle-xs">
+                        <span class="text-sm hover:text-primary ">Daftar Kabupaten/Kota</span>
+                    </div>
+                    <div id="listLayerKAB" class="listLayer"></div>
+                </div>
+
+                <div class="sidebar-section pb-3">
+                    <div class="flex items-center justify-start bg-white bg-opacity-10 p-2 rounded-lg flex-1 gap-2 p-2">
+                        <input type="checkbox" checked="checked" class="toggle toggle-xs" id="toggleBackgroundMap" />
+                        <span class="text-md">Gambar Latar</span>
+                    </div>
                 </div>
 
                 <!-- Info Section -->
@@ -87,7 +131,7 @@
                     <div class="bg-white bg-opacity-10 p-2 rounded-lg text-xs">
                         <div class="mb-1">
                             <strong>Coordinates : </strong>
-                            <span id="currentCoords">-0.8917, 119.8707</span>
+                            <span id="currentCoords"></span>
                         </div>
                         <div>
                             <strong>Zoom Level : </strong>
@@ -134,16 +178,37 @@
             </div>
         </div>
     </main>
+
     <footer id="mobileFooter"
         class="block md:hidden fixed bottom-0 left-0 w-full bg-white bg-opacity-90 text-slate-700 text-center py-2 z-50 shadow border-t border-slate-200">
         <div id="footerMarkInfo"></div>
         SIH3 SULTENG &copy; 2025
     </footer>
-    
+
+    <!-- Modal -->
+<div id="modalData"  class="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-6xl p-4">
+        <div class="flex justify-between items-center border-b pb-2 mb-4">
+            <h2 id="modalTitle" class="text-lg font-bold">Data</h2>
+            <button onclick="closeModal()" class="text-red-500 text-xl font-bold">&times;</button>
+        </div>
+        <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+            <table class="table-auto border-collapse border border-gray-300 w-full text-sm">
+                <thead>
+                    <tr id="modalHeader" class="bg-gray-100"></tr>
+                </thead>
+                <tbody id="modalBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
             const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebarclose = document.querySelector('.sidebar-close');
 
             const observer = new MutationObserver(() => {
                 const visible = sidebar.classList.contains('open');
@@ -153,13 +218,30 @@
                     sidebarToggle.classList.remove('invisible');
                 }
             });
+
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+            });
+            sidebarclose.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+            });
+
             observer.observe(sidebar, {
                 attributes: true,
                 attributeFilter: ['class']
             });
-            
-            const centerOfMaps = [-1.2842, 121.8274];
-            const map = L.map('map').setView(centerOfMaps, 8);
+
+            const centerOfMaps = [-0.9071, 119.9119];
+            const map = L.map('map', {
+                zoomControl: false,
+            }).setView(centerOfMaps, 8);
+            map.on('popupopen', function(e) {
+                const popupContent = e.popup.getElement()?.querySelector('.leaflet-popup-content');
+                if (popupContent) {
+                    popupContent.style.width = ''; // hapus inline width
+                }
+            });
+
             const esriSatLayer = L.tileLayer(
                 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                     attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye',
@@ -172,6 +254,7 @@
                 KAB: L.layerGroup().addTo(map),
                 WS: L.layerGroup().addTo(map),
                 CAT: L.layerGroup().addTo(map),
+                PP: L.layerGroup().addTo(map),
                 // jika tambah baru tambahkan disini 1 : NEW: L.layerGroup().addTo(map),
             };
 
@@ -188,6 +271,7 @@
                 if (!container) return;
 
                 try {
+                    container.classList.add('px-2');
                     const response = await fetch(url);
                     if (!response.ok) throw new Error('Gagal fetch ' + url);
 
@@ -198,20 +282,51 @@
 
                     geoJsonData.features.forEach((feature, index) => {
                         const color = colorList[index % colorList.length] || '#007bff';
+                        // Tentukan style berdasarkan jenis geometri
+                        const style = (geoJsonFeature) => {
+                            const geometryType = geoJsonFeature.geometry.type;
 
-                        const layer = L.geoJSON(feature, {
-                            style: typeof customStyle === 'function'
-                                ? customStyle(color)
-                                : {
+                            if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
+                                return {
                                     color: color,
                                     weight: 0.5,
                                     opacity: 0.9,
                                     fillOpacity: 0.3,
                                     fillColor: color
-                                },
+                                };
+                            } else if (geometryType === 'LineString' || geometryType ===
+                                'MultiLineString') {
+                                return {
+                                    color: color,
+                                    weight: 3, // Garis lebih tebal untuk LineString
+                                    opacity: 0.9
+                                };
+                            }
+                            // Default style untuk jenis geometri selain Point
+                            return {
+                                color: '#333',
+                                weight: 1,
+                                opacity: 1
+                            };
+                        };
+
+                        // Tambahkan fungsi pointToLayer untuk fitur Point
+                        const pointToLayer = (geoJsonFeature, latlng) => {
+                            const icon = getIconForJenisPos(geoJsonFeature.properties
+                                .tag); // Mendapatkan ikon berdasarkan tag
+                            return L.marker(latlng, {
+                                icon: icon
+                            }); // Gunakan ikon pada marker
+                        };
+
+                        const layer = L.geoJSON(feature, {
+                            style: style, // Gunakan style untuk Polygon dan Line
+                            pointToLayer: pointToLayer, // Gunakan pointToLayer untuk Point
                             onEachFeature: (geoJsonFeature, leafletLayer) => {
-                                leafletLayer.bindPopup(
-                                    `<b>${feature.properties.name}</b>`);
+                                const viewPopup = setupPopUp(feature);
+                                leafletLayer.bindPopup(viewPopup, {
+                                    className: 'custom-popup'
+                                });
 
                                 if (typeof clickCallback === 'function') {
                                     leafletLayer.on('click', e => clickCallback(feature,
@@ -225,13 +340,12 @@
                             layerGroup.addLayer(layer);
                         }
 
-                        // Checkbox untuk layer ini
+                        // sidebar handler
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.checked = defaultShow;
-                        checkbox.className = 'mr-2';
+                        checkbox.className = 'mr-2 toggle toggle-xs';
 
-                        // Label
                         const label = document.createElement('label');
                         label.className = 'cursor-pointer flex items-center w-full';
                         label.textContent = feature.properties.name;
@@ -243,7 +357,7 @@
 
                         const toggleContainer = document.createElement('div');
                         toggleContainer.className =
-                            'flex items-center py-1 px-2 cursor-pointer hover:bg-blue-50 hover:text-primary';
+                            'flex items-center py-1 px-2 cursor-pointer hover:bg-blue-50 hover:text-primary text-sm';
                         toggleContainer.appendChild(checkbox);
                         toggleContainer.appendChild(label);
 
@@ -257,61 +371,102 @@
 
                         container.appendChild(toggleContainer);
                     });
+
                 } catch (error) {
                     console.error(`Error loading ${containerId}:`, error);
                 }
             }
 
-            await loadGeoLayer({
-                url: '/api/geo-features/map-kabupaten',
-                containerId: 'listLayerKAB',
-                layerGroup: layerGroups.KAB,
-                defaultShow: false,
-                colorList: [
-                    '#FF5733', '#C70039', '#900C3F', '#581845', '#FF8C00', '#FF4500',
-                    '#FF1493', '#FF69B4', '#FF6347', '#FFB6C1', '#FFD700', '#FFA500',
-                    '#FFDAB9', '#FFDEAD', '#FFFACD', '#EEE8AA', '#F0E68C', '#BDB76B',
-                    '#DAA520', '#B8860B', '#CD853F', '#D2691E', '#A0522D', '#8B4513'
-                ],
-                clickCallback: (feature, e) => getKabInfo(feature.properties.properties.KDWKB),
-                customStyle: (color) => ({
-                    color: color,
-                    weight: 1.5,
-                    opacity: 1,
-                    dashArray: '5, 5',
-                    fill: false
-                })
-            });
-            setupToggleAll('listLayerCAT', 'checkAllCAT', layerGroups.CAT);
 
-            await loadGeoLayer({
-                url: '/api/geo-features/map-ws',
-                containerId: 'listLayerWS',
-                layerGroup: layerGroups.WS,
-                defaultShow: false,
-                colorList: [
-                    '#1E90FF', '#00BFFF', '#87CEFA', '#4682B4', '#5F9EA0', '#6495ED',
-                    '#7B68EE', '#6A5ACD', '#483D8B', '#4169E1', '#0000CD', '#00008B',
-                    '#8A2BE2', '#9370DB', '#BA55D3', '#9400D3', '#9932CC', '#8B008B',
-                    '#6B8E23', '#3CB371', '#2E8B57', '#228B22', '#008000', '#006400'
-                ]
-            });
-            setupToggleAll('listLayerWS', 'checkAllWS', layerGroups.WS);
+            // Menggunakan konsistensi dalam penulisan dan struktur kode
+            const layerConfigs = [{
+                    layerType: "polygon",
+                    id_check_list: 'checkAllKAB',
+                    url: '/api/geo-features/map-kabupaten',
+                    containerId: 'listLayerKAB',
+                    layerGroup: layerGroups.KAB,
+                    defaultShow: false,
+                    colorList: [
+                        '#FF5733', '#C70039', '#900C3F', '#581845', '#FF8C00', '#FF4500',
+                        '#FF1493', '#FF69B4', '#FF6347', '#FFB6C1', '#FFD700', '#FFA500',
+                        '#FFDAB9', '#FFDEAD', '#FFFACD', '#EEE8AA', '#F0E68C', '#BDB76B',
+                        '#DAA520', '#B8860B', '#CD853F', '#D2691E', '#A0522D', '#8B4513'
+                    ],
+                    clickCallback: (feature, e) => getKabInfo(feature.properties.properties.KDWKB),
+                    customStyle: (color) => ({
+                        color: color,
+                        weight: 0.5,
+                        opacity: 1,
+                        dashArray: '5, 5',
+                        // fill: false
+                    })
+                },
+                {
+                    layerType: "polygon",
+                    id_check_list: 'checkAllWS',
+                    url: '/api/geo-features/map-ws',
+                    containerId: 'listLayerWS',
+                    layerGroup: layerGroups.WS,
+                    defaultShow: true,
+                    colorList: [
+                        '#BA55D3', '#8A2BE2', '#7B68EE', '#00BFFF', '#5F9EA0', '#9932CC',
+                        '#4169E1', '#4682B4', '#8B008B', '#1E90FF', '#6B8E23', '#3CB371',
+                        '#00CED1', '#483D8B', '#6A5ACD', '#228B22', '#2E8B57', '#0000CD',
+                        '#F08080', '#006400', '#D2691E', '#FF6347', '#8B4513', '#00008B'
+                    ],
+                    customStyle: (color) => ({
+                        color: color,
+                        weight: 1.5,
+                        dashArray: '5, 5',
+                    })
+                },
+                {
+                    layerType: "polygon",
+                    id_check_list: 'checkAllCAT',
+                    url: '/api/geo-features/map-cat',
+                    containerId: 'listLayerCAT',
+                    layerGroup: layerGroups.CAT,
+                    defaultShow: false,
+                    colorList: [
+                        '#00CED1', '#20B2AA', '#40E0D0', '#48D1CC', '#00FA9A', '#7FFFD4',
+                        '#7FFF00', '#ADFF2F', '#32CD32', '#90EE90', '#98FB98', '#00FF7F',
+                        '#DC143C', '#E9967A', '#FA8072', '#F08080', '#CD5C5C', '#8B0000',
+                        '#F4A460', '#DEB887', '#D2B48C', '#BC8F8F', '#FFE4B5', '#FFDAB9'
+                    ]
+                },
+                {
+                    layerType: "point",
+                    id_check_list: 'checkAllPP',
+                    url: '/api/pos-pantau',
+                    containerId: 'listLayerPP',
+                    layerGroup: layerGroups.PP,
+                    defaultShow: true,
+                    customStyle: (feature) => {
+                        const jenis_pos = feature.jenis_pos;
+                        const icon = getIconForJenisPos(jenis_pos);
+                        return {
+                            icon: icon
+                        };
+                    }
+                }
 
-            await loadGeoLayer({
-                url: '/api/geo-features/map-cat',
-                containerId: 'listLayerCAT',
-                layerGroup: layerGroups.CAT,
-                defaultShow: false,
-                colorList: [
-                    '#00CED1', '#20B2AA', '#40E0D0', '#48D1CC', '#00FA9A', '#7FFFD4',
-                    '#7FFF00', '#ADFF2F', '#32CD32', '#90EE90', '#98FB98', '#00FF7F',
-                    '#DC143C', '#E9967A', '#FA8072', '#F08080', '#CD5C5C', '#8B0000',
-                    '#F4A460', '#DEB887', '#D2B48C', '#BC8F8F', '#FFE4B5', '#FFDAB9'
-                ]
-            });
-            setupToggleAll('listLayerKAB', 'checkAllKAB', layerGroups.KAB);
-            // jika tambah baru tambahkan disini 2 (dari await sampai setupToggleAll)
+            ];
+
+            // Load Geo Layers with the configurations
+            for (const config of layerConfigs) {
+                await loadGeoLayer({
+                    url: config.url,
+                    containerId: config.containerId,
+                    layerGroup: config.layerGroup,
+                    defaultShow: config.defaultShow,
+                    colorList: config.colorList,
+                    clickCallback: config.clickCallback,
+                    customStyle: config.customStyle
+                });
+                await setupToggleAll(config.containerId, config.id_check_list, layerGroups.KAB);
+                document.getElementById(config.id_check_list).checked = config.defaultShow
+
+            }
 
             async function getKabInfo(kab_id) {
                 try {
@@ -332,7 +487,7 @@
                                 }).addTo(map)
                                 .bindPopup(
                                     `<b>${nama_pos}</b><br>Jenis Pos: ${jenis_pos}<br>Lat: ${latitude}<br>Lng: ${longitude}`
-                                    );
+                                );
                             addedMarkers.add(latLng);
                         }
                     });
@@ -355,6 +510,16 @@
                 });
             }
 
+            function toggleBackgroundMap() {
+                // Cek jika layer esriSatLayer sudah ada di peta
+                if (map.hasLayer(esriSatLayer)) {
+                    map.removeLayer(esriSatLayer); // Hapus layer jika sudah ada
+                } else {
+                    esriSatLayer.addTo(map); // Tambahkan layer jika belum ada
+                }
+            }
+            document.getElementById('toggleBackgroundMap').addEventListener('click', toggleBackgroundMap);
+
             document.getElementById('homeButton').addEventListener('click', () => {
                 window.location.href = '/';
             });
@@ -363,19 +528,20 @@
             document.getElementById('toggleCAT').addEventListener('click', () => {
                 document.getElementById('listLayerCAT').classList.toggle('open');
             });
-
             document.getElementById('toggleWS').addEventListener('click', () => {
                 document.getElementById('listLayerWS').classList.toggle('open');
             });
-
             document.getElementById('toggleKAB').addEventListener('click', () => {
                 document.getElementById('listLayerKAB').classList.toggle('open');
+            });
+            document.getElementById('togglePP').addEventListener('click', () => {
+                document.getElementById('listLayerPP').classList.toggle('open');
             });
 
             // Display koordinat dan zoom
             map.on('mousemove', e => {
                 document.getElementById('currentCoords').textContent =
-                    `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+                    `${decimalToDMS(e.latlng.lat)}, ${decimalToDMS(e.latlng.lng)}`;
             });
 
             map.on('zoomend', () => {
@@ -398,7 +564,200 @@
                 });
             }
 
+            function setupPopUp(feature) {
+                // Wilayah Sungai
+                if (feature.properties.tag === "Wilayah Sungai") {
+                    return `
+                        <div class="w-full space-y-3">
+                            <h4 class="font-bold text-base text-gray-800 mb-1 break-words">
+                                ${feature.properties.name}
+                            </h4>
+                            <table class="w-full text-sm border-collapse">
+                                <tbody>
+                                    <tr>
+                                        <td class="text-gray-600 pr-2">Luas WS</td>
+                                        <td class="text-gray-600">:</td>
+                                        <td class="font-semibold text-gray-800 break-words">
+                                            ${feature.ws.luas ?? 0} km²
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-gray-600 pr-2">Kewenangan</td>
+                                        <td class="text-gray-600">:</td>
+                                        <td class="font-semibold text-blue-600 break-words">
+                                            ${feature.ws.kewenangan.singkatan}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+
+                // Pos Klimatologi, Pos Duga Air, Pos Curah Hujan
+                if (['Pos Klimatologi', 'Pos Duga Air', 'Pos Curah Hujan'].includes(feature.properties.tag)) {
+                    const btnDtPk = feature.data_klimatologi.length ?
+                        `<tr>
+                            <td colspan="3" class="p-2">
+                                <button onclick='openModal(${JSON.stringify(feature.data_klimatologi)}, {
+                                    title: "Data Klimatologi",
+                                    columns: [
+                                        { label: "Tanggal", key: "tanggal" },
+                                        { label: "Kecepatan Angin", key: "kecepatan_angin" },
+                                        { label: "Arah Angin", key: "arah_angin" },
+                                        { label: "Kelembapan", key: "kelembapan" },
+                                        { label: "Suhu", key: "suhu" },
+                                        { label: "Curah Hujan", key: "curah_hujan" },
+                                        { label: "Keterangan", key: "keterangan" }
+                                    ]
+                                })' class="w-full btn btn-primary btn-sm">
+                                    Data Klimatologi
+                                </button>
+                            </td>
+                        </tr>` : '';
+
+                        const btnDtCh = feature.data_curah_hujan.length ?
+                            `<tr>
+                                <td colspan="3" class="p-2">
+                                    <button onclick='openModal(${JSON.stringify(feature.data_curah_hujan)}, {
+                                        title: "Data Curah Hujan",
+                                        columns: [
+                                            { label: "Tanggal", key: "tanggal" },
+                                            { label: "Curah Hujan", key: "curah_hujan" },
+                                            { label: "Keterangan", key: "keterangan" }
+                                        ]
+                                    })' class="w-full btn btn-primary btn-sm">
+                                        Data Curah Hujan
+                                    </button>
+                                </td>
+                            </tr>` : '';
+
+                        const btnDtTma = feature.data_tinggi_muka_air.length ?
+                            `<tr>
+                                <td colspan="3" class="p-2">
+                                    <button onclick='openModal(${JSON.stringify(feature.data_tinggi_muka_air)}, {
+                                        title: "Data Tinggi Muka Air",
+                                        columns: [
+                                            { label: "Tanggal", key: "tanggal" },
+                                            { label: "Tinggi Muka Air (cm)", key: "tinggi_muka_air" },
+                                            { label: "Keterangan", key: "keterangan" }
+                                        ]
+                                    })' class="w-full btn btn-primary btn-sm">
+                                        Data Tinggi Muka Air
+                                    </button>
+                                </td>
+                            </tr>` : '';
+
+
+                    return `<div class="w-full space-y-3">
+                            <h4 class="font-bold text-base text-gray-800 mb-1 break-words">
+                                ${feature.jenis_pos} - ${feature.nama_pos}
+                            </h4>
+                            <table class="w-full text-sm border-collapse">
+                                <tbody>
+                                    <tr>
+                                        <td class="text-gray-600 pr-2">Kewenangan</td>
+                                        <td class="text-gray-600">:</td>
+                                        <td class="font-semibold text-blue-600 break-words">
+                                            ${feature.kewenangan.singkatan}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-gray-600 pr-2">Koordinat</td>
+                                        <td class="text-gray-600">:</td>
+                                        <td class="font-semibold text-gray-800 break-words">
+                                            ${decimalToDMS(feature.latitude)}<br>
+                                            ${decimalToDMS(feature.longitude)}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-gray-600 pr-2 align-top">Lokasi</td>
+                                        <td class="text-gray-600 align-top">:</td>
+                                        <td class="font-semibold text-blue-600 break-words">
+                                            Kabupaten : ${feature.kabupaten.nama} <br>
+                                            Kecamatan : ${feature.kecamatan.nama} <br>
+                                            Desa :
+                                        </td>
+                                    </tr>
+                                    ${btnDtPk}
+                                    ${btnDtCh}
+                                    ${btnDtTma}
+                                </tbody>
+                            </table>
+                        </div>`;
+                }
+
+                // Default
+                return `<b class="break-words">${feature.properties.name}</b>`;
+            }
+
+
+
         });
+
+        function decimalToDMS(decimal, isLatitude = true) {
+            const isNegative = decimal < 0;
+            const absolute = Math.abs(decimal);
+
+            const degrees = Math.floor(absolute);
+            const minutesDecimal = (absolute - degrees) * 60;
+            const minutes = Math.trunc(minutesDecimal);
+
+            const secondsDecimal = (minutesDecimal - minutes) * 60;
+            const seconds = Number((secondsDecimal + Number.EPSILON).toFixed(6));
+
+            const direction = isLatitude ?
+                (isNegative ? 'S' : 'N') :
+                (isNegative ? 'W' : 'E');
+
+            return `${degrees}° ${minutes}' ${seconds}" ${direction}`;
+        }
+
+        function DMSToDecimal(dms) {
+            // Regex untuk memisahkan derajat, menit, detik dari string
+            const regex = /^(-?\d+)° (\d+)' (\d+)"$/;
+            const matches = dms.match(regex);
+
+            if (matches) {
+                const degrees = parseInt(matches[1]);
+                const minutes = parseInt(matches[2]);
+                const seconds = parseInt(matches[3]);
+
+                const sign = degrees < 0 ? -1 : 1;
+                const decimal = Math.abs(degrees) + minutes / 60 + seconds / 3600;
+                return sign * decimal;
+            } else {
+                throw new Error("Format DMS tidak valid. Pastikan dalam format 'deg° min' sec\"'");
+            }
+        }
+
+        function openModal(data, fields) {
+            
+            const modalTitle = document.getElementById('modalTitle');
+            const modalHeader = document.getElementById('modalHeader');
+            const modalBody = document.getElementById('modalBody');
+
+            // Judul modal dari fields.title
+            modalTitle.textContent = fields.title || "Data";
+
+            // Header tabel
+            modalHeader.innerHTML = fields.columns.map(col => `<th class="border p-2">${col.label}</th>`).join('');
+
+            // Isi tabel
+            modalBody.innerHTML = data.map(row => `
+                <tr>
+                    ${fields.columns.map(col => `<td class="border p-2">${row[col.key] ?? ''}</td>`).join('')}
+                </tr>
+            `).join('');
+
+            // Tampilkan modal
+            document.getElementById('modalData').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modalData').classList.add('hidden');
+        }
+
     </script>
 
 </body>

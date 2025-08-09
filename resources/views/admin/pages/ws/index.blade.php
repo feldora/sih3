@@ -3,8 +3,10 @@
 @section('content')
 <div class="mx-auto p-4 bg-white shadow-md rounded-lg">
     <h1 class="text-2xl font-bold mb-4">Daftar Wilayah Sungai</h1>
-    <a href="{{ route('admin.wilayah-sungai.create') }}" class="btn btn-sm btn-primary mb-4">Tambah Wilayah Sungai</a>
-
+    <div class="flex justify-end items-center mb-6 gap-5">
+        <a href="{{ route('admin.loadshp.index') }}?type=Wilayah Sungai" class="btn btn-sm mb-4 btn-info">Tambah Dari SHP</a>
+        <a href="{{ route('admin.wilayah-sungai.create') }}" class="btn btn-sm btn-primary mb-4">Tambah Wilayah Sungai</a>
+    </div>
     @if(session('success'))
         <div class="alert alert-success mb-4">{{ session('success') }}</div>
     @endif
@@ -13,6 +15,8 @@
         <thead>
             <tr>
                 <th class="border border-gray-300 p-2">Nama</th>
+                <th class="border border-gray-300 p-2">Kewenangan</th>
+                <th class="border border-gray-300 p-2">Luas</th>
                 <th class="border border-gray-300 p-2">Deskripsi</th>
                 <th class="border border-gray-300 p-2">Aksi</th>
             </tr>
@@ -21,6 +25,8 @@
             @foreach ($wilayahSungais as $wilayahSungai)
             <tr>
                 <td class="border border-gray-300 p-2">{{ $wilayahSungai->name }}</td>
+                <td class="border border-gray-300 p-2">{{ $wilayahSungai->kewenangan->nama }}</td>
+                <td class="border border-gray-300 p-2">{{ $wilayahSungai->luas }}</td>
                 <td class="border border-gray-300 p-2">{{ $wilayahSungai->description }}</td>
                 <td class="border border-gray-300 p-2">
                     <a href="{{ route('admin.wilayah-sungai.edit', $wilayahSungai) }}" class="btn btn-sm btn-warning">Edit</a>
