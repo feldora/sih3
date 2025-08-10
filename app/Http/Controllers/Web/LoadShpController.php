@@ -285,7 +285,7 @@ class LoadShpController extends Controller
                     $signature = $this->saveGeoJsonFeatureToDatabase($featureToSave);
                     if ($signature) {
                         $data['signature'] = $signature;
-                        $data['instansi_id'] = $request->input('kewenangan');
+                        $data['instansi_id'] = $request->input('instansi_id');
                         Log::info(json_encode($data));
                         \App\Models\WilayahSungai::create($data);
                     }
