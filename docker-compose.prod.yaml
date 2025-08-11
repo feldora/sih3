@@ -1,0 +1,102 @@
+services:
+
+  sih3.nginx:
+    image: nginx:alpine
+    depends_on:
+      - sih3.app
+    ports:
+      - "${APP_PORT:-80}:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - sih3-storage:/var/www/html/storage
+    networks:
+      - sih3net
+
+  sih3.app:
+    build:
+      context: '.'
+      dockerfile: docker/php/8.4/Dockerfile.production
+      args:
+        WWWGROUP: '${WWWGROUP}'
+    image: 'fikridulumina/sih3-app:latest'
+    env_file:
+      - .env
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    # ports:
+    #   - '${APP_PORT:-80}:80'
+    #   - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+    environment:
+      WWWUSER: '${WWWUSER}'
+      LARAVEL_sih3: 1
+      XDEBUG_MODE: 'off'
+      IGNITION_LOCAL_SITES_PATH: '${PWD}'
+    volumes:
+      - '.:/var/www/html'
+      - 'sih3-storage:/var/www/html/storage'
+    networks:
+      - sih3
+    depends_on:
+      - sih3.pgsql
+      - sih3.redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost/health || exit 1"]
+      interval: 30s
+      retries: 3
+
+  sih3.pgsql:
+    build:
+      context: ./docker/pgsql/17.5-postgis
+      dockerfile: Dockerfile
+    image: 'fikridulumina/sih3-postgres:latest'
+    env_file:
+      - .env
+    command: >
+      postgres
+      -c shared_buffers=2GB
+      -c work_mem=64MB
+      -c effective_cache_size=6GB
+      -c maintenance_work_mem=256MB
+      -c random_page_cost=1.1
+      -c seq_page_cost=1.0
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+    environment:
+      PGPASSWORD: '${DB_PASSWORD:-secret}'
+      POSTGRES_DB: '${DB_DATABASE}'
+      POSTGRES_USER: '${DB_USERNAME}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+    volumes:
+      - sih3-pgsql:/var/lib/postgresql/data
+    networks:
+      - sih3
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 30s
+      retries: 3
+
+  sih3.redis:
+    image: redis:alpine
+    env_file:
+      - .env
+    volumes:
+      - sih3-redis:/data
+    networks:
+      - sih3
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      retries: 3
+
+networks:
+  sih3:
+    driver: bridge
+
+volumes:
+  sih3-pgsql:
+    driver: local
+  sih3-redis:
+    driver: local
+  sih3-storage:
+    driver: local

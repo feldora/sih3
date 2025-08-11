@@ -16,9 +16,10 @@ return new class extends Migration
             $table->string('nama_sungai');
             $table->float('panjang_sungai');
             $table->float('luas_das');
-            $table->text('hasil_uji_kualitas_air')->nullable();
-            $table->json('geojson')->nullable();
-            $table->string('status')->default('aktif');
+            $table->float('ordo');
+            // $table->text('hasil_uji_kualitas_air')->nullable();
+            // $table->json('geojson')->nullable();
+            // $table->string('status')->default('aktif');
             $table->unsignedBigInteger('wilayah_sungai_id');
             $table->timestamps();
         });

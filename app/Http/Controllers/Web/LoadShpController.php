@@ -63,19 +63,35 @@ class LoadShpController extends Controller
 
             Log::info("ZIP berhasil diekstrak ke: {$extractPath}");
 
-            $shpFilePath = $this->findShpInDir($extractPath);
-            if (!$shpFilePath || !file_exists($shpFilePath)) {
-                return response()->json(['success' => false, 'message' => 'File .shp tidak ditemukan di dalam ZIP.'], 400);
-            }
+$shpFiles = $this->findShpInDir($extractPath);
 
-            $geoJson = $this->convertShpToGeoJson($shpFilePath);
+if (empty($shpFiles)) {
+    return response()->json(['success' => false, 'message' => 'Tidak ada file .shp ditemukan di dalam ZIP.'], 400);
+}
 
-            File::delete($tmpPath);
-            if (File::isDirectory($extractPath)) {
-                File::deleteDirectory($extractPath);
-            }
+$allFeatures = [];
 
-            return response()->json(['success' => true, 'geojson' => $geoJson]);
+foreach ($shpFiles as $shpFilePath) {
+    try {
+        $geoJson = $this->convertShpToGeoJson($shpFilePath);
+
+        // Gabungkan semua fitur dari setiap file
+        if (isset($geoJson['features'])) {
+            $allFeatures = array_merge($allFeatures, $geoJson['features']);
+        }
+    } catch (\Exception $e) {
+        Log::error("Gagal mengonversi file {$shpFilePath}: {$e->getMessage()}");
+        return response()->json(['success' => false, 'message' => "Gagal mengonversi file {$shpFilePath}."], 500);
+    }
+}
+
+return response()->json([
+    'success' => true,
+    'geojson' => [
+        'type' => 'FeatureCollection',
+        'features' => $allFeatures
+    ]
+]);
 
         } catch (\Exception $e) {
             Log::error("Error proses shapefile: {$e->getMessage()}");
@@ -83,45 +99,63 @@ class LoadShpController extends Controller
         }
     }
 
-    private function findShpInDir(string $dir): ?string
-    {
-        $allFiles = File::allFiles($dir);
-        foreach ($allFiles as $f) {
-            if (strtolower($f->getExtension()) === 'shp') {
-                return $f->getPathname();
-            }
-        }
-        return null;
-    }
+private function findShpInDir(string $dir): array
+{
+    $allFiles = File::allFiles($dir);
+    $shpFiles = [];
 
-    private function convertShpToGeoJson(string $shpPath): array
-    {
-        try {
-            $reader = new ShapefileReader($shpPath);
-            $features = [];
-
-            while ($rec = $reader->fetchRecord()) {
-                if ($rec->isDeleted()) continue;
-
-                $geometry = json_decode($rec->getGeoJSON(), true);
-
-                // Deteksi dan konversi jika koordinat dalam EPSG:3857
-                if ($this->isLikelyMercator($geometry)) {
-                    $geometry['coordinates'] = $this->convertCoordinatesToWGS84($geometry['coordinates']);
-                }
-
-                $features[] = [
-                    'type' => 'Feature',
-                    'geometry' => $geometry,
-                    'properties' => $rec->getDataArray(),
-                ];
-            }
-
-            return ['type' => 'FeatureCollection', 'features' => $features];
-        } catch (ShapefileException $e) {
-            throw new \Exception('Error reading SHP: ' . $e->getMessage());
+    foreach ($allFiles as $f) {
+        if (strtolower($f->getExtension()) === 'shp') {
+            $shpFiles[] = $f->getPathname(); // Menambahkan file .shp ke array
         }
     }
+
+    return $shpFiles;
+}
+
+
+private function convertShpToGeoJson(string $shpPath): array
+{
+    try {
+        $reader = new ShapefileReader($shpPath);
+        $features = [];
+
+        while ($rec = $reader->fetchRecord()) {
+            if ($rec->isDeleted()) continue;
+
+            $geoJsonStr = $rec->getGeoJSON();
+            if (!$geoJsonStr || strtolower($geoJsonStr) === 'null') continue;
+
+            $geometry = json_decode($geoJsonStr, true);
+
+            // Skip jika geometry tidak valid
+            if (
+                !$geometry ||
+                !isset($geometry['type']) ||
+                !isset($geometry['coordinates']) ||
+                !is_array($geometry['coordinates']) ||
+                empty($geometry['coordinates'])
+            ) {
+                continue;
+            }
+
+            // Konversi EPSG:3857 ke WGS84 jika perlu
+            if ($this->isLikelyMercator($geometry)) {
+                $geometry['coordinates'] = $this->convertCoordinatesToWGS84($geometry['coordinates']);
+            }
+
+            $features[] = [
+                'type' => 'Feature',
+                'geometry' => $geometry,
+                'properties' => $rec->getDataArray(),
+            ];
+        }
+
+        return ['type' => 'FeatureCollection', 'features' => $features];
+    } catch (ShapefileException $e) {
+        throw new \Exception('Error reading SHP: ' . $e->getMessage());
+    }
+}
 
 
     public function saveGeo(Request $request)
