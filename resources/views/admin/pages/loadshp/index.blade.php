@@ -154,7 +154,8 @@
             #fieldMappingForm {
                 overflow: visible !important;
             }
-            #mapping-fields > div {
+
+            #mapping-fields>div {
                 margin-bottom: 1rem;
             }
         </style>
@@ -173,6 +174,7 @@
         let currentGeoJsonLayer; // Layer grup (untuk fitBounds)
         let dataTableInstance = null;
         let newFeatures = [];
+        let errFeatures = [];
         const type = @json($data['type'] ?? null);
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -201,6 +203,9 @@
                     hideLoadingModal();
                     if (data.success) {
                         currentGeoJsonData = normalizeGeoJson(data.geojson);
+                        currentGeoJsonData.features = currentGeoJsonData.features
+                            .map(f => sanitizeGeoJSONFeature(f))
+                            .filter(f => f !== null);
                         displayGeoJson(currentGeoJsonData);
                         rendertabelFeatures(currentGeoJsonData);
                         showToast('Shapefile berhasil diload dan dikonversi ke GeoJSON!', 'success');
@@ -219,13 +224,14 @@
         });
 
         document.getElementById('saveVisibilityFeatures').addEventListener('click', function(e) {
-            if(!currentGeoJsonData){
-                showToast('Load File SHP terlebihdahulu','warning')
+            if (!currentGeoJsonData) {
+                showToast('Load File SHP terlebihdahulu', 'warning')
                 return false
             }
             let x = getVisibleFeatures();
             if (x.length === 0) {
-                showToast('Pilih Data yang akan di simpan terlebih dahulu dengan mengklik ikon mata pda tabel.', 'warning')
+                showToast('Pilih Data yang akan di simpan terlebih dahulu dengan mengklik ikon mata pda tabel.',
+                    'warning')
                 return false;
             }
             getFormSave(type);
@@ -239,44 +245,164 @@
             document.getElementById('loading-modal').checked = false;
         }
 
+        // Sanitizer helper
+        function sanitizeGeoJSONFeature(originalFeature) {
+            if (!originalFeature || originalFeature.type !== 'Feature' || !originalFeature.geometry) {
+                return null;
+            }
+
+            // deep clone supaya tidak memodifikasi input asli
+            const feature = JSON.parse(JSON.stringify(originalFeature));
+
+            // 1) Normalisasi geometry.type: hapus trailing 'M' (mis. LineStringM -> LineString)
+            if (typeof feature.geometry.type === 'string') {
+                feature.geometry.type = feature.geometry.type.replace(/m$/i, '');
+            }
+
+            // 2) Validasi/bersihkan bbox: harus array angka
+            if (feature.bbox) {
+                if (!Array.isArray(feature.bbox) || feature.bbox.some(v => isNaN(Number(v)))) {
+                    delete feature.bbox;
+                } else {
+                    feature.bbox = feature.bbox.map(Number);
+                }
+            }
+
+            // helper untuk konversi angka yang aman
+            function toNumberOrNull(v) {
+                if (v === null || v === undefined) return null;
+                if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+                const n = Number(String(v).trim());
+                return Number.isFinite(n) ? n : null;
+            }
+
+            // 3) Sanitasi coordinates (rekursif)
+            function sanitizeCoords(coords) {
+                if (!Array.isArray(coords)) return null;
+
+                // Jika ini posisi (array angka) => konversi tiap elemen ke number
+                const isPosition = coords.length > 0 && coords.every(item => typeof item !== 'object');
+                if (isPosition) {
+                    const nums = coords.map(toNumberOrNull);
+                    // minimal harus ada lon & lat valid
+                    if (nums.length < 2 || nums[0] === null || nums[1] === null) return null;
+                    // Ambil maksimal 3 elemen (lon, lat, z) dan buang elemen lainnya (mis. M)
+                    return nums.slice(0, 3);
+                }
+
+                // Jika nested array (LineString, MultiLineString, Polygon, dsb.)
+                const out = coords
+                    .map(sanitizeCoords) // rekursif
+                    .filter(c => c !== null);
+                return out.length > 0 ? out : null;
+            }
+
+            const sanitizedCoords = sanitizeCoords(feature.geometry.coordinates);
+            if (!sanitizedCoords) {
+                return null;
+            }
+            feature.geometry.coordinates = sanitizedCoords;
+
+            return feature;
+        }
+
+        // Contoh penggunaan di displayGeoJson
         function displayGeoJson(geoJsonData) {
             if (currentGeoJsonLayer) {
                 map.removeLayer(currentGeoJsonLayer);
             }
 
-            featureLayers.forEach(layer => map.removeLayer(layer));
+            // clear lama
+            featureLayers.forEach(layer => {
+                if (layer) map.removeLayer(layer);
+            });
             featureLayers = [];
             visibleFeatures = [];
 
-            geoJsonData.features.forEach((feature, index) => {
-                const layer = L.geoJSON(feature, {
-                    style: {
-                        color: '#3388ff',
-                        weight: 2,
-                        opacity: 1,
-                        fillOpacity: 0.2
-                    },
-                    onEachFeature: function(feature, layer) {
-                        if (feature.properties) {
-                            let popupContent = '<div class="popup-content p-2">';
-                            popupContent += '<h6 class="font-semibold text-base mb-2">Properties:</h6>';
-                            for (let key in feature.properties) {
-                                popupContent +=
-                                    `<div class="mb-1"><strong>${key}:</strong> ${feature.properties[key]}</div>`;
-                            }
-                            popupContent += '</div>';
-                            layer.bindPopup(popupContent);
-                        }
-                    }
-                });
+            // kalau mau proses semua features: gunakan geoJsonData.features
+            // disini saya gunakan single firstFeature sesuai kode sebelumnya
+            let firstFeature = [geoJsonData.features[0]];
 
-                featureLayers[index] = layer; // Simpan tanpa ditambahkan ke map
-                visibleFeatures[index] = false; // Default: hidden
+            geoJsonData.features.forEach((feature, index) => {
+                try {
+                    const sanitized = sanitizeGeoJSONFeature(feature);
+                    if (!sanitized) {
+                        errFeatures[index] = {
+                            message: `Skipping invalid/unsupported GeoJSON feature at index ${index}`,
+                            data: feature
+                        };
+                        console.warn(`Skipping invalid/unsupported GeoJSON feature at index ${index}`, feature);
+                        return;
+                    }
+
+                    let layer;
+                    try {
+                        layer = L.geoJSON(sanitized, {
+                            style: {
+                                color: '#3388ff',
+                                weight: 2,
+                                opacity: 1,
+                                fillOpacity: 0.2
+                            },
+                            onEachFeature: function(feat, lyr) {
+                                try {
+                                    if (feat.properties) {
+                                        let popupContent = '<div class="popup-content p-2">';
+                                        popupContent +=
+                                            '<h6 class="font-semibold text-base mb-2">Properties:</h6>';
+                                        for (let key in feat.properties) {
+                                            popupContent +=
+                                                `<div class="mb-1"><strong>${key}:</strong> ${feat.properties[key]}</div>`;
+                                        }
+                                        popupContent += '</div>';
+                                        lyr.bindPopup(popupContent);
+                                    }
+                                } catch (err) {
+                                    errFeatures[index] = {
+                                        message: `Error building popup for feature index ${index}: ${err}`,
+                                        data: feature
+                                    };
+                                    console.error(`Error building popup for feature index ${index}:`,
+                                        err);
+                                }
+                            }
+                        });
+                    } catch (geoErr) {
+                        errFeatures[index] = {
+                            message: `Leaflet rejected sanitized feature at index ${index}: ${geoErr} , ${sanitized}`,
+                            data: feature
+                        };
+                        console.error(`Leaflet rejected sanitized feature at index ${index}:`, geoErr, sanitized);
+                        return;
+                    }
+
+                    if (layer) {
+                        featureLayers.push(layer);
+                        visibleFeatures.push(false);
+                    }
+                } catch (err) {
+                    errFeatures[index] = {
+                        message: `Unexpected error processing feature index ${index}: ${err}`,
+                        data: feature
+                    };
+                    console.error(`Unexpected error processing feature index ${index}:`, err);
+                }
             });
 
-            const tempGroup = L.featureGroup(featureLayers);
-            currentGeoJsonLayer = tempGroup;
-            map.fitBounds(tempGroup.getBounds());
+            // pastikan tidak ada undefined saat buat featureGroup
+            const validLayers = featureLayers.filter(l => l);
+            if (validLayers.length > 0) {
+                const tempGroup = L.featureGroup(validLayers);
+                currentGeoJsonLayer = tempGroup;
+                // cek getBounds aman
+                try {
+                    map.fitBounds(tempGroup.getBounds());
+                } catch (err) {
+                    console.warn('Tidak bisa fitBounds (bounds invalid):', err);
+                }
+            } else {
+                console.warn('No valid features to display after sanitization.');
+            }
         }
 
         function rendertabelFeatures(geoJsonData) {
@@ -350,12 +476,10 @@
 
             dataTableInstance = new DataTable('#FeatureCollection', {
                 scrollX: true,
-                columnDefs: [
-                    {
-                        targets: -1,        // Kolom terakhir (tombol)
-                        orderable: false    // Nonaktifkan sorting
-                    }
-                ]
+                columnDefs: [{
+                    targets: -1, // Kolom terakhir (tombol)
+                    orderable: false // Nonaktifkan sorting
+                }]
 
             });
             dataTableInstance.columns().every(function(index) {
@@ -380,16 +504,19 @@
 
 
             let allVisible = false;
-            document.addEventListener('click', function (e) {
+            document.addEventListener('click', function(e) {
                 if (e.target.closest('#toggleAllFeatures')) {
                     toggleSemuaFitur(); // Fungsi buatanmu sendiri
                 }
             });
+
             function toggleSemuaFitur() {
                 const semuaTertampil = visibleFeatures.every(v => v === true);
                 const toggleBtn = document.getElementById('toggleAllFeatures');
 
-                const visibleRowIndexes = dataTableInstance.rows({ filter: 'applied' }).indexes().toArray();
+                const visibleRowIndexes = dataTableInstance.rows({
+                    filter: 'applied'
+                }).indexes().toArray();
 
                 visibleRowIndexes.forEach(index => {
                     const layer = featureLayers[index];
@@ -427,6 +554,12 @@
         }
 
         function lihatFeature(index) {
+            if (errFeatures[index]) {
+                console.log(errFeatures[index].data);
+
+                showToast(errFeatures[index].message, 'error');
+                return false;
+            }
             const layer = featureLayers[index];
             if (!layer) return;
 
@@ -470,6 +603,52 @@
             if (!currentGeoJsonData || !currentGeoJsonData.features) return [];
 
             return newFeatures.map(index => currentGeoJsonData.features[index]);
+        }
+        
+        function sanitizeGeoJSONFeature(feature) {
+            if (!feature || typeof feature !== 'object') {
+                return null; // Feature tidak valid
+            }
+
+            // Pastikan type = Feature
+            if (feature.type !== 'Feature') {
+                return null;
+            }
+
+            // Bersihkan geometry
+            if (!feature.geometry || typeof feature.geometry !== 'object') {
+                return null;
+            }
+
+            // 1️⃣ Hapus "M" di akhir tipe geometry (LineStringM → LineString)
+            if (typeof feature.geometry.type === 'string') {
+                feature.geometry.type = feature.geometry.type.replace(/M$/i, '');
+            }
+
+            // 2️⃣ Hapus bbox yang tidak valid di geometry
+            if (feature.geometry.bbox && (!Array.isArray(feature.geometry.bbox) || feature.geometry.bbox.some(v => isNaN(
+                    Number(v))))) {
+                delete feature.geometry.bbox;
+            }
+
+            // 3️⃣ Hapus bbox invalid di root feature
+            if (feature.bbox && (!Array.isArray(feature.bbox) || feature.bbox.some(v => isNaN(Number(v))))) {
+                delete feature.bbox;
+            }
+
+            // 4️⃣ Paksa koordinat jadi 2D
+            const stripZ = coords => {
+                if (Array.isArray(coords[0])) {
+                    return coords.map(stripZ);
+                }
+                return coords.slice(0, 2); // Ambil hanya lon & lat
+            };
+
+            if (feature.geometry.coordinates) {
+                feature.geometry.coordinates = stripZ(feature.geometry.coordinates);
+            }
+
+            return feature;
         }
 
         document.getElementById('downloadGeoJson').addEventListener('click', function() {
@@ -565,7 +744,7 @@
                                 <label class="label">${field}</label>
                                 <input type="text" name="${field}" class="input input-bordered w-full" />
                             `;
-                        } else if(mode === 'mapping') {
+                        } else if (mode === 'mapping') {
                             // Select multiple (mapping)
                             const selectId = `select-${field}`;
                             wrapper.innerHTML = `
@@ -573,7 +752,7 @@
                                 <select id="${selectId}" name="mapped[${field}][]" class="w-full" multiple></select>
                             `;
                         } else if (mode === 'instansi') {
-                            
+
                             const selectId = `select-${field}`;
                             wrapper.innerHTML = `
                                 <label class="label">${field}</label>
@@ -630,27 +809,27 @@
             formData.append('pos_type', type);
 
             fetch(form.action, {
-                method: form.method,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    // Kalau form pakai multipart/form-data, jangan set Content-Type manual
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                document.getElementById('my_modal_1').close();
-                showToast(data.message, 'success')
-                // Lakukan sesuatu dengan response, misalnya tampilkan pesan sukses
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('my_modal_1').close();
-                showToast(error, 'warning')
-                // Tampilkan pesan error
-            });
+                    method: form.method,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content'),
+                        // Kalau form pakai multipart/form-data, jangan set Content-Type manual
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    document.getElementById('my_modal_1').close();
+                    showToast(data.message, 'success')
+                    // Lakukan sesuatu dengan response, misalnya tampilkan pesan sukses
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('my_modal_1').close();
+                    showToast(error, 'warning')
+                    // Tampilkan pesan error
+                });
         });
-
     </script>
 @endpush

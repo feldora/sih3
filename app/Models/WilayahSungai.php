@@ -29,4 +29,14 @@ class WilayahSungai extends Model
     public function feature(){
         return $this->hasOne(GeoFeature::class, 'signature', 'signature');
     }
+    
+    protected static function booted()
+    {
+        static::deleting(function ($wilayahSungai) {
+            DB::transaction(function () use ($wilayahSungai) {
+                $wilayahSungai->feature()->delete();
+            });
+        });
+    }
+
 }

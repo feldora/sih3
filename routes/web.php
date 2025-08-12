@@ -141,6 +141,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         'update' => 'sungai.update',
         'destroy' => 'sungai.destroy',
     ]);
+    Route::prefix('sungai/{sungai}/media')->name('sungai.media.')->group(function () {
+        Route::get('{media}/download', [SungaiController::class, 'downloadMedia'])->name('download');
+        Route::delete('{media}', [SungaiController::class, 'deleteMedia'])->name('delete');
+        Route::get('/', [SungaiController::class, 'listMedia'])->name('list');
+    });
+
     Route::resource('loadshp', LoadShpController::class);
     Route::post('loadshp/saveGeo', [LoadShpController::class, 'saveGeo'])->name('loadshp.saveGeo');
     Route::get('formFields', [FormFieldsController::class, 'getFields'])->name('formFields');

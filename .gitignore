@@ -52,6 +52,7 @@ Thumbs.db
 vendor/
 public/hot
 public/build
+public/media
 public/dist
 public/mix-manifest.json
 public/storage

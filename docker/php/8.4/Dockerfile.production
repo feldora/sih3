@@ -18,22 +18,30 @@ RUN composer install \
 
 COPY . .
 
+# Pastikan folder storage & cache path ada sebelum artisan
+RUN mkdir -p storage/app \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/testing \
+    storage/framework/views \
+    storage/logs \
+    bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# Jalankan cache Laravel
 RUN php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
 
 # Bersihkan yang tidak perlu di production
-RUN rm -rf node_modules \
-    && rm -rf storage/* \
-    && mkdir -p storage/app storage/framework storage/logs \
-    && chmod -R 775 storage bootstrap/cache
+RUN rm -rf node_modules
 
 # =====================
 # Stage 2 - Production
 # =====================
 FROM php:8.4-fpm-alpine
 
-# Install PHP extensions + runtime dependencies
+# Install PHP extensions + runtime dependencies + build tools
 RUN apk add --no-cache \
     libjpeg-turbo \
     libpng \
@@ -47,13 +55,24 @@ RUN apk add --no-cache \
     freetype-dev \
     postgresql-dev \
     libzip-dev \
+    autoconf \
+    g++ \
+    make \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo pdo_pgsql gd exif zip \
     && pecl install redis \
     && docker-php-ext-enable redis \
-    && apk del libjpeg-turbo-dev libpng-dev libwebp-dev freetype-dev postgresql-dev libzip-dev \
-    && rm -rf /var/cache/apk/*
-
+    && apk del \
+        libjpeg-turbo-dev \
+        libpng-dev \
+        libwebp-dev \
+        freetype-dev \
+        postgresql-dev \
+        libzip-dev \
+        autoconf \
+        g++ \
+        make \
+    && rm -rf /var/cache/apk/* /tmp/pear
 
 WORKDIR /var/www/html
 

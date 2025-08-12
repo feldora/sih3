@@ -1,264 +1,366 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Sungai - SIH3 Sulteng')
+@section('title', 'Data Sungai')
 
 @section('content')
 <div class="container mx-auto px-4">
     <div class="card bg-base-100 shadow-xl my-6 p-6 rounded-xl">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-3xl font-bold text-base-content">Data Sungai</h1>
-                <p class="text-base-content/70 mt-1">Kelola data sungai dan media terkait</p>
+                <h1 class="text-2xl font-bold text-gray-800">Data Sungai</h1>
+                {{-- <p class="text-gray-600 mt-1">Kelola data informasi sungai dan dokumen terkait</p> --}}
             </div>
-            <a href="{{ route('admin.sungai.create') }}" class="btn btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <a href="{{ route('admin.loadshp.index') }}?type=Sungai" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Tambah Sungai
+                Import shp Sungai
             </a>
         </div>
 
-        <!-- Filter & Search -->
-        <div class="card bg-base-200 p-4 mb-6">
-            <form method="GET" action="{{ route('admin.sungai.index') }}" class="flex flex-col lg:flex-row gap-4">
-                <div class="form-control flex-1">
-                    <input type="text" 
-                           name="search" 
-                           value="{{ request('search') }}" 
-                           placeholder="Cari nama sungai, ordo..." 
-                           class="input input-bordered w-full">
-                </div>
-                <div class="form-control lg:w-64">
-                    <select name="wilayah_sungai_id" class="select select-bordered">
-                        <option value="">Semua Wilayah Sungai</option>
-                        @foreach($wilayahSungais as $wilayah)
-                            <option value="{{ $wilayah->id }}" 
-                                    {{ request('wilayah_sungai_id') == $wilayah->id ? 'selected' : '' }}>
-                                {{ $wilayah->nama }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="form-control">
-                    <div class="btn-group">
-                        <button type="submit" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            Cari
-                        </button>
-                        <a href="{{ route('admin.sungai.index') }}" class="btn btn-outline">Reset</a>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="stat bg-primary text-primary-content rounded-xl">
-                <div class="stat-title text-primary-content/70">Total Sungai</div>
-                <div class="stat-value">{{ $sungais->total() }}</div>
-            </div>
-            <div class="stat bg-secondary text-secondary-content rounded-xl">
-                <div class="stat-title text-secondary-content/70">Dengan Media</div>
-                <div class="stat-value">{{ $sungais->where('media_count', '>', 0)->count() }}</div>
-            </div>
-            <div class="stat bg-accent text-accent-content rounded-xl">
-                <div class="stat-title text-accent-content/70">Total Media</div>
-                <div class="stat-value">{{ $sungais->sum('media_count') }}</div>
-            </div>
-        </div>
-
-        <!-- Table -->
-        @if($sungais->count() > 0)
+        <!-- DataTable -->
         <div class="overflow-x-auto">
-            <table class="table table-zebra w-full">
+            <table id="sungaiTable" class="table table-zebra w-full">
                 <thead>
                     <tr>
                         <th class="text-center">No</th>
                         <th>Nama Sungai</th>
-                        <th>Wilayah Sungai</th>
-                        <th class="text-center">Panjang (km)</th>
-                        <th class="text-center">Luas DAS (km²)</th>
-                        <th class="text-center">Ordo</th>
-                        <th class="text-center">Media</th>
+                        <th>Panjang</th>
+                        <th>Luas DAS</th>
+                        <th>Ordo</th>
+                        <th>Dokumen</th>
                         <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($sungais as $index => $sungai)
-                    <tr class="hover">
-                        <td class="text-center">{{ $sungais->firstItem() + $index }}</td>
-                        <td class="font-semibold">{{ $sungai->nama_sungai }}</td>
-                        <td>
-                            <div class="badge badge-outline">
-                                {{ $sungai->wilayahSungai->nama ?? '-' }}
-                            </div>
-                        </td>
-                        <td class="text-center">
-                            {{ $sungai->panjang_sungai ? number_format($sungai->panjang_sungai, 2) : '-' }}
-                        </td>
-                        <td class="text-center">
-                            {{ $sungai->luas_das ? number_format($sungai->luas_das, 2) : '-' }}
-                        </td>
-                        <td class="text-center">
-                            @if($sungai->ordo)
-                                <div class="badge badge-primary">{{ $sungai->ordo }}</div>
-                            @else
-                                <span class="text-base-content/50">-</span>
-                            @endif
-                        </td>
-                        <td class="text-center">
-                            @if($sungai->media->count() > 0)
-                                <div class="badge badge-success">{{ $sungai->media->count() }} file(s)</div>
-                            @else
-                                <div class="badge badge-ghost">0 file</div>
-                            @endif
-                        </td>
-                        <td class="text-center">
-                            <div class="dropdown dropdown-end">
-                                <label tabindex="0" class="btn btn-ghost btn-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                    </svg>
-                                </label>
-                                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                                    <li>
-                                        <a href="{{ route('admin.sungai.show', $sungai) }}" class="text-info">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            Detail
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('admin.sungai.edit', $sungai) }}" class="text-warning">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                            Edit
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <button onclick="confirmDelete('{{ $sungai->id }}', '{{ $sungai->nama_sungai }}')" class="text-error">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            Hapus
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
+                    <!-- Data akan dimuat via DataTables AJAX -->
                 </tbody>
             </table>
         </div>
-
-        <!-- Pagination -->
-        <div class="flex justify-center mt-6">
-            {{ $sungais->withQueryString()->links() }}
-        </div>
-        @else
-        <div class="text-center py-12">
-            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-24 w-24 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-            <h3 class="mt-4 text-lg font-semibold text-base-content">Belum ada data sungai</h3>
-            <p class="text-base-content/70 mt-2">Mulai dengan menambahkan data sungai pertama Anda.</p>
-            <a href="{{ route('admin.sungai.create') }}" class="btn btn-primary mt-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Sungai
-            </a>
-        </div>
-        @endif
     </div>
-</div>
 
-<!-- Delete Confirmation Modal -->
-<dialog id="deleteModal" class="modal">
-    <div class="modal-box">
-        <h3 class="font-bold text-lg">Konfirmasi Hapus</h3>
-        <p class="py-4">Apakah Anda yakin ingin menghapus sungai <span id="sungaiName" class="font-semibold text-error"></span>?</p>
-        <p class="text-sm text-warning mb-4">⚠️ Tindakan ini akan menghapus semua data dan media terkait secara permanen!</p>
-        
-        <div class="modal-action">
-            <form id="deleteForm" method="POST">
-                @csrf
-                @method('DELETE')
-                <button type="button" onclick="closeDeleteModal()" class="btn btn-ghost">Batal</button>
-                <button type="submit" class="btn btn-error">Ya, Hapus</button>
-            </form>
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Konfirmasi Hapus</h3>
+            <p class="py-4">Apakah Anda yakin ingin menghapus data sungai ini? Semua dokumen terkait juga akan dihapus.</p>
+            <div class="modal-action">
+                <button id="cancelDelete" class="btn btn-ghost">Batal</button>
+                <button id="confirmDelete" class="btn btn-error">Hapus</button>
+            </div>
         </div>
+    </div>
+    <!-- Modal List Media -->
+<dialog id="modalListMedia" class="modal">
+    <div class="modal-box">
     </div>
 </dialog>
+
+    
+</div>
 @endsection
 
 @push('styles')
+
 <style>
+    .dataTables_wrapper .dataTables_length select {
+        @apply select select-bordered select-sm;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+        @apply input input-bordered input-sm;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        @apply btn btn-sm btn-ghost;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        @apply btn-active;
+    }
+    
     .table th {
-        background-color: hsl(var(--b2));
+        background-color: #f8fafc;
         font-weight: 600;
-    }
-    
-    .stat {
-        padding: 1.5rem;
-    }
-    
-    .dropdown-content {
-        z-index: 999;
     }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-    window.addEventListener('load', function() {
-        if (typeof $ === 'undefined') {
-            console.error('jQuery is not loaded yet.');
-            return;
-        }
+window.addEventListener('load', function() {
+    if (typeof $ === 'undefined') {
+        console.error('jQuery is not loaded yet.');
+        return;
+    }
 
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-top toast-end`;
-            toast.innerHTML = `
-              <div class="alert alert-${type}">
+    // Toast function
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-top toast-end`;
+        toast.innerHTML = `
+            <div class="alert alert-${type}">
                 <span>${message}</span>
-              </div>
-            `;
-            document.body.appendChild(toast);
+            </div>
+        `;
+        document.body.appendChild(toast);
 
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
 
-        @if (session('error'))
-            showToast("{{ session('error') }}", "error");
-        @endif
+    // Session messages
+    @if (session('error'))
+        showToast("{{ session('error') }}", "error");
+    @endif
 
-        @if (session('success'))
-            showToast("{{ session('success') }}", "success");
-        @endif
+    @if (session('success'))
+        showToast("{{ session('success') }}", "success");
+    @endif
 
-        @if (session('warning'))
-            showToast("{{ session('warning') }}", "warning");
-        @endif
+    @if (session('warning'))
+        showToast("{{ session('warning') }}", "warning");
+    @endif
+
+    // Initialize DataTable
+    let table = $('#sungaiTable').DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        ajax: {
+            url: "{{ route('admin.sungai.index') }}",
+            type: 'GET'
+        },
+        columns: [
+            {
+                data: 'DT_RowIndex',
+                name: 'DT_RowIndex',
+                orderable: false,
+                searchable: false,
+                className: 'text-center',
+                width: '5%'
+            },
+            {
+                data: 'nama_sungai',
+                name: 'nama_sungai',
+                render: function(data, type, row) {
+                    return `<div class="font-medium text-gray-900">${data}</div>`;
+                }
+            },
+            {
+                data: 'panjang_sungai',
+                name: 'panjang_sungai',
+                className: 'text-center',
+                render: function(data, type, row) {
+                    return data ? `<span class="badge badge-info">${data}</span>` : '<span class="text-gray-400">-</span>';
+                }
+            },
+            {
+                data: 'luas_das',
+                name: 'luas_das',
+                className: 'text-center',
+                render: function(data, type, row) {
+                    return data ? `<span class="badge badge-success">${data}</span>` : '<span class="text-gray-400">-</span>';
+                }
+            },
+            {
+                data: 'ordo',
+                name: 'ordo',
+                className: 'text-center',
+                render: function(data, type, row) {
+                    if (!data) {
+                        return '<span class="text-gray-400">-</span>';
+                    }
+                    const colorMap = {
+                        '9': 'bg-blue-100 text-blue-800',
+                        '8': 'bg-blue-200 text-blue-900',
+                        '7': 'bg-blue-300 text-blue-900',
+                        '6': 'bg-blue-400 text-white',
+                        '5': 'bg-blue-500 text-white',
+                        '4': 'bg-blue-600 text-white',
+                        '3': 'bg-blue-700 text-white',
+                        '2': 'bg-blue-800 text-white',
+                        '1': 'bg-blue-900 text-white' 
+                    };
+                    const badgeClass = colorMap[data] || 'badge-outline';
+                    return `<span class="badge ${badgeClass}">${data}</span>`;
+                }
+            },
+            {
+                data: 'media_count',
+                name: 'media_count',
+                orderable: false,
+                searchable: false,
+                className: 'text-center',
+                render: function(data, type, row) {
+                    const count = data.split(' ')[0];
+                    if (count > 0) {
+                        const baseUrl = "{{ route('admin.sungai.media.list', ':id') }}"
+                            .replace(':id', row.id);
+                        return `<span class="badge badge-primary cursor-pointer listMedia" data-getListMediaUrl="${baseUrl}">${data}</span>`;
+                    }
+
+
+                    return `<span class="text-gray-400 ">0 file(s)</span>`;
+                }
+            },            
+            {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false,
+                className: 'text-center',
+                width: '15%'
+            }
+        ],
+        language: {
+            processing: '<div class="loading loading-spinner loading-md"></div>',
+            search: "Cari:",
+            lengthMenu: "Tampilkan _MENU_ data per halaman",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+            infoFiltered: "(difilter dari _MAX_ total data)",
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "Selanjutnya",
+                previous: "Sebelumnya"
+            },
+            emptyTable: "Tidak ada data sungai tersedia",
+            zeroRecords: "Tidak ditemukan data yang sesuai"
+        },
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        order: [[6, 'desc']] // Order by created_at desc
     });
 
-    function confirmDelete(id, name) {
-        document.getElementById('sungaiName').textContent = name;
-        document.getElementById('deleteForm').action = `/admin/sungai/${id}`;
-        document.getElementById('deleteModal').showModal();
-    }
+    // Delete functionality
+    let deleteId = null;
+    const deleteModal = document.getElementById('deleteModal');
 
-    function closeDeleteModal() {
-        document.getElementById('deleteModal').close();
-    }
+    // Handle delete button click
+    $(document).on('click', '.delete-btn', function() {
+        deleteId = $(this).data('id');
+        deleteModal.classList.add('modal-open');
+    });
+
+    // Handle cancel delete
+    document.getElementById('cancelDelete').addEventListener('click', function() {
+        deleteModal.classList.remove('modal-open');
+        deleteId = null;
+    });
+
+    // Handle confirm delete
+    document.getElementById('confirmDelete').addEventListener('click', function() {
+        if (deleteId) {
+            // Show loading
+            this.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Menghapus...';
+            this.disabled = true;
+
+            $.ajax({
+                url: `{{ route('admin.sungai.destroy', ':id') }}`.replace(':id', deleteId),
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    deleteModal.classList.remove('modal-open');
+                    showToast(response.message || 'Data berhasil dihapus', 'success');
+                    table.ajax.reload();
+                },
+                error: function(xhr) {
+                    let message = 'Terjadi kesalahan saat menghapus data';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+                    showToast(message, 'error');
+                },
+                complete: function() {
+                    document.getElementById('confirmDelete').innerHTML = 'Hapus';
+                    document.getElementById('confirmDelete').disabled = false;
+                    deleteId = null;
+                }
+            });
+        }
+    });
+
+    // Close modal when clicking outside
+    deleteModal.addEventListener('click', function(e) {
+        if (e.target === deleteModal) {
+            deleteModal.classList.remove('modal-open');
+            deleteId = null;
+        }
+    });
+
+    // Refresh table function (if needed)
+    window.refreshSungaiTable = function() {
+        table.ajax.reload();
+    };
+
+    document.addEventListener('click', function (event) {
+        const el = event.target.closest('.listMedia');
+        const modal = document.getElementById('modalListMedia');
+        modal.addEventListener('click', (event) => {
+            const modalBox = modal.querySelector('.modal-box');
+            if (!modalBox.contains(event.target)) {
+                modal.close();
+            }
+        });
+
+        if (!el) return;
+
+        const mediaUrl = el.getAttribute('data-getListMediaUrl');
+        if (!mediaUrl) return;
+
+        fetch(mediaUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(res => {
+                if (!res.success || !Array.isArray(res.data)) {
+                    throw new Error('Data dokumen tidak valid');
+                }
+
+                const modalBox = document.querySelector('#modalListMedia .modal-box');
+                let html = `<h3 class="font-bold text-lg mb-3">Daftar Dokumen</h3>`;
+
+                if (res.data.length === 0) {
+                    html += `<p class="text-gray-500">Tidak ada dokumen tersedia.</p>`;
+                } else {
+                    html += `<ul class="space-y-2">`;
+                    res.data.forEach(media => {
+                        const isPdf = media.extension.toLowerCase() === 'pdf';
+                        html += `
+                            <li class="flex justify-between items-center border-b border-base-300 pb-2">
+                                <span>${media.file_name} <small class="text-gray-400">(${media.size_kb} KB)</small></span>
+                                <a href="${media.url}" 
+                                target="_blank" 
+                                class="btn btn-xs ${isPdf ? 'btn-primary' : 'btn-secondary'}">
+                                    ${isPdf ? 'Lihat' : 'Download'}
+                                </a>
+                            </li>
+                        `;
+                    });
+                    html += `</ul>`;
+                }
+
+                modalBox.innerHTML = html;
+
+                // Tampilkan modal (DaisyUI modal)
+                document.getElementById('modalListMedia').showModal();
+                // document.getElementById('modalListMedia').classList.add('modal-open');
+            })
+            .catch(error => {
+                console.error('Error fetching media list:', error);
+            });
+    });
+
+
+});
 </script>
 @endpush

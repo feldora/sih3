@@ -12,6 +12,7 @@ use Shapefile\ShapefileException;
 use ZipArchive;
 use Illuminate\Support\Facades\DB;
 use App\Models\WilayahSungai;
+use App\Models\Sungai;
 
 class LoadShpController extends Controller
 {
@@ -63,35 +64,35 @@ class LoadShpController extends Controller
 
             Log::info("ZIP berhasil diekstrak ke: {$extractPath}");
 
-$shpFiles = $this->findShpInDir($extractPath);
+            $shpFiles = $this->findShpInDir($extractPath);
 
-if (empty($shpFiles)) {
-    return response()->json(['success' => false, 'message' => 'Tidak ada file .shp ditemukan di dalam ZIP.'], 400);
-}
+            if (empty($shpFiles)) {
+                return response()->json(['success' => false, 'message' => 'Tidak ada file .shp ditemukan di dalam ZIP.'], 400);
+            }
 
-$allFeatures = [];
+            $allFeatures = [];
 
-foreach ($shpFiles as $shpFilePath) {
-    try {
-        $geoJson = $this->convertShpToGeoJson($shpFilePath);
+            foreach ($shpFiles as $shpFilePath) {
+                try {
+                    $geoJson = $this->convertShpToGeoJson($shpFilePath);
 
-        // Gabungkan semua fitur dari setiap file
-        if (isset($geoJson['features'])) {
-            $allFeatures = array_merge($allFeatures, $geoJson['features']);
-        }
-    } catch (\Exception $e) {
-        Log::error("Gagal mengonversi file {$shpFilePath}: {$e->getMessage()}");
-        return response()->json(['success' => false, 'message' => "Gagal mengonversi file {$shpFilePath}."], 500);
-    }
-}
+                    // Gabungkan semua fitur dari setiap file
+                    if (isset($geoJson['features'])) {
+                        $allFeatures = array_merge($allFeatures, $geoJson['features']);
+                    }
+                } catch (\Exception $e) {
+                    Log::error("Gagal mengonversi file {$shpFilePath}: {$e->getMessage()}");
+                    return response()->json(['success' => false, 'message' => "Gagal mengonversi file {$shpFilePath}."], 500);
+                }
+            }
 
-return response()->json([
-    'success' => true,
-    'geojson' => [
-        'type' => 'FeatureCollection',
-        'features' => $allFeatures
-    ]
-]);
+            return response()->json([
+                'success' => true,
+                'geojson' => [
+                    'type' => 'FeatureCollection',
+                    'features' => $allFeatures
+                ]
+            ]);
 
         } catch (\Exception $e) {
             Log::error("Error proses shapefile: {$e->getMessage()}");
@@ -99,64 +100,82 @@ return response()->json([
         }
     }
 
-private function findShpInDir(string $dir): array
-{
-    $allFiles = File::allFiles($dir);
-    $shpFiles = [];
+    private function findShpInDir(string $dir): array
+    {
+        $allFiles = File::allFiles($dir);
+        $shpFiles = [];
 
-    foreach ($allFiles as $f) {
-        if (strtolower($f->getExtension()) === 'shp') {
-            $shpFiles[] = $f->getPathname(); // Menambahkan file .shp ke array
-        }
-    }
-
-    return $shpFiles;
-}
-
-
-private function convertShpToGeoJson(string $shpPath): array
-{
-    try {
-        $reader = new ShapefileReader($shpPath);
-        $features = [];
-
-        while ($rec = $reader->fetchRecord()) {
-            if ($rec->isDeleted()) continue;
-
-            $geoJsonStr = $rec->getGeoJSON();
-            if (!$geoJsonStr || strtolower($geoJsonStr) === 'null') continue;
-
-            $geometry = json_decode($geoJsonStr, true);
-
-            // Skip jika geometry tidak valid
-            if (
-                !$geometry ||
-                !isset($geometry['type']) ||
-                !isset($geometry['coordinates']) ||
-                !is_array($geometry['coordinates']) ||
-                empty($geometry['coordinates'])
-            ) {
-                continue;
+        foreach ($allFiles as $f) {
+            if (strtolower($f->getExtension()) === 'shp') {
+                $shpFiles[] = $f->getPathname(); // Menambahkan file .shp ke array
             }
-
-            // Konversi EPSG:3857 ke WGS84 jika perlu
-            if ($this->isLikelyMercator($geometry)) {
-                $geometry['coordinates'] = $this->convertCoordinatesToWGS84($geometry['coordinates']);
-            }
-
-            $features[] = [
-                'type' => 'Feature',
-                'geometry' => $geometry,
-                'properties' => $rec->getDataArray(),
-            ];
         }
 
-        return ['type' => 'FeatureCollection', 'features' => $features];
-    } catch (ShapefileException $e) {
-        throw new \Exception('Error reading SHP: ' . $e->getMessage());
+        return $shpFiles;
     }
-}
 
+    private function convertShpToGeoJson(string $shpPath): array
+    {
+        try {
+            $reader = new ShapefileReader($shpPath);
+            $features = [];
+
+            while ($rec = $reader->fetchRecord()) {
+                if ($rec->isDeleted()) continue;
+
+                $geoJsonStr = $rec->getGeoJSON();
+                if (!$geoJsonStr || strtolower($geoJsonStr) === 'null') continue;
+
+                $geometry = json_decode($geoJsonStr, true);
+
+                // Skip jika geometry tidak valid
+                if (
+                    !$geometry ||
+                    !isset($geometry['type']) ||
+                    !isset($geometry['coordinates']) ||
+                    !is_array($geometry['coordinates']) ||
+                    empty($geometry['coordinates'])
+                ) {
+                    continue;
+                }
+
+                // Konversi EPSG:3857 ke WGS84 jika perlu
+                if ($this->isLikelyMercator($geometry)) {
+                    $geometry['coordinates'] = $this->convertCoordinatesToWGS84($geometry['coordinates']);
+                }
+                // Bersihkan tipe geometry yang pakai "M" di akhir (contoh: LineStringM -> LineString)
+                if (isset($geometry['type']) && preg_match('/M$/i', $geometry['type'])) {
+                    $geometry['type'] = preg_replace('/M$/i', '', $geometry['type']);
+                }
+
+                // Hapus bbox invalid di level geometry
+                if (isset($geometry['bbox'])) {
+                    if (!is_array($geometry['bbox']) || array_filter($geometry['bbox'], fn($v) => !is_numeric($v))) {
+                        unset($geometry['bbox']);
+                    }
+                }
+
+                $feature = [
+                    'type' => 'Feature',
+                    'geometry' => $geometry,
+                    'properties' => $rec->getDataArray(),
+                ];
+
+                if (isset($feature['bbox'])) {
+                    if (!is_array($feature['bbox']) || array_filter($feature['bbox'], fn($v) => !is_numeric($v))) {
+                        unset($feature['bbox']);
+                    }
+                }
+
+                $features[] = $feature;
+
+            }
+
+            return ['type' => 'FeatureCollection', 'features' => $features];
+        } catch (ShapefileException $e) {
+            throw new \Exception('Error reading SHP: ' . $e->getMessage());
+        }
+    }
 
     public function saveGeo(Request $request)
     {
@@ -167,6 +186,8 @@ private function convertShpToGeoJson(string $shpPath): array
                 return $this->savePosPantau($request);
             case 'Wilayah Sungai' :
                 return $this->saveWilayahSungai($request);
+            case 'Sungai' :
+                return $this->saveSungai($request);
             default:
                 return response()->json([
                     'success' => false,
@@ -258,6 +279,13 @@ private function convertShpToGeoJson(string $shpPath): array
                         $datas[] = $data;
                         Log::info(json_encode($data));
                         \App\Models\PosPantau::create($data);
+                    } else {
+                        DB::rollBack();
+                        return response()->json([
+                            'success'   => false,
+                            'message'   => "Gagal Membuat Signature",
+                            'data'      => $data,
+                        ]);
                     }
                 }
             });
@@ -322,6 +350,83 @@ private function convertShpToGeoJson(string $shpPath): array
                         $data['instansi_id'] = $request->input('instansi_id');
                         Log::info(json_encode($data));
                         \App\Models\WilayahSungai::create($data);
+                    } else {
+                        DB::rollBack();
+                        return response()->json([
+                            'success'   => false,
+                            'message'   => "Gagal Membuat Signature",
+                            'data'      => $data,
+                        ]);
+                    }
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => count($features) . ' data berhasil disimpan.',
+                'datas'    => $datas
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan data: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function saveSungai(Request $request) {
+        
+        $features = json_decode($request->input('visibleFeatures'), true);
+        $mapped = $request->input('mapped', []);
+
+        if (!$features || !is_array($features)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data fitur tidak valid.'
+            ], 400);
+        }
+        $datas=[];
+        try {
+            DB::transaction(function () use ($features, $mapped, $request) {
+                foreach ($features as $feature) {
+                    $data = [];
+
+                    $coordinates = $feature['geometry']['coordinates'] ?? [null, null];
+
+                    foreach ($mapped as $field => $mappingOptions) {
+                        $mappedKey = $mappingOptions[0] ?? null;
+
+                        if ($mappedKey && str_starts_with($mappedKey, 'properties.') && isset($feature['properties'])) {
+                            $propName = str_replace('properties.', '', $mappedKey);
+                            $data[$field] = $feature['properties'][$propName] ?? null;
+                        }
+                    }
+
+                    $featureToSave = [
+                        'type' => 'Feature',
+                        'geometry' => $feature['geometry'],
+                        'properties' => [
+                            'name' => $data['nama_sungai'] ?? null,
+                            'tag' => 'Sungai',
+                            'properties' => $feature['properties']
+                        ]
+                    ];
+                    $signature = $this->saveGeoJsonFeatureToDatabase($featureToSave);
+                    if ($signature) {
+                        $data['signature'] = $signature;
+                        // $data['instansi_id'] = $request->input('instansi_id');
+                        $data['luas_das'] = $data['luas_das'] ?: 0;
+                        $data['panjang_sungai'] = $data['panjang_sungai'] ?: 0;
+                        $data['ordo'] = $data['ordo'] ? : null;
+                        Log::info(json_encode($data));
+                        \App\Models\Sungai::create($data);
+                    } else {
+                        DB::rollBack();
+                        return response()->json([
+                            'success'   => false,
+                            'message'   => "Gagal Membuat Signature",
+                            'data'      => $data,
+                        ]);
                     }
                 }
             });

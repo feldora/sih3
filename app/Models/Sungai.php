@@ -22,22 +22,22 @@ class Sungai extends Model implements HasMedia
         'panjang_sungai',
         'luas_das',
         'ordo',
-        'wilayah_sungai_id'
     ];
 
     public $timestamps = true;
 
-    // public function titikPantau()
-    // {
-    //     return $this->hasMany(TitikPantau::class, 'sungai_id');
-    // }
-    // public function posPantau()
-    // {
-    //     return $this->hasMany(PosPantau::class, 'sungai_id');
-    // }
-    public function wilayahSungai()
+    protected static function booted()
     {
-        return $this->belongsTo(WilayahSungai::class, 'wilayah_sungai_id');
+        static::deleting(function ($sungai) {
+            DB::transaction(function () use ($sungai) {
+                $sungai->feature()->delete();
+            });
+        });
+    }
+
+    public function feature()
+    {
+        return $this->hasOne(GeoFeature::class, 'signature', 'signature');
     }
 
 }

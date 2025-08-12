@@ -17,19 +17,17 @@ return new class extends Migration
             $table->float('panjang_sungai');
             $table->float('luas_das');
             $table->float('ordo');
-            // $table->text('hasil_uji_kualitas_air')->nullable();
-            // $table->json('geojson')->nullable();
-            // $table->string('status')->default('aktif');
-            $table->unsignedBigInteger('wilayah_sungai_id');
+            $table->string('signature');
             $table->timestamps();
         });
 
-        Schema::table('sungai', function (Blueprint $table) {
-            $table->foreign('wilayah_sungai_id')
-                ->references('id')
-                ->on('wilayah_sungai')
+        Schema::table('geo_features', function (Blueprint $table) {
+            $table->foreign('signature')
+                ->references('signature')
+                ->on('geo_features')
                 ->onDelete('cascade');
         });
+
     }
 
     /**
@@ -37,9 +35,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('sungai', function (Blueprint $table) {
-            $table->dropForeign(['wilayah_sungai_id']);
+        Schema::table('geo_features', function (Blueprint $table) {
+            $table->dropForeign(['signature']);
         });
+
         Schema::dropIfExists('sungai');
     }
+
 };

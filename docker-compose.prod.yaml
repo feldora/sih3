@@ -10,7 +10,7 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - sih3-storage:/var/www/html/storage
     networks:
-      - sih3net
+      - sih3
 
   sih3.app:
     build:

@@ -43,7 +43,12 @@ class FormFieldsController extends Controller
             'name'          => 'mapping',
             'luas'          => 'mapping',
         ],
-        'Sungai'    => [],
+        'Sungai'    => [
+            'nama_sungai'      => 'mapping',
+            'panjang_sungai'   => 'mapping',
+            'luas_das'         => 'mapping',
+            'ordo'             => 'mapping',
+        ],
         'Cekungan Air Tanah' => [],
     ];
 }

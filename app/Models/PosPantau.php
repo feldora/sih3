@@ -78,4 +78,13 @@ class PosPantau extends Model
         return $this->hasMany(DataTinggiMukaAir::class, 'pos_pantau_id');
     }
 
+    protected static function booted()
+    {
+        static::deleting(function ($posPantau) {
+            DB::transaction(function () use ($posPantau) {
+                $posPantau->feature()->delete();
+            });
+        });
+    }
+
 }
