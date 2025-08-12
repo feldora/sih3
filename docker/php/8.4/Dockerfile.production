@@ -1,4 +1,22 @@
 # =====================
+# Stage 0 - Frontend build
+# =====================
+FROM node:20-alpine AS frontend
+
+WORKDIR /app
+
+# Copy package files dulu untuk cache
+COPY package.json package-lock.json ./
+
+RUN npm install
+
+# Copy semua file untuk build
+COPY . .
+
+RUN npm run build
+
+
+# =====================
 # Stage 1 - Vendor build
 # =====================
 FROM composer:2 AS vendor
@@ -18,6 +36,9 @@ RUN composer install \
 
 COPY . .
 
+# Copy hasil build frontend dari stage frontend
+COPY --from=frontend /app/public/build ./public/build
+
 # Pastikan folder storage & cache path ada sebelum artisan
 RUN mkdir -p storage/app \
     storage/framework/cache \
@@ -35,6 +56,7 @@ RUN php artisan config:cache \
 
 # Bersihkan yang tidak perlu di production
 RUN rm -rf node_modules
+
 
 # =====================
 # Stage 2 - Production
@@ -79,7 +101,7 @@ WORKDIR /var/www/html
 # Copy hasil vendor stage
 COPY --from=vendor /app ./
 
-# Set permission (storage nanti mount external)
+# Set permission
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
