@@ -159,8 +159,17 @@ class LoadShpController extends Controller
 
                 // === Perhitungan Luas, Keliling, Panjang ===
                 if ($geometry['type'] === 'Polygon') {
-                    $properties['area_m2'] = $this->calculatePolygonArea($geometry['coordinates']);
-                    $properties['perimeter_m'] = $this->calculatePolygonPerimeter($geometry['coordinates']);
+                    $area_m2 = $this->calculatePolygonArea($geometry['coordinates']);
+                    $perimeter_m = $this->calculatePolygonPerimeter($geometry['coordinates']);
+
+                    $properties['area_m2'] = $area_m2;
+                    $properties['area_ha'] = $area_m2 / 10000; // hektar
+                    $properties['area_km2'] = $area_m2 / 1_000_000; // km²
+                    $properties['area_acre'] = $area_m2 / 4046.8564224; // acre
+
+                    $properties['perimeter_m'] = $perimeter_m;
+                    $properties['perimeter_km'] = $perimeter_m / 1000; // km
+                    $properties['perimeter_miles'] = $perimeter_m / 1609.344; // mil
                 } elseif ($geometry['type'] === 'MultiPolygon') {
                     $totalArea = 0;
                     $totalPerimeter = 0;
@@ -168,17 +177,32 @@ class LoadShpController extends Controller
                         $totalArea += $this->calculatePolygonArea($polygon);
                         $totalPerimeter += $this->calculatePolygonPerimeter($polygon);
                     }
+
                     $properties['area_m2'] = $totalArea;
+                    $properties['area_ha'] = $totalArea / 10000;
+                    $properties['area_km2'] = $totalArea / 1_000_000;
+                    $properties['area_acre'] = $totalArea / 4046.8564224;
+
                     $properties['perimeter_m'] = $totalPerimeter;
+                    $properties['perimeter_km'] = $totalPerimeter / 1000;
+                    $properties['perimeter_miles'] = $totalPerimeter / 1609.344;
                 } elseif ($geometry['type'] === 'LineString') {
-                    $properties['length_m'] = $this->calculateLineLength($geometry['coordinates']);
+                    $length_m = $this->calculateLineLength($geometry['coordinates']);
+
+                    $properties['length_m'] = $length_m;
+                    $properties['length_km'] = $length_m / 1000;
+                    $properties['length_miles'] = $length_m / 1609.344;
                 } elseif ($geometry['type'] === 'MultiLineString') {
                     $totalLength = 0;
                     foreach ($geometry['coordinates'] as $line) {
                         $totalLength += $this->calculateLineLength($line);
                     }
+
                     $properties['length_m'] = $totalLength;
+                    $properties['length_km'] = $totalLength / 1000;
+                    $properties['length_miles'] = $totalLength / 1609.344;
                 }
+
 
                 // Buat Feature GeoJSON
                 $feature = [

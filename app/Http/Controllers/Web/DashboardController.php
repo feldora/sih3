@@ -42,10 +42,10 @@ class DashboardController extends Controller
     private function getOverviewData()
     {
         return [
-            'total_pos' => PosPantau::count(),
-            'total_ws' => WilayahSungai::count(),
-            'total_data' => DataCurahHujan::count() + DataTinggiMukaAir::count() + DataKlimatologi::count(),
-            'last_update' => PosPantau::latest('updated_at')->value('updated_at')
+            'total_pos' => PosPantau::count() ?? 0,
+            'total_ws' => WilayahSungai::count() ?? 0,
+            'total_data' => (DataCurahHujan::count() + DataTinggiMukaAir::count() + DataKlimatologi::count()) ?? 0,
+            'last_update' => PosPantau::latest('updated_at')->value('updated_at') ?? 0,
         ];
     }
 
