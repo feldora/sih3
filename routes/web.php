@@ -20,7 +20,7 @@ use App\Http\Controllers\Web\DataHujanController;
 use App\Http\Controllers\Web\DataTinggiMukaAirController;
 use App\Http\Controllers\Web\DataKlimatologiController;
 use App\Http\Controllers\Web\DataMukaAirTanahController;
-
+use App\Http\Controllers\Web\DashboardController;
 // $routeData = config('resources');
 
 // \Log::info("data config", $routeData);
@@ -87,9 +87,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::get('/', function () {
         return redirect()->route('admin.dashboard');
     })->name('index');
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    // Route::get('/dashboard', function () {
+    //     return view('admin.dashboard');
+    // })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+
 
     Route::resource('users', UserManagementController::class);
     Route::resource('menus', MenuController::class);
