@@ -14,13 +14,16 @@ return new class extends Migration
         Schema::create('cekungan_air_tanah', function (Blueprint $table) {
             $table->id();
             $table->string('nama_cat');
-            $table->double('luas_cat_ha')->nullable()->comment('Luas cekungan air tanah dalam hektar');
-            $table->string('status_pengelolaan')->nullable()->comment('Status pengelolaan cekungan (misal: Terlindungi, Dikembangkan, Terancam)');
-            $table->integer('jumlah_sumur')->nullable()->comment('Jumlah sumur yang terdata dalam cekungan air tanah');
-            $table->string('jenis_akuifer')->nullable()->comment('Jenis akuifer (misal: Akuifer bebas, tertekan, campuran)');
-            $table->float('kedalaman_akuifer')->nullable()->comment('Kedalaman rata-rata akuifer dalam meter');
-            $table->double('kapasitas_air_tanah')->nullable()->comment('Estimasi kapasitas atau potensi air tanah (L/detik atau m³/tahun)');
-            $table->date('tanggal_pembaruan')->nullable()->comment('Tanggal terakhir data diperbarui');
+            $table->double('luas_cat_ha')->nullable(); //->comment('Luas cekungan air tanah dalam hektar');
+            $table->double('potensi_air_tanah_bebas')->nullable(); //->comment('Potensi air tanah bebas (m³/tahun)');
+            $table->double('potensi_air_tanah_tertekan')->nullable(); //->comment('Potensi air tanah tertekan (m³/tahun)');
+            $table->string('status_pengelolaan')->nullable(); //->comment('Status pengelolaan cekungan (misal: Terlindungi, Dikembangkan, Terancam)');
+            $table->integer('jumlah_sumur')->nullable(); //->comment('Jumlah sumur yang terdata dalam cekungan air tanah');
+            $table->string('jenis_akuifer')->nullable(); //->comment('Jenis akuifer (misal: Akuifer bebas, tertekan, campuran)');
+            $table->float('kedalaman_akuifer')->nullable(); //->comment('Kedalaman rata-rata akuifer dalam meter');
+            $table->double('kapasitas_air_tanah')->nullable(); //->comment('Estimasi kapasitas atau potensi total air tanah (L/detik atau m³/tahun)');
+            $table->date('tanggal_pembaruan')->nullable(); //->comment('Tanggal terakhir data diperbarui');
+            $table->string('signature')->nullable();
             $table->timestamps();
         });
     }

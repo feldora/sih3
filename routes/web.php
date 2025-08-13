@@ -21,6 +21,8 @@ use App\Http\Controllers\Web\DataTinggiMukaAirController;
 use App\Http\Controllers\Web\DataKlimatologiController;
 use App\Http\Controllers\Web\DataMukaAirTanahController;
 use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Web\CekunganAirTanahController;
+
 // $routeData = config('resources');
 
 // \Log::info("data config", $routeData);
@@ -147,6 +149,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('{media}/download', [SungaiController::class, 'downloadMedia'])->name('download');
         Route::delete('{media}', [SungaiController::class, 'deleteMedia'])->name('delete');
         Route::get('/', [SungaiController::class, 'listMedia'])->name('list');
+    });
+    Route::prefix('cekungan-air-tanah')->name('cat.')->group(function () {
+        Route::resource('', CekunganAirTanahController::class)
+            ->parameters(['' => 'cekunganAirTanah'])
+            ->names([
+                'index' => 'index',
+                'create' => 'create',
+                'store' => 'store',
+                'show' => 'show',
+                'edit' => 'edit',
+                'update' => 'update',
+                'destroy' => 'destroy',
+            ]);
     });
 
     Route::resource('loadshp', LoadShpController::class);

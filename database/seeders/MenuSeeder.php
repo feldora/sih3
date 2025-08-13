@@ -230,6 +230,16 @@ class MenuSeeder extends Seeder
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);
+        Menu::create([
+            'title' => 'Cekungan Air Tanah',
+            'url' => '/admin/cekungan-air-tanah',
+            'icon' => 'fas fa-map',
+            'parent_id' => null,
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'cat',
+            'zona' => 'admin',
+            'menu_type' => 'link',
+        ]);
         // Menu::create([
         //     'title' => 'Titik Pantau',
         //     'url' => '/admin/titik-pantau',

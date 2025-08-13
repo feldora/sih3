@@ -139,36 +139,59 @@ class LoadShpController extends Controller
                     continue;
                 }
 
-                // Konversi EPSG:3857 ke WGS84 jika perlu
+                // Konversi koordinat jika perlu
                 if ($this->isLikelyMercator($geometry)) {
                     $geometry['coordinates'] = $this->convertCoordinatesToWGS84($geometry['coordinates']);
                 }
-                // Bersihkan tipe geometry yang pakai "M" di akhir (contoh: LineStringM -> LineString)
+
+                // Bersihkan tipe geometry yang pakai "M" di akhir
                 if (isset($geometry['type']) && preg_match('/M$/i', $geometry['type'])) {
                     $geometry['type'] = preg_replace('/M$/i', '', $geometry['type']);
                 }
 
-                // Hapus bbox invalid di level geometry
-                if (isset($geometry['bbox'])) {
-                    if (!is_array($geometry['bbox']) || array_filter($geometry['bbox'], fn($v) => !is_numeric($v))) {
-                        unset($geometry['bbox']);
-                    }
+                // Hapus bbox invalid
+                if (isset($geometry['bbox']) && (!is_array($geometry['bbox']) || array_filter($geometry['bbox'], fn($v) => !is_numeric($v)))) {
+                    unset($geometry['bbox']);
                 }
 
+                // Ambil properties asli dari shapefile
+                $properties = $rec->getDataArray();
+
+                // === Perhitungan Luas, Keliling, Panjang ===
+                if ($geometry['type'] === 'Polygon') {
+                    $properties['area_m2'] = $this->calculatePolygonArea($geometry['coordinates']);
+                    $properties['perimeter_m'] = $this->calculatePolygonPerimeter($geometry['coordinates']);
+                } elseif ($geometry['type'] === 'MultiPolygon') {
+                    $totalArea = 0;
+                    $totalPerimeter = 0;
+                    foreach ($geometry['coordinates'] as $polygon) {
+                        $totalArea += $this->calculatePolygonArea($polygon);
+                        $totalPerimeter += $this->calculatePolygonPerimeter($polygon);
+                    }
+                    $properties['area_m2'] = $totalArea;
+                    $properties['perimeter_m'] = $totalPerimeter;
+                } elseif ($geometry['type'] === 'LineString') {
+                    $properties['length_m'] = $this->calculateLineLength($geometry['coordinates']);
+                } elseif ($geometry['type'] === 'MultiLineString') {
+                    $totalLength = 0;
+                    foreach ($geometry['coordinates'] as $line) {
+                        $totalLength += $this->calculateLineLength($line);
+                    }
+                    $properties['length_m'] = $totalLength;
+                }
+
+                // Buat Feature GeoJSON
                 $feature = [
                     'type' => 'Feature',
                     'geometry' => $geometry,
-                    'properties' => $rec->getDataArray(),
+                    'properties' => $properties,
                 ];
 
-                if (isset($feature['bbox'])) {
-                    if (!is_array($feature['bbox']) || array_filter($feature['bbox'], fn($v) => !is_numeric($v))) {
-                        unset($feature['bbox']);
-                    }
+                if (isset($feature['bbox']) && (!is_array($feature['bbox']) || array_filter($feature['bbox'], fn($v) => !is_numeric($v)))) {
+                    unset($feature['bbox']);
                 }
 
                 $features[] = $feature;
-
             }
 
             return ['type' => 'FeatureCollection', 'features' => $features];
@@ -188,6 +211,8 @@ class LoadShpController extends Controller
                 return $this->saveWilayahSungai($request);
             case 'Sungai' :
                 return $this->saveSungai($request);
+            case 'Cekungan Air Tanah' :
+                return $this->saveCAT($request);
             default:
                 return response()->json([
                     'success' => false,
@@ -444,6 +469,73 @@ class LoadShpController extends Controller
         }
     }
 
+    private function saveCAT(Request $request) {
+        
+        $features = json_decode($request->input('visibleFeatures'), true);
+        $mapped = $request->input('mapped', []);
+
+        if (!$features || !is_array($features)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data fitur tidak valid.'
+            ], 400);
+        }
+        $datas=[];
+        try {
+            DB::transaction(function () use ($features, $mapped, $request) {
+                foreach ($features as $feature) {
+                    $data = [];
+
+                    $coordinates = $feature['geometry']['coordinates'] ?? [null, null];
+
+                    foreach ($mapped as $field => $mappingOptions) {
+                        $mappedKey = $mappingOptions[0] ?? null;
+
+                        if ($mappedKey && str_starts_with($mappedKey, 'properties.') && isset($feature['properties'])) {
+                            $propName = str_replace('properties.', '', $mappedKey);
+                            $data[$field] = $feature['properties'][$propName] ?? null;
+                        }
+                    }
+
+                    $featureToSave = [
+                        'type' => 'Feature',
+                        'geometry' => $feature['geometry'],
+                        'properties' => [
+                            'name' => $data['nama_cat'] ?? null,
+                            'tag' => 'Cekungan Air Tanah',
+                            'properties' => $feature['properties']
+                        ]
+                    ];
+                    $signature = $this->saveGeoJsonFeatureToDatabase($featureToSave);
+                    if ($signature) {
+                        $data['signature'] = $signature;
+                        // $data['instansi_id'] = $request->input('instansi_id');
+                        
+                        \App\Models\CekunganAirTanah::create($data);
+                    } else {
+                        DB::rollBack();
+                        return response()->json([
+                            'success'   => false,
+                            'message'   => "Gagal Membuat Signature",
+                            'data'      => $data,
+                        ]);
+                    }
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => count($features) . ' data berhasil disimpan.',
+                'datas'    => $datas
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan data: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     private function isLikelyMercator(array $geometry): bool
     {
         $coords = $this->extractFirstCoordinate($geometry['coordinates'] ?? []);
@@ -475,6 +567,67 @@ class LoadShpController extends Controller
         $lng = ($x / $R) * (180 / pi());
         $lat = rad2deg(atan(sinh($y / $R)));
         return [$lng, $lat];
+    }
+
+    private function calculatePolygonArea(array $coordinates): float
+    {
+        // Menghitung luas polygon (meter²) menggunakan formula spherical
+        // Asumsi koordinat dalam WGS84 (longitude, latitude)
+        $earthRadius = 6378137; // meter
+
+        $area = 0;
+        foreach ($coordinates as $ring) { // Outer + inner rings
+            $ringArea = 0;
+            $pointsCount = count($ring);
+
+            for ($i = 0; $i < $pointsCount - 1; $i++) {
+                $lon1 = deg2rad($ring[$i][0]);
+                $lat1 = deg2rad($ring[$i][1]);
+                $lon2 = deg2rad($ring[$i+1][0]);
+                $lat2 = deg2rad($ring[$i+1][1]);
+
+                $ringArea += ($lon2 - $lon1) * (2 + sin($lat1) + sin($lat2));
+            }
+
+            $area += abs($ringArea);
+        }
+
+        return abs($area * $earthRadius * $earthRadius / 2.0); // m²
+    }
+
+    private function calculatePolygonPerimeter(array $coordinates): float
+    {
+        // Hitung keliling (meter)
+        $perimeter = 0;
+        foreach ($coordinates as $ring) {
+            $perimeter += $this->calculateLineLength($ring);
+        }
+        return $perimeter;
+    }
+
+    private function calculateLineLength(array $coordinates): float
+    {
+        // Menghitung panjang garis (meter) dengan Haversine
+        $length = 0;
+        $earthRadius = 6378137; // meter
+
+        for ($i = 0; $i < count($coordinates) - 1; $i++) {
+            $lat1 = deg2rad($coordinates[$i][1]);
+            $lon1 = deg2rad($coordinates[$i][0]);
+            $lat2 = deg2rad($coordinates[$i+1][1]);
+            $lon2 = deg2rad($coordinates[$i+1][0]);
+
+            $dlat = $lat2 - $lat1;
+            $dlon = $lon2 - $lon1;
+
+            $a = sin($dlat / 2) ** 2 +
+                cos($lat1) * cos($lat2) * sin($dlon / 2) ** 2;
+            $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+            $length += $earthRadius * $c;
+        }
+
+        return $length; // meter
     }
 
 }

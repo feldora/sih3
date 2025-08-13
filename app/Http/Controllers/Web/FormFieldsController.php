@@ -49,6 +49,11 @@ class FormFieldsController extends Controller
             'luas_das'         => 'mapping',
             'ordo'             => 'mapping',
         ],
-        'Cekungan Air Tanah' => [],
+        'Cekungan Air Tanah' => [
+            'nama_cat'                      => 'mapping',
+            'luas_cat_ha'                   => 'mapping',
+            'potensi_air_tanah_bebas'       => 'mapping',
+            'potensi_air_tanah_tertekan'    => 'mapping',
+        ],
     ];
 }

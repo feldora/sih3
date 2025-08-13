@@ -47,6 +47,7 @@ class PermissionRoleMenuSeeder extends Seeder
         Permission::create(['name' => 'kualitas_air_tanah']);
         Permission::create(['name' => 'cekungan_air_tanah']);
         Permission::create(['name' => 'hidrogeologi']);
+        Permission::create(['name' => 'cat']);
 
         // Buat role admin dan assign semua permission
         $admin = Role::create(['name' => 'admin']);
@@ -73,6 +74,7 @@ class PermissionRoleMenuSeeder extends Seeder
             'kualitas_air_tanah',
             'cekungan_air_tanah',
             'hidrogeologi',
+            'cat',
         ]);
 
         // Buat role lain dan assign sebagian permission
