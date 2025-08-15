@@ -777,7 +777,7 @@
                     return `
                         <div class="w-full space-y-3">
                             <h4 class="font-bold text-base text-gray-800 mb-1 break-words">
-                                ${feature.properties.nama_cat}
+                                ${feature.cat.nama_cat}
                             </h4>
                             <table class="w-full text-sm border-collapse">
                                 <tbody>
