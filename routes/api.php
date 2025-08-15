@@ -18,7 +18,7 @@ Route::get('/geo-features/map-kabupaten', [App\Http\Controllers\Api\GeoFeatureCo
 Route::get('/geo-features/map-kabupaten/info', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapKabupatenInfo']);
 
 Route::get('/geo-features/map-ws', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapWilayahSungai']);
-Route::get('/geo-features/map-cat', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapKabupaten']);
+Route::get('/geo-features/map-cat', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapCAT']);
 
 Route::get('/geo-features/map-sungai', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapSungai']);
 

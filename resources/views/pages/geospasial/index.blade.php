@@ -433,21 +433,21 @@
                         // dashArray: '5, 5',
                     })
                 },
-                // {
-                //     layerType: "polygon",
-                //     id_check_list: 'checkAllCAT',
-                //     url: '/api/geo-features/map-cat',
-                //     containerId: 'listLayerCAT',
-                //     layerGroup: layerGroups.CAT,
-                //     defaultShow: false,
-                //     defaultLoad: false,
-                //     colorList: [
-                //         '#00CED1', '#20B2AA', '#40E0D0', '#48D1CC', '#00FA9A', '#7FFFD4',
-                //         '#7FFF00', '#ADFF2F', '#32CD32', '#90EE90', '#98FB98', '#00FF7F',
-                //         '#DC143C', '#E9967A', '#FA8072', '#F08080', '#CD5C5C', '#8B0000',
-                //         '#F4A460', '#DEB887', '#D2B48C', '#BC8F8F', '#FFE4B5', '#FFDAB9'
-                //     ]
-                // },
+                {
+                    layerType: "polygon",
+                    id_check_list: 'checkAllCAT',
+                    url: '/api/geo-features/map-cat',
+                    containerId: 'listLayerCAT',
+                    layerGroup: layerGroups.CAT,
+                    defaultShow: false,
+                    defaultLoad: false,
+                    colorList: [
+                        '#00CED1', '#20B2AA', '#40E0D0', '#48D1CC', '#00FA9A', '#7FFFD4',
+                        '#7FFF00', '#ADFF2F', '#32CD32', '#90EE90', '#98FB98', '#00FF7F',
+                        '#DC143C', '#E9967A', '#FA8072', '#F08080', '#CD5C5C', '#8B0000',
+                        '#F4A460', '#DEB887', '#D2B48C', '#BC8F8F', '#FFE4B5', '#FFDAB9'
+                    ]
+                },
                 {
                     layerType: "point",
                     id_check_list: 'checkAllPP',

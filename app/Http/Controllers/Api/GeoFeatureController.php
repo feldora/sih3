@@ -16,6 +16,7 @@ use ZipArchive;
 use Illuminate\Support\Facades\DB;
 use App\Models\WilayahSungai;
 use App\Models\Sungai;
+use App\Models\CekunganAirTanah;
 
 class GeoFeatureController extends Controller
 {
@@ -278,6 +279,21 @@ class GeoFeatureController extends Controller
         if (count($features) >= 1) {
             foreach ($features['features'] as $key => $feature) {
                 $features['features'][$key]['sungai'] = Sungai::with('media')->where('signature', $feature['signature'])->first();
+            }
+        }
+        $headers = [] ;
+        return response()->json($features, 200, $headers);
+    }
+
+    public function getMapCAT(Request $request)
+    {
+        $filters = [
+            'tag' => 'Cekungan Air Tanah',
+        ];
+        $features = $this->geoFeatureService->getAllAsGeoJson($filters);
+        if (count($features) >= 1) {
+            foreach ($features['features'] as $key => $feature) {
+                $features['features'][$key]['sungai'] = CekunganAirTanah::where('signature', $feature['signature'])->first();
             }
         }
         $headers = [] ;
