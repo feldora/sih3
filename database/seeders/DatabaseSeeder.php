@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Support\Facades\App;
 
 class DatabaseSeeder extends Seeder
 {
@@ -32,9 +33,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PermissionRoleMenuSeeder::class,
             MenuSeeder::class,
+            InstansiSeeder::class,
             CategorySeeder::class,
             TagsTableSeeder::class,
-            PostSeeder::class,
+            // PostSeeder::class,
             // WilayahSungaiSeeder::class,
             assignRoleToUser::class,
             ProvinsiSeeder::class,
@@ -43,7 +45,13 @@ class DatabaseSeeder extends Seeder
             DesaSeeder::class,
             // ImportGeoFeaturesSqlSeeder::class,
             ShapefileImportSeeder::class,
-            InstansiSeeder::class,
         ]);
+
+        if (App::environment('local')) {
+            $this->call([
+                PostSeeder::class,
+            ]);
+            
+        };
     }
 }

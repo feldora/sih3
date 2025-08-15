@@ -286,8 +286,13 @@ class DataKlimatologiController extends Controller
 
     public function templateExcel()
     {
-        $pos_pantau = PosPantau::all();
-
+        $PosPantau = PosPantau::where('jenis_pos', 'Pos Klimatologi')->get();
+        if ($PosPantau->isEmpty()) {
+            return redirect()
+                ->back()
+                ->with('error', 'Tidak ada pos tinggi muka air yang tersedia untuk template.');
+        }
+        $pos_pantau = json_decode(json_encode($PosPantau));
         $spreadsheet = new Spreadsheet();
         $sheet1 = $spreadsheet->getActiveSheet();
         $sheet1->setTitle('Form Data');

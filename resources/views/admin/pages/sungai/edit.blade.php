@@ -95,13 +95,13 @@
                 <!-- Right Column -->
                 <div class="space-y-4">
                     <!-- Dokumen yang Ada -->
-                    @if($sungai->getMedia('dokumen sungai')->count() > 0)
+                    @if($sungai->getMedia('documents')->count() > 0)
                     <div class="form-control w-full">
                         <label class="label">
                             <span class="label-text font-medium">Dokumen Tersedia</span>
                         </label>
                         <div class="space-y-2 max-h-64 overflow-y-auto">
-                            @foreach($sungai->getMedia('dokumen sungai') as $media)
+                            @foreach($sungai->getMedia('documents') as $media)
                             <div class="flex items-center justify-between p-3 border border-base-300 rounded-lg bg-base-50">
                                 <div class="flex items-center space-x-3 cursor-pointer clickAble" data-mediaUrl="{{ route('admin.sungai.media.download', [$sungai->id, $media->id]) }}">
                                     <div class="avatar">

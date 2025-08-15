@@ -34,7 +34,7 @@ class SungaiController extends Controller
                     return $btn;
                 })
                 ->addColumn('media_count', function ($row) {
-                    return $row->getMedia('dokumen sungai')->count() . ' file(s)';
+                    return $row->getMedia('documents')->count() . ' file(s)';
                 })
                 ->editColumn('panjang_sungai', function ($row) {
                     return $row->panjang_sungai ? $row->panjang_sungai . ' km' : '-';
@@ -155,7 +155,7 @@ public function update(Request $request, Sungai $sungai): JsonResponse|RedirectR
         // Handle file deletions FIRST
         if ($request->has('delete_media') && is_array($request->delete_media)) {
             foreach ($request->delete_media as $mediaId) {
-                $media = $sungai->getMedia('dokumen sungai')->where('id', $mediaId)->first();
+                $media = $sungai->getMedia('documents')->where('id', $mediaId)->first();
                 if ($media) {
                     $media->delete();
                 }
@@ -258,7 +258,7 @@ public function update(Request $request, Sungai $sungai): JsonResponse|RedirectR
     public function downloadMedia($sungaiId, $mediaId): BinaryFileResponse
     {
         $sungai = Sungai::findOrFail($sungaiId);
-        $media = $sungai->getMedia('dokumen sungai')->where('id', $mediaId)->firstOrFail();
+        $media = $sungai->getMedia('documents')->where('id', $mediaId)->firstOrFail();
 
         $mimeType = $media->mime_type; // Contoh: application/pdf
         $extension = strtolower($media->extension); // Contoh: pdf
@@ -285,7 +285,7 @@ public function update(Request $request, Sungai $sungai): JsonResponse|RedirectR
     public function listMedia($sungaiId): JsonResponse
     {
         $sungai = Sungai::findOrFail($sungaiId);
-        $mediaCollection = $sungai->getMedia('dokumen sungai');
+        $mediaCollection = $sungai->getMedia('documents');
 
         $mediaList = $mediaCollection->map(function ($media) {
             return [
@@ -311,7 +311,7 @@ public function update(Request $request, Sungai $sungai): JsonResponse|RedirectR
     public function deleteMedia($sungaiId, $mediaId): JsonResponse
     {
         $sungai = Sungai::findOrFail($sungaiId);
-        $media = $sungai->getMedia('dokumen sungai')->where('id', $mediaId)->first();
+        $media = $sungai->getMedia('documents')->where('id', $mediaId)->first();
         
         if ($media) {
             $media->delete();

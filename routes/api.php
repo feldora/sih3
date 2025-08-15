@@ -20,6 +20,8 @@ Route::get('/geo-features/map-kabupaten/info', [App\Http\Controllers\Api\GeoFeat
 Route::get('/geo-features/map-ws', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapWilayahSungai']);
 Route::get('/geo-features/map-cat', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapKabupaten']);
 
+Route::get('/geo-features/map-sungai', [App\Http\Controllers\Api\GeoFeatureController::class, 'getMapSungai']);
+
 Route::post('/geo-features/loadshp', [App\Http\Controllers\Api\GeoFeatureController::class, 'loadshp']);
 
 Route::get('/geo-features/kecamatan', [App\Http\Controllers\Api\GeoFeatureController::class, 'getKecamatan']);

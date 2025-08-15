@@ -23,6 +23,7 @@ class Sungai extends Model implements HasMedia
         'panjang_sungai',
         'luas_das',
         'ordo',
+        'signature',
     ];
 
     public $timestamps = true;

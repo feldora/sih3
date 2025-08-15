@@ -15,6 +15,7 @@ use Shapefile\ShapefileException;
 use ZipArchive;
 use Illuminate\Support\Facades\DB;
 use App\Models\WilayahSungai;
+use App\Models\Sungai;
 
 class GeoFeatureController extends Controller
 {
@@ -262,6 +263,25 @@ class GeoFeatureController extends Controller
             return response()->json(['message' => 'Kecamatan is required'], 400);
         }
         return response()->json(\App\Models\Desa::where('kecamatan_id', $kecamatan_id)->orderBy('nama')->get());
+    }
+
+    public function getMapSungai(Request $request)
+    {
+        // $sungais = Sungai::all();
+        // foreach ($variable as $key => $sungai) {
+            
+        // }
+        $filters = [
+            'tag' => 'Sungai',
+        ];
+        $features = $this->geoFeatureService->getAllAsGeoJson($filters);
+        if (count($features) >= 1) {
+            foreach ($features['features'] as $key => $feature) {
+                $features['features'][$key]['sungai'] = Sungai::with('media')->where('signature', $feature['signature'])->first();
+            }
+        }
+        $headers = [] ;
+        return response()->json($features, 200, $headers);
     }
 
     public function filter(Request $request)

@@ -291,6 +291,8 @@ class LoadShpController extends Controller
                         // $data['desa'] = $properties['WADMKD'];
                         $data['kabupaten_id'] = $properties['KDWKB'];
                         $data['kecamatan_id'] = $properties['KDWKC'];
+                    }else {
+                        continue;
                     }
                     $ws= $this->geoFeatureService->findFeatureContainingPoint( $coordinates[0], $coordinates[1], 'Wilayah Sungai');
                     if (!empty($ws)) {

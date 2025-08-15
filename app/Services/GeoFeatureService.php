@@ -235,10 +235,14 @@ class GeoFeatureService
 
     public function exists(array $geojson)
     {
-        $geometryJson = json_encode($geojson['geometry']);
-        $prop = $geojson['properties']['properties'] ?? $geojson['properties'];
-        $propertiesArray = $prop ?? [];
-        $signature = $this->signature($geojson['geometry'], $propertiesArray);
+        // $geometryJson = json_encode($geojson['geometry']);
+        // $prop = $geojson['properties']['properties'] ?? $geojson['properties'];
+        // $propertiesArray = $prop ?? [];
+        // $signature = $this->signature($geojson['geometry'], $propertiesArray);   
+
+        // return GeoFeature::where('signature', $signature)->first() ?: false;
+
+        $signature = $this->signature($geojson['geometry']);
 
         return GeoFeature::where('signature', $signature)->first() ?: false;
     }
@@ -411,9 +415,10 @@ class GeoFeatureService
         ];
     }
 
-    public function signature($geometry, $properties): string
+    public function signature($geometry, $properties = null): string
     {
-        return hash('sha256', json_encode($geometry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK) . json_encode($properties, JSON_UNESCAPED_UNICODE));
+        // return hash('sha256', json_encode($geometry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK) . json_encode($properties, JSON_UNESCAPED_UNICODE));
+        return hash('sha256', json_encode($geometry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK));
     }
 
     public function cachePolygons($tag = 'kecamatan')

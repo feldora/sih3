@@ -17,16 +17,16 @@ return new class extends Migration
             $table->float('panjang_sungai');
             $table->float('luas_das');
             $table->float('ordo');
-            $table->string('signature');
+            $table->string('signature')->nullable();
             $table->timestamps();
         });
 
-        Schema::table('geo_features', function (Blueprint $table) {
-            $table->foreign('signature')
-                ->references('signature')
-                ->on('geo_features')
-                ->onDelete('cascade');
-        });
+        // Schema::table('geo_features', function (Blueprint $table) {
+        //     $table->foreign('signature')
+        //         ->references('signature')
+        //         ->on('geo_features')
+        //         ->onDelete('cascade');
+        // });
 
     }
 

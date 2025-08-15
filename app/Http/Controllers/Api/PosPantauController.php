@@ -26,8 +26,12 @@ class PosPantauController extends Controller
                     'dataCurahHujan',
                     'dataKlimatologi',
                     'dataTinggiMukaAir'
-                ])->where('geo_feature_signature', $Feature['signature'])->first()->toArray();
-                $geoJson['features'][$key] = array_merge($Feature, $PosPantau);
+                ])->where('geo_feature_signature', $Feature['signature'])->get();
+                if(!$PosPantau->isEmpty()){
+                    $geoJson['features'][$key] = array_merge($Feature, $PosPantau->first()->toArray());
+                }else{
+                    unset($geoJson['features'][$key]);
+                }
         }
 
         $headers = [] ;
