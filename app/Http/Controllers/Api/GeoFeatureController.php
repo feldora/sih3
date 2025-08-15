@@ -293,7 +293,7 @@ class GeoFeatureController extends Controller
         $features = $this->geoFeatureService->getAllAsGeoJson($filters);
         if (count($features) >= 1) {
             foreach ($features['features'] as $key => $feature) {
-                $features['features'][$key]['sungai'] = CekunganAirTanah::where('signature', $feature['signature'])->first();
+                $features['features'][$key]['cat'] = CekunganAirTanah::where('signature', $feature['signature'])->first();
             }
         }
         $headers = [] ;

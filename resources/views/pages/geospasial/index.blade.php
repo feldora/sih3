@@ -519,35 +519,6 @@
                 });
             }
 
-            async function getKabInfo(kab_id) {
-                return;
-                try {
-                    const res = await fetch(`/api/geo-features/map-kabupaten/info?KDWKB=${kab_id}`);
-                    const data = await res.json();
-                    data.titik_pantau.forEach(item => {
-                        const {
-                            latitude,
-                            longitude,
-                            nama_pos,
-                            jenis_pos
-                        } = item;
-                        const latLng = `${latitude},${longitude}`;
-                        if (!addedMarkers.has(latLng)) {
-                            const icon = getIconForJenisPos(jenis_pos);
-                            L.marker([parseFloat(latitude), parseFloat(longitude)], {
-                                    icon
-                                }).addTo(map)
-                                .bindPopup(
-                                    `<b>${nama_pos}</b><br>Jenis Pos: ${jenis_pos}<br>Lat: ${latitude}<br>Lng: ${longitude}`
-                                );
-                            addedMarkers.add(latLng);
-                        }
-                    });
-                } catch (e) {
-                    console.error('Error fetch kab info:', e);
-                }
-            }
-
             function getIconForJenisPos(jenis_pos) {
                 let iconUrl = '/images/pin/kuning.svg';
                 if (jenis_pos === "Pos Curah Hujan") iconUrl = '/images/pin/merah.svg';
@@ -793,6 +764,42 @@
                                         <td class="text-gray-600">:</td>
                                         <td class="font-semibold text-blue-600 break-words">
                                             ${feature.sungai.ordo}
+                                        </td>
+                                    </tr>
+                                    ${btnData}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+
+                if (feature.properties.tag === 'Cekungan Air Tanah') {
+                    return `
+                        <div class="w-full space-y-3">
+                            <h4 class="font-bold text-base text-gray-800 mb-1 break-words">
+                                ${feature.properties.nama_cat}
+                            </h4>
+                            <table class="w-full text-sm border-collapse">
+                                <tbody>
+                                    <tr>
+                                        <td class="text-gray-600 pr-2">Luas CAT</td>
+                                        <td class="text-gray-600">:</td>
+                                        <td class="font-semibold text-gray-800 break-words">
+                                            ${feature.cat.luas_cat_ha} ha
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-gray-600 pr-2">Potensi air tanah bebas</td>
+                                        <td class="text-gray-600">:</td>
+                                        <td class="font-semibold text-blue-600 break-words">
+                                            ${feature.cat.potensi_air_tanah_bebas}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-gray-600 pr-2">Potensi air tanah tertekan</td>
+                                        <td class="text-gray-600">:</td>
+                                        <td class="font-semibold text-blue-600 break-words">
+                                            ${feature.cat.potensi_air_tanah_tertekan}
                                         </td>
                                     </tr>
                                     ${btnData}
