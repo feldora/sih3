@@ -802,7 +802,6 @@
                                             ${feature.cat.potensi_air_tanah_tertekan}
                                         </td>
                                     </tr>
-                                    ${btnData}
                                 </tbody>
                             </table>
                         </div>
