@@ -20,6 +20,7 @@ class InstansiSelect extends Component
 
     public function render()
     {
-        return view('components.instansi-select');
+        $instansi = Instansi::all();
+        return view('components.instansi-select', compact('instansi'));
     }
 }

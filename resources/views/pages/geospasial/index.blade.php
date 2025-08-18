@@ -15,6 +15,10 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/pages/geospasial-map.css'])
     <style>
+        #map {
+            height: 100vh;
+            background-color: #589bd1; /* atau warna lain */
+        }
         #listLayerCAT,
         #listLayerWS,
         #listLayerPP,
@@ -291,7 +295,8 @@
                     if (geoJsonData.type !== 'FeatureCollection' || !Array.isArray(geoJsonData.features)) {
                         throw new Error('Format GeoJSON tidak valid');
                     }
-
+                    if (!geoJsonData.features.length) return;
+                    console.log(geoJsonData.features);
                     geoJsonData.features.forEach((feature, index) => {
                         const color = colorList[index % colorList.length] || '#007bff';
                         // Tentukan style berdasarkan jenis geometri
@@ -351,7 +356,7 @@
                         if (defaultShow) {
                             layerGroup.addLayer(layer);
                         }
-
+                        
                         // sidebar handler
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
@@ -541,6 +546,7 @@
                     esriSatLayer.addTo(map); // Tambahkan layer jika belum ada
                 }
             }
+
             document.getElementById('toggleBackgroundMap').addEventListener('click', toggleBackgroundMap);
 
             document.getElementById('homeButton').addEventListener('click', () => {
@@ -810,7 +816,6 @@
                 // Default
                 return `<b class="break-words">${feature.properties.name}</b>`;
             }
-
         });
 
         function decimalToDMS(decimal, isLatitude = true) {

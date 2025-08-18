@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Services\PostService;
 use App\Models\Post;  // Gunakan model Post, bukan dataMukaAirTanah
 
-class DataMukaAirTanahController extends Controller
+class DataBentukDokumenController extends Controller
 {
     private $baseLabelUrl;
     private $actionUrls = [];
@@ -16,6 +16,7 @@ class DataMukaAirTanahController extends Controller
     private $generalTitle;
     private $filterCategories;
     private $filterTag;
+    private $category;
 
     public function __construct(array $config = [])
     {
@@ -35,6 +36,9 @@ class DataMukaAirTanahController extends Controller
             'update' => route($this->baseLabelUrl.'.update', ':id'),
             'destroy' => route($this->baseLabelUrl.'.destroy', ':id'),
         ];
+        $this->category = Category::where('type', 'data')
+            ->where('name', $this->filterCategories)
+            ->first();
     }
     
     /**
@@ -42,18 +46,12 @@ class DataMukaAirTanahController extends Controller
      */
     public function index(Request $request, PostService $service)
     {
-        
-        $existingCategory = Category::where('type', 'data')
-            ->where('name', $this->filterCategories)
-            ->first();
-        if ($existingCategory) {
-            $category = $existingCategory;
-        } else {
-            $category = new Category();
-            $category->type = 'data';
-            $category->name = $this->filterCategories;
-            $category->slug = str_replace(' ', '-', $this->filterCategories);
-            $category->save();
+        if (!$this->category) {
+            $this->category = new Category();
+            $this->category->type = 'data';
+            $this->category->name = $this->filterCategories;
+            $this->category->slug = str_replace(' ', '-', $this->filterCategories);
+            $this->category->save();
         }
 
         $existingTag = Tag::where('name', $this->filterTag)->first();
@@ -67,7 +65,7 @@ class DataMukaAirTanahController extends Controller
 
         $actionUrls = $this->actionUrls;
         $title = $this->generalTitle;
-        $categories = $category;
+        $categories = $this->category;
 
         return view($this->viewPath.'index', compact('title', 'categories', 'tag', 'actionUrls'));
     }
@@ -95,8 +93,11 @@ class DataMukaAirTanahController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
+        // pd($request->all());
 
-        $service->store($request->all());
+        $data = $request->all();
+        $data['tags'] =[$this->filterTag];
+        $service->store($data);
         return redirect()->route($this->baseLabelUrl.'.index')->with('success', 'Post created successfully.');
     }
 
@@ -106,7 +107,7 @@ class DataMukaAirTanahController extends Controller
     public function show($slug, PostService $service)  // Menggunakan Post sebagai parameter
     {
         $post = $service->getPostBySlug($slug); 
-        $post->load(['category', 'tags', 'user', 'media']); 
+        $post->load(['category', 'tags', 'user', 'media', 'pos_pantau']); 
         $title = $this->generalTitle . ' - ' . $post->title;
         return view($this->viewPath.'show', compact('title', 'post'));
     }
@@ -120,7 +121,7 @@ class DataMukaAirTanahController extends Controller
         
         $title = $this->generalTitle;
         $post = $post->load(['category', 'tags', 'user', 'media']);
-        
+        // pd($post->toArray());
         return view($this->viewPath.'edit', compact('title', 'post', 'actionPost'));
     }
 
@@ -135,9 +136,11 @@ class DataMukaAirTanahController extends Controller
         ]);
 
         $post = $post->load(['category', 'tags', 'user', 'media']);
-
+        
         try {
-            $service->update($post, $request->all());
+            $data = $request->all();
+            $data['tags'] =[$this->filterTag];
+            $service->update($post, $data);
             return redirect()->route($this->baseLabelUrl.'.index')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
             return back()
@@ -154,4 +157,19 @@ class DataMukaAirTanahController extends Controller
         $service->delete($post);
         return redirect()->route($this->baseLabelUrl.'.index')->with('success', 'Post deleted successfully.');
     }
+
+    public function data(Request $request, PostService $service)
+    {
+        $posts = $service->getPosts([
+            'search' => $request->input('search') ?? null,
+            'category' => $this->category->id,
+            'tags'     => $this->filterTag,
+            'status' => $request->input('status'),
+            'sort' => $request->input('sort', 'created_at'),
+            'direction' => $request->input('direction', 'desc'),
+            'per_page' => 9,
+        ]);
+        return response()->json($posts);
+    }
 }
+

@@ -145,6 +145,7 @@ class MenuSeeder extends Seeder
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);
+
         Menu::create([
             'title' => 'Postingan',
             'url' => '/admin/posts',
@@ -405,6 +406,17 @@ class MenuSeeder extends Seeder
             'permission_name' => 'hidrogeologi',
             'zona' => 'admin',
             'menu_type' => 'child',
+        ]);
+
+        Menu::create([
+            'title' => 'Instansi',
+            'url' => '/admin/instansi',
+            'icon' => 'fas fa-building',
+            'parent_id' => null,
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'instansi',
+            'zona' => 'admin',
+            'menu_type' => 'link',
         ]);
     }
 }

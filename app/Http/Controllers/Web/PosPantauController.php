@@ -28,8 +28,19 @@ class PosPantauController extends Controller
      */
     public function index()
     {
-        
-        $posPantau = PosPantau::with(['kewenangan', 'kabupaten', 'kecamatan', 'desa'])->paginate(10);
+        $user = \Auth::user();
+        if($user->is_admin){
+            $posPantau = PosPantau::with(['kewenangan', 'kabupaten', 'kecamatan', 'desa'])
+                ->orderBy('nama_pos')
+                ->paginate(10);
+        } else {
+            $instansi_id = $user->instansi_id ?? null;
+            $posPantau = PosPantau::with(['kewenangan', 'kabupaten', 'kecamatan', 'desa'])
+                ->when($instansi_id, fn($q) => $q->where('instansi_id', $instansi_id))
+                ->orderBy('nama_pos')
+                ->paginate(10);
+        }
+
 
         return view('admin.pages.pos_pantau.index', compact('posPantau'));
     }

@@ -19,9 +19,10 @@ use App\Http\Controllers\Web\FormFieldsController;
 use App\Http\Controllers\Web\DataHujanController;
 use App\Http\Controllers\Web\DataTinggiMukaAirController;
 use App\Http\Controllers\Web\DataKlimatologiController;
-use App\Http\Controllers\Web\DataMukaAirTanahController;
+use App\Http\Controllers\Web\DataBentukDokumenController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\CekunganAirTanahController;
+use App\Http\Controllers\Web\InstansiController;
 
 // $routeData = config('resources');
 
@@ -204,37 +205,37 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
                         
                         // INDEX
                         Route::get('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->index($request, $service);
+                            return (new DataBentukDokumenController($config))->index($request, $service);
                         })->name('index');
     
                         // CREATE
                         Route::get('/create', function () use ($config) {
-                            return (new DataMukaAirTanahController($config))->create();
+                            return (new DataBentukDokumenController($config))->create();
                         })->name('create');
     
                         // STORE
                         Route::post('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->store($request, $service);
+                            return (new DataBentukDokumenController($config))->store($request, $service);
                         })->name('store');
     
                         // SHOW
                         Route::get('/{slug}', function ($slug, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->show($slug, $service);
+                            return (new DataBentukDokumenController($config))->show($slug, $service);
                         })->name('show');
     
                         // EDIT
                         Route::get('/{post}/edit', function (App\Models\Post $post) use ($config) {
-                            return (new DataMukaAirTanahController($config))->edit($post);
+                            return (new DataBentukDokumenController($config))->edit($post);
                         })->name('edit');
     
                         // UPDATE
                         Route::put('/{post}', function (App\Models\Post $post, Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->update($post, $request, $service);
+                            return (new DataBentukDokumenController($config))->update($post, $request, $service);
                         })->name('update');
     
                         // DESTROY
                         Route::delete('/{post}', function (App\Models\Post $post, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->destroy($post, $service);
+                            return (new DataBentukDokumenController($config))->destroy($post, $service);
                         })->name('destroy');
                     });
             }
@@ -296,37 +297,37 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
                         
                         // INDEX
                         Route::get('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->index($request, $service);
+                            return (new DataBentukDokumenController($config))->index($request, $service);
                         })->name('index');
 
                         // CREATE
                         Route::get('/create', function () use ($config) {
-                            return (new DataMukaAirTanahController($config))->create();
+                            return (new DataBentukDokumenController($config))->create();
                         })->name('create');
 
                         // STORE
                         Route::post('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->store($request, $service);
+                            return (new DataBentukDokumenController($config))->store($request, $service);
                         })->name('store');
 
                         // SHOW
                         Route::get('/{slug}', function ($slug, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->show($slug, $service);
+                            return (new DataBentukDokumenController($config))->show($slug, $service);
                         })->name('show');
 
                         // EDIT
                         Route::get('/{post}/edit', function (App\Models\Post $post) use ($config) {
-                            return (new DataMukaAirTanahController($config))->edit($post);
+                            return (new DataBentukDokumenController($config))->edit($post);
                         })->name('edit');
 
                         // UPDATE
                         Route::put('/{post}', function (App\Models\Post $post, Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->update($post, $request, $service);
+                            return (new DataBentukDokumenController($config))->update($post, $request, $service);
                         })->name('update');
 
                         // DESTROY
                         Route::delete('/{post}', function (App\Models\Post $post, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->destroy($post, $service);
+                            return (new DataBentukDokumenController($config))->destroy($post, $service);
                         })->name('destroy');
                     });
             }
@@ -346,27 +347,30 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
                 Route::prefix($resource['prefix'])
                     ->name($resource['name'])
                     ->group(function () use ($resource) {
-                        $config = $resource['config'];                        
+                        $config = $resource['config'];
                         Route::get('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->index($request, $service);
+                            return (new DataBentukDokumenController($config))->index($request, $service);
                         })->name('index');
+                        Route::get('/data', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataBentukDokumenController($config))->data($request, $service);
+                        })->name('data');
                         Route::get('/create', function () use ($config) {
-                            return (new DataMukaAirTanahController($config))->create();
+                            return (new DataBentukDokumenController($config))->create();
                         })->name('create');
                         Route::post('/', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->store($request, $service);
+                            return (new DataBentukDokumenController($config))->store($request, $service);
                         })->name('store');
                         Route::get('/{slug}', function ($slug, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->show($slug, $service);
+                            return (new DataBentukDokumenController($config))->show($slug, $service);
                         })->name('show');
                         Route::get('/{post}/edit', function (App\Models\Post $post) use ($config) {
-                            return (new DataMukaAirTanahController($config))->edit($post);
+                            return (new DataBentukDokumenController($config))->edit($post);
                         })->name('edit');
                         Route::put('/{post}', function (App\Models\Post $post, Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->update($post, $request, $service);
+                            return (new DataBentukDokumenController($config))->update($post, $request, $service);
                         })->name('update');
                         Route::delete('/{post}', function (App\Models\Post $post, App\Services\PostService $service) use ($config) {
-                            return (new DataMukaAirTanahController($config))->destroy($post, $service);
+                            return (new DataBentukDokumenController($config))->destroy($post, $service);
                         })->name('destroy');
                     });
             }
@@ -374,8 +378,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
 
     });
 
+    Route::resource('instansi', InstansiController::class);
+    Route::get('instansi-data', [InstansiController::class, 'getData'])->name('instansi.getData');
 });
-
-// Route::prefix('api')->name('public-api.')->group(function () {
-    
-// }); 

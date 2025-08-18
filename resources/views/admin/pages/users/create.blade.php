@@ -10,6 +10,14 @@
 
         <x-input label="Email" name="email" type="email" :value="old('email')" required class="flex-1" />
 
+        <label for="instansi_id" class="block text-gray-700 font-bold mb-2">Instansi</label>
+        <x-instansi-select 
+            name="instansi_id" 
+            {{-- :instansis="$instansis"  --}}
+            :selected="old('instansi_id')"
+            class="w-full"
+        />
+
         <x-input label="Password" name="password" type="password" required class="flex-1" />
 
         <x-input label="Konfirmasi Password" name="password_confirmation" type="password" required class="flex-1" />

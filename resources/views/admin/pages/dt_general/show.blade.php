@@ -41,7 +41,6 @@
 
                                         </div>
                                     </Header>
-
                                     <!-- Media Display Component -->
                                     @foreach ($post->media->all() as $media)
                                         <x-media-display :media="$media" />
@@ -54,7 +53,14 @@
                                             {!! $post->content !!}
                                         </div>
                                     </div>
-
+                                    <div>
+                                        <strong>
+                                            Pos Pantau :
+                                        </strong>
+                                        @if ($post->pos_pantau)                                        
+                                            {{$post->pos_pantau->jenis_pos ." - ". $post->pos_pantau->nama_pos}}
+                                        @endif
+                                    </div>
                                 </div>
                             </article>
                         </div>

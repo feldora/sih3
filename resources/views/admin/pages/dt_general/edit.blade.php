@@ -29,6 +29,14 @@
                     @method('PUT')
 
                     <div class="space-y-6">
+                        <x-pos-pantau-map-selector
+                            name="pos_pantau_id"
+                            label="Pilih Pos Pantau"
+                            :view-only="false"
+                            :value="old('pos_pantau_id', $post->pos_pantau_id)"
+                            :required="true"
+                            placeholder="Klik untuk memilih pos pantau"
+                        />
                         <!-- Title Field -->
                         <div>
                             <label for="title" class="label">Title</label>

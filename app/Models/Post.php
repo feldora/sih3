@@ -15,7 +15,7 @@ class Post extends Model implements HasMedia
     use HasFactory;
     use InteractsWithMedia;
 
-    protected $fillable = ['title', 'slug', 'content', 'user_id', 'category_id', 'status', 'role', 'views'];
+    protected $fillable = ['title', 'slug', 'content', 'user_id', 'category_id', 'status', 'instansi_id', 'pos_pantau_id', 'views'];
 
     // Relasi ke User (One-to-Many)
     public function user()
@@ -33,6 +33,11 @@ class Post extends Model implements HasMedia
     public function tags()
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    public function pos_pantau()
+    {
+        return $this->belongsTo(PosPantau::class);
     }
 
     public function registerMediaConversions(?Media $media = null): void

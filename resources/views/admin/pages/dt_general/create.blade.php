@@ -29,6 +29,7 @@
                     <form action="{{ $actionPost }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="space-y-6">
+                            <x-pos-pantau-map-selector name="pos_pantau_id" />
                             <!-- Title Field -->
                             <div>
                                 <label for="title" class="label">Title</label>

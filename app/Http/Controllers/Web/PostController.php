@@ -49,7 +49,7 @@ class PostController extends Controller
         ]);
 
         $data = $request->only([
-            'title', 'content', 'status', 'role', 'views', 'tags', 'category_id'
+            'title', 'content', 'status', 'instansi_id', 'views', 'tags', 'category_id'
         ]);
 
         $data['featured_image'] = $request->file('featured_image');

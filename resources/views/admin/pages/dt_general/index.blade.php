@@ -124,7 +124,11 @@ window.addEventListener('load', function() {
     const queryString = urlParams.toString();
 
     // Fetch data from API
-    fetch(`/api/posts?${queryString}`)
+    fetch(`${actionUrls.index}/data?${queryString}`, {
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      })
       .then(response => response.json())
       .then(data => {
         loading.style.display = 'none';

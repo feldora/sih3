@@ -13,6 +13,7 @@
             <tr>
                 <th class="border border-gray-300 p-2">Nama</th>
                 <th class="border border-gray-300 p-2">Email</th>
+                <th class="border border-gray-300 p-2">Instansi</th>
                 <th class="border border-gray-300 p-2">Roles</th>
                 <th class="border border-gray-300 p-2">Aksi</th>
             </tr>
@@ -22,6 +23,7 @@
             <tr>
                 <td class="border border-gray-300 p-2">{{ $user->name }}</td>
                 <td class="border border-gray-300 p-2">{{ $user->email }}</td>
+                <td class="border border-gray-300 p-2">{{ $user->instansi->singkatan ?? '' }}</td>
                 <td class="border border-gray-300 p-2">
                     {{ $user->roles->pluck('name')->join(', ') }}
                 </td>

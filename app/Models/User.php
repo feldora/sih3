@@ -22,6 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'instansi_id',
         'password',
     ];
 
@@ -47,4 +48,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function instansi()
+    {
+        return $this->belongsTo(Instansi::class);
+    }
+
 }
