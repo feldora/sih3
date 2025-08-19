@@ -49,6 +49,8 @@ class PermissionRoleMenuSeeder extends Seeder
         Permission::create(['name' => 'hidrogeologi']);
         Permission::create(['name' => 'cat']);
         Permission::create(['name' => 'instansi']);
+        Permission::create(['name' => 'produk-hukum']);
+        Permission::create(['name' => 'kontak']);
 
 
         // Buat role admin dan assign semua permission
@@ -78,6 +80,8 @@ class PermissionRoleMenuSeeder extends Seeder
             'hidrogeologi',
             'cat',
             'instansi',
+            'produk-hukum',
+            'kontak',
         ]);
 
         // Buat role lain dan assign sebagian permission

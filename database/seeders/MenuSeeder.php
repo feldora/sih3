@@ -420,11 +420,11 @@ class MenuSeeder extends Seeder
         ]);
         Menu::create([
             'title' => 'Produk Hukum',
-            'url' => '/admin/produk-hukum',
+            'url' => '/admin/produk_hukum',
             'icon' => 'fas fa-solid fa-gavel',
             'parent_id' => null,
             'order' => $adminMenuOrder++,
-            'permission_name' => 'produk-hukum',
+            'permission_name' => 'produk_hukum',
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);
