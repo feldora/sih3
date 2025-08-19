@@ -111,7 +111,7 @@
                 
                 // Fetch 3 posts from each category
                 for (const category of categories) {
-                    const response = await fetch(`http://localhost:8756/api/posts?per_page=3&category=${category.id}`);
+                    const response = await fetch(`/api/posts?per_page=3&category=${category.id}`);
                     const data = await response.json();
                     
                     if (data.data && data.data.length > 0) {
