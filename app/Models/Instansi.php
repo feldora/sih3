@@ -15,4 +15,10 @@ class Instansi extends Model
     {
         return $this->hasMany(User::class);
     }
+    
+    public function kontak()
+    {
+        return $this->hasMany(Kontak::class);
+    }
+
 }

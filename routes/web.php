@@ -23,6 +23,8 @@ use App\Http\Controllers\Web\DataBentukDokumenController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\CekunganAirTanahController;
 use App\Http\Controllers\Web\InstansiController;
+use App\Http\Controllers\Web\ProdukHukumController;
+use App\Http\Controllers\Web\KontakController;
 
 // $routeData = config('resources');
 
@@ -47,8 +49,8 @@ Route::get('/informasi-h3/info', [ App\Http\Controllers\Web\InfoH3Controller::cl
 
 Route::view('/informasi-h3/data', 'pages.blank_page');
 Route::view('/informasi-h3/neraca-air', 'pages.blank_page');
-Route::view('/produk-hukum', 'pages.blank_page');
-Route::view('/kontak', 'pages.blank_page');
+Route::view('/produk-hukum', 'pages.produk_hukum');
+Route::view('/kontak', 'pages.kontak');
 Route::view('/tentang', 'pages.tentang');
 // Route::view('/artikel', 'pages.blank_page');
 Route::view('/berita', 'pages.blank_page');
@@ -208,6 +210,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
                             return (new DataBentukDokumenController($config))->index($request, $service);
                         })->name('index');
     
+                        Route::get('/data', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataBentukDokumenController($config))->data($request, $service);
+                        })->name('data');
+                        
                         // CREATE
                         Route::get('/create', function () use ($config) {
                             return (new DataBentukDokumenController($config))->create();
@@ -300,6 +306,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
                             return (new DataBentukDokumenController($config))->index($request, $service);
                         })->name('index');
 
+                        Route::get('/data', function (Illuminate\Http\Request $request, App\Services\PostService $service) use ($config) {
+                            return (new DataBentukDokumenController($config))->data($request, $service);
+                        })->name('data');
+
                         // CREATE
                         Route::get('/create', function () use ($config) {
                             return (new DataBentukDokumenController($config))->create();
@@ -380,4 +390,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
 
     Route::resource('instansi', InstansiController::class);
     Route::get('instansi-data', [InstansiController::class, 'getData'])->name('instansi.getData');
+    
+    Route::get('produk-hukum/get-data', [ProdukHukumController::class, 'getData'])->name('produk-hukum.getData');
+    Route::resource('produk-hukum', ProdukHukumController::class);
+
+    Route::get('kontak/data', [KontakController::class, 'getData'])->name('kontak.getData');
+    Route::resource('kontak', KontakController::class)->except(['create']); 
+
 });

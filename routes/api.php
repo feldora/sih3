@@ -41,3 +41,6 @@ Route::get('desa', function(Illuminate\Http\Request $req){
     return Desa::where('kecamatan_id', $req->kecamatan_id)
         ->select('id','nama')->get();
 });
+
+Route::get('produk-hukum/get-data', [App\Http\Controllers\Web\ProdukHukumController::class, 'getData'])->name('produk-hukum.getData');
+Route::get('kontak/data', [App\Http\Controllers\Web\KontakController::class, 'getPublicData'])->name('kontak.getData');

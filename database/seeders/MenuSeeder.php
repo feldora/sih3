@@ -418,5 +418,25 @@ class MenuSeeder extends Seeder
             'zona' => 'admin',
             'menu_type' => 'link',
         ]);
+        Menu::create([
+            'title' => 'Produk Hukum',
+            'url' => '/admin/produk-hukum',
+            'icon' => 'fas fa-solid fa-gavel',
+            'parent_id' => null,
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'produk-hukum',
+            'zona' => 'admin',
+            'menu_type' => 'link',
+        ]);
+        Menu::create([
+            'title' => 'Kontak',
+            'url' => '/admin/kontak',
+            'icon' => 'fas fa-address-book',
+            'parent_id' => null,
+            'order' => $adminMenuOrder++,
+            'permission_name' => 'kontak',
+            'zona' => 'admin',
+            'menu_type' => 'link',
+        ]);
     }
 }
