@@ -24,7 +24,7 @@
         "choices.js": "^11.1.0",
         "daisyui": "^5.0.35",
         "datatables.net": "^2.3.2",
-        "datatables.net-dt": "^2.3.2",
+        "datatables.net-dt": "^2.3.3",
         "dotenv": "^17.0.1",
         "jquery": "^3.7.1",
         "leaflet": "^1.9.4",
