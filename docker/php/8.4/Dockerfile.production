@@ -61,7 +61,7 @@ RUN rm -rf node_modules
 # =====================
 # Stage 2 - Production
 # =====================
-FROM php:8.4-fpm-alpine
+FROM php:8.5.0RC2-fpm-alpine
 
 # Install PHP extensions + runtime dependencies + build tools
 RUN apk add --no-cache \
